@@ -25,9 +25,14 @@ interface Props {
   hue: number;
   seed: string;
   class?: string;
+  /**
+   * Exact accent colour. Overrides `hue` — used by the project labs, whose
+   * colour worlds come from the printed poster palettes.
+   */
+  accent?: string;
 }
 
-const { visual, hue, seed, class: className = '' } = Astro.props;
+const { visual, hue, seed, class: className = '', accent: accentOverride } = Astro.props;
 
 /** xmur3 + mulberry32: stable across builds, so the art never flickers. */
 function rng(str: string) {
@@ -50,7 +55,7 @@ const random = rng(seed);
 const W = 320;
 const H = 220;
 
-const accent = `oklch(0.74 0.18 ${hue})`;
+const accent = accentOverride ?? `oklch(0.74 0.18 ${hue})`;
 const dim = 'rgba(235, 231, 222, 0.24)';
 const faint = 'rgba(235, 231, 222, 0.09)';
 

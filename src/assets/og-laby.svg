@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!--
+    OPEN GRAPH SOURCE — /cs/laby/ (project labs for schools)
+    Edit this file, then run `npm run og` to regenerate
+    public/assets/og-laby.png.
+
+    Same system as og.svg: the site's dark ground, the faint editorial grid,
+    a system grotesque (the webfont is not available to the rasteriser) and
+    one warm accent. The five short bars at the bottom are the labs' own
+    colour worlds, in the order they appear on the page.
+  -->
+  <rect width="1200" height="630" fill="#08080a"/>
+
+  <g stroke="#23232b" stroke-width="1">
+    <path d="M80 0v630M380 0v630M680 0v630M980 0v630"/>
+    <path d="M0 96h1200M0 500h1200"/>
+  </g>
+
+  <text x="80" y="66" font-family="Consolas, 'DejaVu Sans Mono', monospace" font-size="20"
+        letter-spacing="5" fill="#a7a29a">PROJEKTOVÉ LABY PRO STŘEDNÍ ŠKOLY</text>
+  <text x="1120" y="66" text-anchor="end" font-family="Consolas, 'DejaVu Sans Mono', monospace"
+        font-size="20" letter-spacing="5" fill="#6b6862">2026/27</text>
+
+  <text x="74" y="236" font-family="Arial, Helvetica, sans-serif" font-weight="300"
+        font-size="104" letter-spacing="-4" fill="#ebe7de">Nejdeme na zkoušku.</text>
+  <text x="74" y="352" font-family="Arial, Helvetica, sans-serif" font-weight="300"
+        font-size="104" letter-spacing="-4" fill="#e8927f">Jdeme tvořit.</text>
+
+  <text x="80" y="432" font-family="Arial, Helvetica, sans-serif" font-size="30"
+        fill="#a7a29a">AI · informatika · Unreal Engine · tvorba · pedagogika</text>
+
+  <!-- The five labs, each in its own colour world. -->
+  <g>
+    <rect x="80" y="540" width="120" height="4" fill="#e8927f"/>
+    <rect x="216" y="540" width="120" height="4" fill="#d9566d"/>
+    <rect x="352" y="540" width="120" height="4" fill="#9fb39b"/>
+    <rect x="488" y="540" width="120" height="4" fill="#e2448b"/>
+    <rect x="624" y="540" width="120" height="4" fill="#c08bb0"/>
+  </g>
+  <text x="80" y="586" font-family="Consolas, 'DejaVu Sans Mono', monospace" font-size="18"
+        letter-spacing="4" fill="#6b6862">MALÁ PROJEKTOVÁ SKUPINA · DO 12 STUDENTŮ</text>
+
+  <text x="1120" y="590" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-weight="bold"
+        font-size="40" letter-spacing="-1" fill="#ebe7de">DENIS MITROVIĆ</text>
+</svg>

@@ -31,6 +31,14 @@ export interface MorphOptions {
   morphMs?: number;
   /** Per-glyph stagger. */
   stepMs?: number;
+  /**
+   * Keep cycling through the greetings after the first pass (which reveals
+   * the chooser). The loop pauses while the tab is hidden, never runs under
+   * reduced motion and stops on `destroy()`.
+   */
+  loop?: boolean;
+  /** How long each greeting stays legible once the intro is over. */
+  loopHoldMs?: number;
 }
 
 export interface MorphController {
@@ -58,7 +66,7 @@ export function supportsGooeyMorph(): boolean {
 }
 
 export function createGreetingMorph(root: HTMLElement, options: MorphOptions = {}): MorphController {
-  const { holdMs = 460, morphMs = 420, stepMs = 24 } = options;
+  const { holdMs = 460, morphMs = 420, stepMs = 24, loop = false, loopHoldMs = 1500 } = options;
 
   const words = Array.from(root.querySelectorAll<HTMLElement>('[data-word]'));
   const live = new Set<Animation>();
@@ -75,7 +83,14 @@ export function createGreetingMorph(root: HTMLElement, options: MorphOptions = {
   const shift = gooey ? '0.16em' : '0.5em';
 
   let skipped = false;
+  let finished = false;
   let resolveSkip: (() => void) | null = null;
+
+  // Loop state — independent of `skipped`, which only concerns the intro.
+  let looping = false;
+  let stopped = false;
+  let loopTimer: number | undefined;
+  let wakeLoop: (() => void) | null = null;
 
   const glyphsOf = (word: HTMLElement) =>
     Array.from(word.querySelectorAll<HTMLElement>('[data-glyph]'));
@@ -196,13 +211,83 @@ export function createGreetingMorph(root: HTMLElement, options: MorphOptions = {
   }
 
   function finish() {
+    if (finished) return;
+    finished = true;
     root.classList.remove('is-gooey');
     root.setAttribute('data-morph-state', 'done');
     root.dispatchEvent(new CustomEvent('morph:done', { bubbles: true }));
+    startLoop(words.length - 1);
+  }
+
+  /** A timer the loop can be woken from (destroy) and that waits out hidden tabs. */
+  const loopSleep = (ms: number) =>
+    new Promise<void>((resolve) => {
+      if (stopped) return resolve();
+      wakeLoop = resolve;
+      loopTimer = window.setTimeout(resolve, ms);
+    });
+
+  const untilVisible = () =>
+    new Promise<void>((resolve) => {
+      if (stopped || !document.hidden) return resolve();
+      const onChange = () => {
+        if (!document.hidden) {
+          document.removeEventListener('visibilitychange', onChange);
+          resolve();
+        }
+      };
+      document.addEventListener('visibilitychange', onChange);
+      wakeLoop = () => {
+        document.removeEventListener('visibilitychange', onChange);
+        resolve();
+      };
+    });
+
+  /** One calm morph from `current` to `next`, then reset both words' glyph animations. */
+  async function loopStep(current: HTMLElement, next: HTMLElement) {
+    next.style.opacity = '1';
+    next.toggleAttribute('data-active', true);
+    if (gooey) root.classList.add('is-gooey');
+
+    const animations = [...animateOut(current), ...animateIn(next)];
+    const longestDelay = Math.max(glyphsOf(current).length, glyphsOf(next).length) * stepMs;
+    await Promise.race([
+      Promise.all(animations.map((a) => a.finished.catch(() => {}))),
+      new Promise((resolve) => window.setTimeout(resolve, morphMs + longestDelay + 120)),
+    ]);
+
+    root.classList.remove('is-gooey');
+    current.style.opacity = '0';
+    current.removeAttribute('data-active');
+
+    // Cancelling returns every glyph to its resting style, which is exactly
+    // the end state of the incoming word and invisible for the hidden one.
+    // It also stops finished animations from piling up across endless cycles.
+    [current, next].forEach((word) =>
+      glyphsOf(word).forEach((glyph) => glyph.getAnimations().forEach((anim) => anim.cancel())),
+    );
+  }
+
+  function startLoop(from: number) {
+    if (!loop || looping || stopped || words.length < 2 || prefersReducedMotion()) return;
+    looping = true;
+
+    void (async () => {
+      let index = from;
+      while (!stopped) {
+        await loopSleep(loopHoldMs);
+        await untilVisible();
+        if (stopped) break;
+        const next = (index + 1) % words.length;
+        await loopStep(words[index]!, words[next]!);
+        index = next;
+      }
+      looping = false;
+    })();
   }
 
   function skip() {
-    if (skipped) return;
+    if (skipped || finished) return;
     skipped = true;
     live.forEach((anim) => {
       try {
@@ -219,6 +304,10 @@ export function createGreetingMorph(root: HTMLElement, options: MorphOptions = {
   }
 
   function destroy() {
+    stopped = true;
+    window.clearTimeout(loopTimer);
+    wakeLoop?.();
+    wakeLoop = null;
     live.forEach((anim) => anim.cancel());
     live.clear();
     resolveSkip = null;

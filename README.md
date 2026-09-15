@@ -1,7 +1,8 @@
-# IRL — personal portfolio / creative lab
+# Denis Mitrović — personal site / creative lab
 
-Working title. `IRL` and `Ideas, made real.` are placeholders and are designed
-to be replaced from one file.
+The site brand is the person: `Denis Mitrović`, with `Ideas, made real.` as a
+secondary claim. Project labs for schools (`/cs/laby/`) are one of the
+activities on the site, not a separate brand.
 
 A statically generated, six-language personal site built so that the site
 itself reads as one of the projects: an entry gate instead of a homepage, one
@@ -64,7 +65,7 @@ for the create-a-project-in-the-admin test.
 | `npm run build` | Static build into `dist/` |
 | `npm run preview` | Serve the built output |
 | `npm run check` | `astro check` — TypeScript + template diagnostics |
-| `npm run og` | Rasterise `src/assets/og.svg` to the Open Graph PNG |
+| `npm run og` | Rasterise `src/assets/og*.svg` to the Open Graph PNGs |
 | `cd cms && npm run dev` | Payload CMS admin on port 3000 |
 | `npm run cms:snapshot-fallback` | Payload → `src/data/generated` (one way) |
 | `cd cms && npm run content:import` | Load case studies + lab notes |
@@ -77,12 +78,14 @@ for the create-a-project-in-the-admin test.
 
 | I want to change… | Edit this |
 | --- | --- |
-| Brand name, tagline, my name, role, domain, social links | `src/config/site.ts` |
+| Brand name, tagline, my name, role, contact, social links | `src/config/site.ts` |
+| Production domain (canonical, og:url, hreflang, sitemap) | `SITE_URL` env — see `.env.example` and `src/config/site-url.mjs` |
+| Project labs for schools (Czech) | `src/data/labs.ts` |
 | Which languages exist, their routes and labels | `src/i18n/locales.ts` |
 | UI copy, hero, about, services, contact wording | `src/i18n/translations/<code>.ts` |
 | Projects in Selected Work | CMS admin (canonical) — `src/data/generated/` is a generated fallback |
 | A project case study | the project's fields in the CMS admin |
-| The Open Graph image | `src/assets/og.svg`, then `npm run og` |
+| The Open Graph images | `src/assets/og.svg` (site), `src/assets/og-laby.svg` (labs), then `npm run og` |
 | Lab experiments and open questions | CMS admin — `src/data/generated/` is a generated fallback |
 | What I am currently doing | CMS admin — `src/data/generated/` is a generated fallback |
 | Colour, type scale, spacing, motion timing | `src/styles/tokens.css` |
@@ -151,10 +154,13 @@ src/
     [lang]/projects/[slug].astro   30 project pages (6 locales x 5 projects)
     [lang]/lab/index.astro         the Lab index, one per locale
     [lang]/lab/[slug].astro        66 lab notes (6 locales x 11 experiments)
+    [lang]/laby/index.astro        /cs/laby/ — project labs for schools (Czech only)
+    [lang]/laby/[slug].astro       /cs/laby/<lab>/ — five lab detail pages
   styles/                 tokens, reset, typography, motion, global
 public/assets/fonts/      self-hosted variable fonts
 integrations/
   media-snapshot.mjs      copies published CMS uploads into dist/media/ at build
+  sitemap.mjs             writes sitemap.xml + robots.txt when SITE_URL is known
 scripts/
   render-pointcloud.py    renders a .ply scan to PNG (how the scan evidence was made)
 docs/                     architecture, content model, motion references, visual audit
@@ -227,8 +233,9 @@ JavaScript module checks `prefersReducedMotion()` before doing anything.
 
 - The site works without JavaScript. All hidden-until-revealed states are
   gated behind `html.js`; if the scripts never load, everything is visible.
-- No invented facts. `src/config/site.ts` ships with `null` contact details,
-  and a `null` renders an honest note instead of a plausible-looking address.
+- No invented facts. A `null` contact field in `src/config/site.ts` renders an
+  honest note instead of a plausible-looking address, and an unknown production
+  domain omits canonical/hreflang/sitemap instead of guessing one.
   No client, metric, award or partnership appears anywhere unless it was
   given. Image `alt` text is never generated for an image nobody has seen.
 - Content that has not been translated says so, rather than serving English

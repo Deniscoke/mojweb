@@ -164,7 +164,7 @@
  * has no reason to still be there once the chooser is up.
  */
 .gate__morph.is-gooey {
-  filter: url('#irl-threshold');
+  filter: url('#gate-threshold');
 }
 
 .gate__morph.is-gooey .gate__glyph {

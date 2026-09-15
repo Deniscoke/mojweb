@@ -22,6 +22,7 @@ const dict = useTranslations(lang);
  * project plates open with.
  */
 const email = site.contact.email;
+const phone = site.contact.phone;
 const links = site.contact.links.filter((link) => Boolean(link.href));
 ---
 
@@ -60,12 +61,23 @@ const links = site.contact.links.filter((link) => Boolean(link.href));
     <div class="contact__actions" data-reveal style="--reveal-delay:260ms">
       {
         email ? (
-          <a class="action" href={`mailto:${email}`}>
-            {dict.contact.emailCta}
-            <span class="action__arrow" aria-hidden="true">
-              &#8599;
-            </span>
-          </a>
+          <>
+            <a class="action" href={`mailto:${email}`}>
+              {dict.contact.emailCta}
+              <span class="action__arrow" aria-hidden="true">
+                &#8599;
+              </span>
+            </a>
+            <p class="mono contact__direct">
+              <a class="link" href={`mailto:${email}`}>{email}</a>
+              {phone && (
+                <span class="contact__phone">
+                  <span aria-hidden="true"> · </span>
+                  <a class="link" href={`tel:${phone.replace(/\s+/g, '')}`}>{phone}</a>
+                </span>
+              )}
+            </p>
+          </>
         ) : (
           <p class="mono working-note">{dict.contact.pending}</p>
         )
@@ -129,6 +141,28 @@ const links = site.contact.links.filter((link) => Boolean(link.href));
 
   .contact__actions {
     margin-block-start: var(--s-2);
+    display: grid;
+    gap: var(--s-4);
+    justify-items: start;
+  }
+
+  .contact__direct {
+    color: var(--c-bone-dim);
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* The separator travels with the phone number, so a wrap never leaves a
+     dangling "·" at the end of the e-mail line. */
+  .contact__phone {
+    white-space: nowrap;
+  }
+
+  @media (pointer: coarse) {
+    .contact__direct .link {
+      padding-block: 0.7em;
+      margin-block: -0.7em; /* bigger target, same layout */
+    }
   }
 
   .contact__elsewhere {

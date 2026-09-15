@@ -2,15 +2,33 @@
 import { site } from '~/config/site';
 import { LOCALES, getLocale, localePath, useTranslations } from '~/i18n';
 
-interface Props {
-  lang: string;
+interface NavLink {
+  href: string;
+  label: string;
+  /** Highlighted entry, e.g. the schools branch. */
+  accent?: boolean;
 }
 
-const { lang } = Astro.props;
+interface Props {
+  lang: string;
+  /** Replaces the default homepage anchors, e.g. on the project labs pages. */
+  links?: NavLink[];
+}
+
+const { lang, links: customLinks } = Astro.props;
 const dict = useTranslations(lang);
 const current = getLocale(lang);
 
-const links = [
+/**
+ * The project labs exist in Czech only, so only the Czech navigation gets the
+ * schools entry. It is listed first: it is the one link a visitor coming for
+ * schools is looking for.
+ */
+const schoolsLink: NavLink[] =
+  lang === 'cs' ? [{ href: localePath('cs', 'laby'), label: 'Pro školy', accent: true }] : [];
+
+const links: NavLink[] = customLinks ?? [
+  ...schoolsLink,
   { href: '#work', label: dict.nav.work },
   { href: '#lab', label: dict.nav.lab },
   { href: '#about', label: dict.nav.about },
@@ -30,14 +48,15 @@ const links = [
 
 <header class="nav" data-nav>
   <div class="nav__inner">
-    <a class="nav__brand" href={localePath(current.route)} aria-label={dict.nav.home}>
+    <!-- The accessible name contains the visible name (WCAG 2.5.3). -->
+    <a class="nav__brand" href={localePath(current.route)} aria-label={`${site.brandMark} — ${dict.nav.home}`}>
       <span class="nav__mark">{site.brandMark}</span>
     </a>
 
     <nav class="nav__links" aria-label={dict.nav.home}>
       {
         links.map((link) => (
-          <a class="mono nav__link touch-target" href={link.href}>
+          <a class="mono nav__link touch-target" href={link.href} data-accent={link.accent ? '' : undefined}>
             {link.label}
           </a>
         ))
@@ -118,13 +137,16 @@ const links = [
     font-size: var(--t-mono);
     font-weight: 700;
     letter-spacing: 0.18em;
+    text-transform: uppercase;
+    white-space: nowrap;
     color: var(--c-bone);
   }
 
   .nav__links {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-start;
-    gap: clamp(0.75rem, 3vw, 2.25rem);
+    gap: 0 clamp(0.75rem, 3vw, 2.25rem);
     grid-column: 1 / -1;
     grid-row: 2;
     padding-block-start: var(--s-1);
@@ -138,6 +160,37 @@ const links = [
   .nav__link:hover,
   .nav__link:focus-visible {
     color: var(--c-signal);
+  }
+
+  /* The 44px touch minimum widens short labels; centring keeps the gaps even. */
+  .nav__link {
+    justify-content: center;
+  }
+
+  /* Five links on a 360px phone: tighten spacing so the row does not wrap. */
+  @media (max-width: 24rem) {
+    .nav__links {
+      column-gap: 0.55rem;
+    }
+
+    .nav__link {
+      letter-spacing: 0.08em;
+    }
+  }
+
+  .nav__link[data-accent] {
+    color: var(--c-bone);
+  }
+
+  .nav__link[data-accent]::before {
+    content: '';
+    display: inline-block;
+    inline-size: 6px;
+    block-size: 6px;
+    margin-inline-end: 0.6em;
+    border-radius: var(--r-pill);
+    background-color: var(--c-signal);
+    vertical-align: 0.15em;
   }
 
   /* --------------------------------------------------- language switcher */

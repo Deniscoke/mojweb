@@ -1,7 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- DM monogram for Denis Mitrović, in the site palette: void ground, bone
+       strokes, one signal-orange mark. Strokes, not text, so it renders the
+       same everywhere without a font. -->
   <rect width="32" height="32" fill="#08080a"/>
-  <rect x="6" y="7" width="3" height="18" fill="#ebe7de"/>
-  <rect x="13" y="7" width="3" height="18" fill="#ebe7de"/>
-  <rect x="20" y="7" width="3" height="12" fill="#ebe7de"/>
-  <rect x="20" y="22" width="6" height="3" fill="#ff4a1c"/>
+  <path d="M5.5 8h3.5a8 8 0 0 1 0 16h-3.5z" fill="none" stroke="#ebe7de" stroke-width="2.6"/>
+  <path d="M19 24V8l4 7 4-7v16" fill="none" stroke="#ebe7de" stroke-width="2.6" stroke-linejoin="miter"/>
+  <rect x="4.2" y="26.5" width="6" height="2.5" fill="#ff4a1c"/>
 </svg>

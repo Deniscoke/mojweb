@@ -21,7 +21,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     meta: {
-      titleSuffix: ' — IRL CMS',
+      titleSuffix: ' — Denis Mitrović CMS',
     },
   },
 

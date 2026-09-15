@@ -24,10 +24,10 @@ const greetings = GREETING_SEQUENCE;
 
 <div class="gate" data-gate>
   <!-- Threshold filter for the enhanced morph tier. Referenced by CSS as
-       url(#irl-threshold); inert until .is-gooey is applied. -->
+       url(#gate-threshold); inert until .is-gooey is applied. -->
   <svg class="gate__defs" aria-hidden="true" focusable="false" width="0" height="0">
     <defs>
-      <filter id="irl-threshold" x="-20%" y="-40%" width="140%" height="180%">
+      <filter id="gate-threshold" x="-20%" y="-40%" width="140%" height="180%">
         <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"></feGaussianBlur>
         <feColorMatrix
           in="blur"
@@ -44,7 +44,7 @@ const greetings = GREETING_SEQUENCE;
 
   <main class="gate__stage" id="main">
     <h1 class="visually-hidden">
-      {site.brand} — {site.tagline}. {site.author.name}. Choose your language.
+      {site.author.name} — {site.tagline} Choose your language.
     </h1>
 
     <div class="gate__morph" data-morph aria-hidden="true">
@@ -94,7 +94,7 @@ const greetings = GREETING_SEQUENCE;
 
   <footer class="gate__bar gate__bar--end">
     <p class="mono gate__tagline" data-transition-fade>{site.tagline}</p>
-    <p class="mono gate__author" data-transition-fade>{site.author.name}</p>
+    <p class="mono gate__author" data-transition-fade>{site.author.disciplines.join(' · ')}</p>
   </footer>
 </div>
 
@@ -308,7 +308,12 @@ const greetings = GREETING_SEQUENCE;
         ?.setAttribute('data-remembered', '');
     }
 
-    const morph = createGreetingMorph(morphRoot);
+    // The greetings keep cycling after the chooser appears, so the gate stays
+    // alive while the visitor decides. Picking a language stops the loop.
+    const morph = createGreetingMorph(morphRoot, { loop: true });
+    gate.querySelectorAll<HTMLElement>('[data-lang-option]').forEach((option) => {
+      option.addEventListener('click', () => morph.destroy(), { once: true });
+    });
 
     const reveal = () => {
       gate.setAttribute('data-ready', '');

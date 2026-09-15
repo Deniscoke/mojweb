@@ -19,6 +19,15 @@ interface Props {
    * at six homepages.
    */
   altPath?: string;
+  /**
+   * Restrict the hreflang set to these locale codes. Pages that exist in only
+   * some languages (the Czech project labs) must not point at translations
+   * that were never generated.
+   */
+  onlyLocales?: string[];
+  /** Open Graph image path relative to /public. Defaults to the site image. */
+  ogImage?: string;
+  ogImageAlt?: string;
 }
 
 const {
@@ -29,17 +38,47 @@ const {
   variant = 'site',
   bodyClass = '',
   altPath = '',
+  onlyLocales,
+  ogImage: ogImagePath = site.ogImage,
+  ogImageAlt = `${site.author.name} — ${site.tagline}`,
 } = Astro.props;
 
 const htmlLangAttr = htmlLang ?? (variant === 'gate' ? 'en' : getLocale(lang).htmlLang);
-const canonical = new URL(Astro.url.pathname, site.url).href;
-const ogImage = new URL(site.ogImage, site.url).href;
+
+/**
+ * Absolute URLs need the production origin, which comes from SITE_URL /
+ * VERCEL_PROJECT_PRODUCTION_URL through astro.config (see site-url.mjs).
+ * Without it, canonical, og:url and hreflang are left out rather than pointed
+ * at a guessed domain. The OG image then falls back to a root-relative path.
+ */
+const origin = Astro.site;
+const absolute = (path: string) => (origin ? new URL(path, origin).href : null);
+
+const canonical = absolute(Astro.url.pathname);
+const ogImage = absolute(ogImagePath) ?? ogImagePath;
 
 const sub = altPath.replace(/^\/+|\/+$/g, '');
-const alternates = LOCALES.map((locale) => ({
-  hreflang: locale.htmlLang,
-  href: new URL(sub ? `/${locale.route}/${sub}/` : `/${locale.route}/`, site.url).href,
-}));
+const alternateLocales = onlyLocales ? LOCALES.filter((locale) => onlyLocales.includes(locale.code)) : LOCALES;
+const alternates = origin
+  ? alternateLocales.map((locale) => ({
+      hreflang: locale.htmlLang,
+      href: new URL(sub ? `/${locale.route}/${sub}/` : `/${locale.route}/`, origin).href,
+    }))
+  : [];
+// x-default points at the language gate, which only lists the locale
+// homepages — so only those pages (and the gate) may name it. Subpages would
+// get an annotation without a return link, which search engines drop.
+const xDefault = origin && !onlyLocales && sub === '' ? new URL('/', origin).href : null;
+
+/** Open Graph expects language_TERRITORY, not a BCP 47 tag. */
+const OG_LOCALES: Record<string, string> = {
+  en: 'en_US',
+  cs: 'cs_CZ',
+  sk: 'sk_SK',
+  es: 'es_ES',
+  sr: 'sr_RS',
+  tr: 'tr_TR',
+};
 
 /**
  * One inline script, before first paint, doing only what must happen before
@@ -60,21 +99,25 @@ const bootScript = `document.documentElement.classList.add('js');${
 
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {canonical && <link rel="canonical" href={canonical} />}
 
     {alternates.map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
-    <link rel="alternate" hreflang="x-default" href={new URL('/', site.url).href} />
+    {xDefault && <link rel="alternate" hreflang="x-default" href={xDefault} />}
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.brand} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {canonical && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    {variant === 'site' && <meta property="og:locale" content={getLocale(lang).htmlLang} />}
+    <meta property="og:image:alt" content={ogImageAlt} />
+    {variant === 'site' && <meta property="og:locale" content={OG_LOCALES[lang] ?? getLocale(lang).htmlLang} />}
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#08080a" />

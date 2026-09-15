@@ -382,7 +382,7 @@ async function seed() {
   await payload.updateGlobal({
     slug: 'site-settings',
     data: {
-      brandName: 'IRL',
+      brandName: 'Denis Mitrović',
       tagline: 'Ideas, made real.',
     } as never,
   })

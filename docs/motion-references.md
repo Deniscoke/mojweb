@@ -220,7 +220,7 @@ Those are not ours, and none of them are in this repository.
 
 - **04 — adapted and shipped.** `motion/language/greetingMorph.ts` now has
   three tiers: reduced / baseline / enhanced. The enhanced tier applies an
-  SVG alpha-threshold filter (`#irl-threshold`, defined in the gate) so the
+  SVG alpha-threshold filter (`#gate-threshold`, defined in the gate) so the
   blurred glyphs fuse and separate like liquid. It is capability-gated on
   `CSS.supports('filter','url(#x)')` and `hardwareConcurrency >= 4`, and the
   filter is attached only for the ~400 ms of each morph, not for the holds —

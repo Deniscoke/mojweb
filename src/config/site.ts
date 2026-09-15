@@ -6,11 +6,14 @@
  */
 
 export const site = {
-  /** Working brand name. Not final. */
-  brand: 'IRL',
-  /** Short mark used in the navigation when space is tight. */
-  brandMark: 'IRL',
-  /** Working tagline. Not final. */
+  /**
+   * The site brand is the person. Project labs, projects and the lab are
+   * activities of Denis Mitrović, not separate brands.
+   */
+  brand: 'Denis Mitrović',
+  /** Mark used in the navigation and on the gate. */
+  brandMark: 'Denis Mitrović',
+  /** Secondary claim. */
   tagline: 'Ideas, made real.',
   /** Positioning sentence used across the site. */
   statement: 'I make ideas real.',
@@ -27,15 +30,20 @@ export const site = {
     disciplines: ['Technology', 'Learning', 'Movement', 'Creative Work'],
   },
 
-  /** Deployed origin. Used for canonical + hreflang + og:url. */
-  url: 'https://irl.example.com', // TODO: replace with the real domain
+  /*
+   * The deployed origin is NOT set here. It comes from SITE_URL (or Vercel's
+   * VERCEL_PROJECT_PRODUCTION_URL) via src/config/site-url.mjs and is read in
+   * components as `Astro.site`. See .env.example.
+   */
 
   /**
    * Contact + social. `null` means "not provided yet" and the entry is simply
    * not rendered. Never invent values here.
    */
   contact: {
-    email: null as string | null, // TODO
+    email: 'denis.mitrovi@gmail.com' as string | null,
+    /** Human-readable form; the tel: link is derived by stripping spaces. */
+    phone: '+420 728 523 267' as string | null,
     links: [
       { id: 'linkedin', label: 'LinkedIn', href: null as string | null }, // TODO
       { id: 'github', label: 'GitHub', href: null as string | null }, // TODO

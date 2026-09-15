@@ -245,8 +245,10 @@ favicon.
 
 ## Known gaps
 
-- `site.url` is a placeholder domain and must be set before deployment;
-  canonical, `hreflang` and `og:url` all derive from it.
+- The production domain is not decided yet. It is set with the `SITE_URL`
+  env variable (see `.env.example` and `src/config/site-url.mjs`); on Vercel,
+  `VERCEL_PROJECT_PRODUCTION_URL` is a stop-gap until a custom domain exists.
+  Without a URL, canonical, `og:url`, `hreflang` and `sitemap.xml` are omitted.
 - The Open Graph image is now a real PNG, but it is set in a fallback
   grotesque rather than in Inter Tight. Rendering it through a headless
   browser would fix that if it ever matters.

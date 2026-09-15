@@ -14,7 +14,7 @@ export const SiteSettings: GlobalConfig = {
       name: 'brandName',
       type: 'text',
       admin: {
-        description: 'Working brand name. Currently "IRL".',
+        description: 'Site brand name. Currently "Denis Mitrović".',
       },
     },
     {
@@ -47,7 +47,7 @@ export const SiteSettings: GlobalConfig = {
       name: 'productionSiteUrl',
       type: 'text',
       admin: {
-        description: 'The canonical domain, e.g. https://denismitrovic.com',
+        description: 'Not used by the site build. The canonical domain comes from the SITE_URL env variable (see .env.example).',
       },
     },
   ],

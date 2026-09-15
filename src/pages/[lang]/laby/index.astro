@@ -1,0 +1,783 @@
+---
+import SiteFooter from '~/components/contact/SiteFooter.astro';
+import SiteNav from '~/components/navigation/SiteNav.astro';
+import ProjectVisual from '~/components/projects/ProjectVisual.astro';
+import Readout from '~/components/ui/Readout.astro';
+import TransitionCover from '~/components/ui/TransitionCover.astro';
+import { site } from '~/config/site';
+import { LAB_FORMATS, LAB_GROUP, LAB_ONLINE, LAB_PDFS, LAB_PRINCIPLES, LABS, SCHOOL_YEAR } from '~/data/labs';
+import { localePath, t } from '~/i18n';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { getProjects } from '~/lib/cms';
+
+/**
+ * PROJEKTOVÉ LABY — /cs/laby/
+ *
+ * The landing page for schools. Visitors from the e-mail and the PDF poster
+ * are linked here directly, so this page has to work without the homepage:
+ * who, what, for whom and how to get in touch, in the first screen.
+ *
+ * Czech only for now — getStaticPaths returns `cs` alone.
+ */
+export function getStaticPaths() {
+  return [{ params: { lang: 'cs' }, props: { code: 'cs' } }];
+}
+
+const { code } = Astro.props;
+const projects = await getProjects(code);
+
+const email = site.contact.email;
+const phone = site.contact.phone;
+const tel = phone ? `tel:${phone.replace(/\s+/g, '')}` : null;
+
+const title = 'Projektové laby pro střední školy — Denis Mitrović';
+const description =
+  'Nejdeme na zkoušku. Jdeme tvořit. Projektové vzdělávání pro střední školy: AI, informatika, Unreal Engine, tvorba, pedagogika a otázky o technologiích. Malé skupiny do 12 studentů.';
+
+const navLinks = [
+  { href: '#laby', label: 'Laby' },
+  { href: '#formaty', label: 'Formáty' },
+  { href: '#projekty', label: 'Projekty' },
+  { href: '#kontakt', label: 'Kontakt' },
+  { href: `${localePath('cs')}#about`, label: 'O mně' },
+];
+
+const readout = [
+  { key: 'Pro', value: 'střední školy', accent: true },
+  { key: 'Skupina', value: 'do 12 studentů' },
+  { key: 'Formáty', value: '90 min – pololetí' },
+  { key: 'Školní rok', value: SCHOOL_YEAR },
+];
+---
+
+<BaseLayout
+  lang={code}
+  title={title}
+  description={description}
+  altPath="laby"
+  onlyLocales={['cs']}
+  ogImage="/assets/og-laby.png"
+  ogImageAlt="Nejdeme na zkoušku. Jdeme tvořit. Projektové laby pro střední školy — Denis Mitrović"
+>
+  <TransitionCover />
+  <SiteNav lang={code} links={navLinks} />
+
+  <main id="main" class="labs-page">
+    <!-- ================================================================ HERO -->
+    <section class="labs-hero" id="hero">
+      <div class="wrap labs-hero__inner grid12">
+        <p class="mono labs-hero__label" data-reveal>Pro školy · Projektové laby · <span class="nowrap">{site.author.name}</span></p>
+
+        <h1 class="labs-hero__title is-say" data-reveal-lines>
+          <span class="line"><span class="line__inner">Nejdeme na zkoušku.</span></span>
+          <span class="line"><span class="line__inner labs-hero__accent" style="--reveal-delay:90ms">Jdeme tvořit.</span></span>
+        </h1>
+
+        <div class="labs-hero__body" data-reveal style="--reveal-delay:240ms">
+          <p class="lead">
+            Projektové vzdělávání pro střední školy na pomezí AI, informatiky, tvorby, pedagogiky a světa kolem nás.
+          </p>
+          <p class="labs-hero__credo">
+            Technologie nejsou cíl. Jsou to nástroje, se kterými můžeme tvořit, přemýšlet, zkoumat a hledat řešení,
+            která mají smysl.
+          </p>
+          <div class="labs-hero__actions">
+            <a class="action" href="#laby">Prozkoumat projektové laby <span class="action__arrow" aria-hidden="true">&#8595;</span></a>
+            <a class="action" href="#kontakt">Domluvit projekt <span class="action__arrow" aria-hidden="true">&#8594;</span></a>
+          </div>
+        </div>
+
+        <div class="labs-hero__aside" data-reveal style="--reveal-delay:340ms">
+          <Readout rows={readout} />
+          <a class="mono labs-hero__pdf link hit" href={LAB_PDFS.poster.href} download>{LAB_PDFS.poster.label}</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ MANIFEST -->
+    <section class="section section--sm labs-manifest" aria-labelledby="manifest-title">
+      <div class="wrap grid12">
+        <p class="mono section__label" data-reveal>
+          <span class="section__index">01</span>
+          Proč to dělám
+        </p>
+        <div class="labs-manifest__body" data-reveal style="--reveal-delay:80ms">
+          <h2 id="manifest-title" class="labs-manifest__title is-say">Do škol nenosím přednášku. Nosím&nbsp;projekt.</h2>
+          <div class="labs-manifest__cols">
+            <p>
+              Čau, jsem Denis. Osm let jsem se věnoval výuce informatiky, tělesné výchovy a projektovému vzdělávání.
+              Dnes se intenzivně věnuji AI, digitálním produktům, Unreal Engine a experimentům na pomezí technologií,
+              vzdělávání a společnosti.
+            </p>
+            <p>
+              Pedagogika pro mě není minulá profese, ale jeden z pilířů. Zajímá mě, jak se člověk učí, co podporuje
+              motivaci, jak vzniká prostředí, kde se nebojí experimentovat, a jak propojit hru se skutečnou prací.
+              Studenti se u mě ptají, zkouší, tvoří, ověřují a odcházejí s výstupem, který má smysl.
+            </p>
+          </div>
+          <p class="labs-manifest__sig">Čau lidi, jdeme na to.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ LABS -->
+    <section class="section labs-list" id="laby" aria-labelledby="labs-title">
+      <div class="wrap">
+        <header class="section__head grid12" data-reveal>
+          <p class="mono section__label">
+            <span class="section__index">02</span>
+            Pět vstupních cest
+          </p>
+          <div class="section__intro">
+            <h2 id="labs-title">Projektové laby</h2>
+            <p class="lead">
+              Nejde o pět kurzů. Je to jeden projektový prostor a pět různých cest, kterými se do něj dá vstoupit.
+            </p>
+          </div>
+        </header>
+
+        <ol class="labs-grid" role="list">
+          {
+            LABS.map((lab, index) => (
+              <li
+                class="lab-card"
+                data-reveal
+                data-draw-group
+                style={`--reveal-delay:${index * 70}ms; --lab-accent:${lab.world.accent}; --lab-second:${lab.world.second}`}
+              >
+                <a class="lab-card__link" href={localePath('cs', `laby/${lab.slug}`)}>
+                  <div class="lab-card__plate">
+                    <ProjectVisual visual={lab.visual} hue={0} seed={`lab-${lab.slug}`} accent={lab.world.accent} />
+                  </div>
+                  <p class="mono lab-card__name">
+                    <span class="lab-card__glyph" aria-hidden="true">{lab.glyph}</span>
+                    {lab.name}
+                  </p>
+                  <h3 class="lab-card__q">{lab.question}</h3>
+                  <p class="lab-card__short">{lab.short}</p>
+                  <span class="mono lab-card__more">
+                    Detail labu <span aria-hidden="true">&#8594;</span>
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============================================================= FORMATS -->
+    <section class="section section--sm labs-formats" id="formaty" aria-labelledby="formats-title">
+      <div class="wrap">
+        <header class="section__head grid12" data-reveal>
+          <p class="mono section__label">
+            <span class="section__index">03</span>
+            Formáty spolupráce
+          </p>
+          <div class="section__intro">
+            <h2 id="formats-title">Od workshopu po ateliér</h2>
+            <p class="lead">Délku a hloubku domluvíme podle školy, studentů i rozvrhu.</p>
+          </div>
+        </header>
+
+        <div class="labs-formats__layout grid12">
+          <ol class="formats" role="list">
+            {
+              LAB_FORMATS.map((format, index) => (
+                <li class="formats__row" data-reveal style={`--reveal-delay:${index * 60}ms`}>
+                  <span class="mono formats__dur">{format.duration}</span>
+                  <h3 class="formats__name">{format.name}</h3>
+                  <p class="formats__body">{format.body}</p>
+                </li>
+              ))
+            }
+            <li class="formats__row formats__row--online" data-reveal style="--reveal-delay:320ms">
+              <span class="mono formats__dur">kdekoli</span>
+              <h3 class="formats__name">{LAB_ONLINE.name}</h3>
+              <p class="formats__body">{LAB_ONLINE.body}</p>
+            </li>
+          </ol>
+
+          <aside class="group" data-reveal style="--reveal-delay:120ms" aria-labelledby="group-title">
+            <p class="mono group__label" id="group-title">Velikost skupiny</p>
+            <p class="group__figure is-name">
+              6–10 <span class="group__max">max. 12</span>
+            </p>
+            <p class="group__title">Malá projektová skupina</p>
+            <p class="group__body">{LAB_GROUP.why}</p>
+            <p class="group__flex">{LAB_GROUP.flex}</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== PRINCIPLES -->
+    <section class="section section--sm labs-principles" aria-labelledby="principles-title">
+      <div class="wrap grid12">
+        <p class="mono section__label" data-reveal>
+          <span class="section__index">04</span>
+          <span id="principles-title">Jak pracujeme</span>
+        </p>
+        <ul class="principles" role="list" data-reveal style="--reveal-delay:80ms">
+          {LAB_PRINCIPLES.map((principle) => <li class="principles__item">{principle}</li>)}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ======================================================= REAL PROJECTS -->
+    <section class="section section--sm labs-projects" id="projekty" aria-labelledby="projects-title">
+      <div class="wrap">
+        <header class="section__head grid12" data-reveal>
+          <p class="mono section__label">
+            <span class="section__index">05</span>
+            Reálné projekty
+          </p>
+          <div class="section__intro">
+            <h2 id="projects-title">Tohle nejsou témata, o kterých jen přednáším</h2>
+            <p class="lead">Jsou to oblasti, ve kterých skutečně pracuji. Laby z nich přímo vycházejí.</p>
+          </div>
+        </header>
+
+        <ul class="projects" role="list">
+          {
+            projects.map((project, index) => (
+              <li class="projects__row" data-reveal style={`--reveal-delay:${index * 60}ms`}>
+                <a class="projects__link" href={localePath('cs', `projects/${project.slug}`)}>
+                  <span class="projects__title">{t(project.title, code)}</span>
+                  <span class="mono projects__cat">{t(project.category, code)}</span>
+                </a>
+              </li>
+            ))
+          }
+          <li class="projects__row projects__row--plain" data-reveal>
+            <span class="projects__title">Usage</span>
+            <span class="mono projects__cat">Experimentální projekt · ve vývoji · základ Usage Labu</span>
+          </li>
+          <li class="projects__row projects__row--plain" data-reveal>
+            <span class="projects__title">Invok</span>
+            <span class="mono projects__cat">Vzdělávací produkt · ve vývoji · základ Invok Labu</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================= CONTACT -->
+    <section class="section section--lg labs-contact" id="kontakt" aria-labelledby="contact-title">
+      <div class="wrap labs-contact__inner">
+        <p class="mono section__label" data-reveal>
+          <span class="section__index">06</span>
+          Kontakt
+        </p>
+        <h2 id="contact-title" class="labs-contact__title is-say" data-reveal style="--reveal-delay:80ms">
+          Pojďme společně vymyslet projekt pro vaši školu.
+        </h2>
+
+        <div class="labs-contact__grid" data-reveal style="--reveal-delay:160ms">
+          <div class="labs-contact__person">
+            <p class="labs-contact__name is-name">{site.author.name}</p>
+            {email && <a class="link labs-contact__line hit" href={`mailto:${email}`}>{email}</a>}
+            {phone && tel && <a class="link labs-contact__line hit" href={tel}>{phone}</a>}
+            <p class="labs-contact__sig">Čau lidi, jdeme na to.</p>
+          </div>
+
+          <div class="labs-contact__actions">
+            {email && (
+              <a class="action" href={`mailto:${email}?subject=${encodeURIComponent('Projektové laby pro naši školu')}`}>
+                Napsat e-mail <span class="action__arrow" aria-hidden="true">&#8599;</span>
+              </a>
+            )}
+            <a class="action" href={LAB_PDFS.poster.href} download>
+              Stáhnout nabídku pro školy · PDF <span class="action__arrow" aria-hidden="true">&#8595;</span>
+            </a>
+            <a class="action" href={LAB_PDFS.cards.href} download>
+              Karty pěti labů · PDF <span class="action__arrow" aria-hidden="true">&#8595;</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <SiteFooter lang={code} />
+</BaseLayout>
+
+<style>
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  /* Larger hit area for small inline links on touch screens. */
+  @media (pointer: coarse) {
+    .hit {
+      padding-block: 0.7em;
+      margin-block: -0.7em; /* bigger target, same layout */
+    }
+  }
+
+  /* ------------------------------------------------------------------ hero */
+  .labs-hero {
+    padding-block: clamp(3rem, 9vh, 7rem) var(--s-section-sm);
+    --lab-accent: #e8927f; /* the main schools world: salmon */
+  }
+
+  .labs-hero__inner {
+    row-gap: clamp(1.25rem, 3vh, 2.25rem);
+  }
+
+  .labs-hero__label,
+  .labs-hero__title,
+  .labs-hero__body,
+  .labs-hero__aside {
+    grid-column: 1 / -1;
+  }
+
+  .labs-hero__label {
+    color: var(--c-bone-faint);
+  }
+
+  /* A sentence, not a name: light weight per the site's weight rule. Open line
+     height so the diacritics in "zkoušku" and "tvořit" never touch. */
+  .labs-hero__title {
+    font-size: var(--t-mega);
+    line-height: 1;
+  }
+
+  .labs-hero__accent {
+    color: var(--lab-accent);
+  }
+
+  .labs-hero__body {
+    display: grid;
+    gap: var(--s-4);
+    max-inline-size: var(--w-lead);
+  }
+
+  .labs-hero__credo {
+    color: var(--c-bone-dim);
+    max-inline-size: 48ch;
+    text-wrap: pretty;
+  }
+
+  .labs-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-6);
+    margin-block-start: var(--s-2);
+  }
+
+  .labs-hero__aside {
+    display: grid;
+    gap: var(--s-4);
+    align-content: end;
+  }
+
+  .labs-hero__pdf {
+    color: var(--c-bone-dim);
+    justify-self: start;
+  }
+
+  @media (min-width: 62rem) {
+    .labs-hero__title {
+      grid-column: 1 / span 11;
+    }
+
+    .labs-hero__body {
+      grid-column: 1 / span 7;
+    }
+
+    .labs-hero__aside {
+      grid-column: 9 / span 4;
+    }
+  }
+
+  /* -------------------------------------------------------------- manifest */
+  .labs-manifest__body {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--s-5);
+  }
+
+  .labs-manifest__title {
+    font-size: var(--t-display);
+    max-inline-size: 18ch;
+    text-wrap: balance;
+  }
+
+  .labs-manifest__cols {
+    display: grid;
+    gap: var(--s-4) var(--col-gap);
+    color: var(--c-bone-dim);
+  }
+
+  .labs-manifest__cols p {
+    max-inline-size: 52ch;
+    text-wrap: pretty;
+  }
+
+  .labs-manifest__sig,
+  .labs-contact__sig {
+    font-size: var(--t-lead);
+    font-weight: var(--fw-light);
+    font-style: italic;
+    color: var(--c-bone-dim);
+  }
+
+  @media (min-width: 48rem) {
+    .labs-manifest__body {
+      grid-column: 4 / span 9;
+    }
+
+    .labs-manifest__cols {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* ------------------------------------------------------------------ labs */
+  .labs-grid {
+    display: grid;
+    gap: var(--s-7) var(--col-gap);
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Plate, name, question and summary hug their content; the spare height of
+     a shorter card goes above "Detail labu", so every card in a row lines up. */
+  .lab-card__link {
+    display: grid;
+    grid-template-rows: auto auto auto 1fr auto;
+    gap: var(--s-3);
+    color: var(--c-bone);
+    block-size: 100%;
+  }
+
+  .lab-card__plate {
+    aspect-ratio: 16 / 10;
+    max-inline-size: 100%;
+    overflow: hidden;
+    border-block-end: 2px solid var(--lab-accent);
+    margin-block-end: var(--s-2);
+  }
+
+  .lab-card__name {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-3);
+    color: var(--c-bone-dim);
+  }
+
+  .lab-card__glyph {
+    color: var(--lab-accent);
+    letter-spacing: 0;
+  }
+
+  .lab-card__q {
+    font-size: var(--t-h3);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--tr-snug);
+    line-height: 1.12;
+    text-wrap: balance;
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .lab-card__short {
+    color: var(--c-bone-dim);
+    max-inline-size: 46ch;
+    text-wrap: pretty;
+  }
+
+  .lab-card__more {
+    color: var(--lab-accent);
+    margin-block-start: var(--s-2);
+  }
+
+  .lab-card__link:hover .lab-card__q,
+  .lab-card__link:focus-visible .lab-card__q {
+    color: var(--lab-accent);
+  }
+
+  @media (min-width: 48rem) {
+    .labs-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Two columns and five labs: the last one takes the whole row. */
+    .lab-card:last-child {
+      grid-column: 1 / -1;
+    }
+
+    .lab-card:last-child .lab-card__plate {
+      aspect-ratio: 32 / 10;
+    }
+  }
+
+  /* Three over two on wide screens: the last two labs take the wider slots. */
+  @media (min-width: 75rem) {
+    .labs-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .lab-card {
+      grid-column: span 2;
+    }
+
+    .lab-card:nth-child(n + 4) {
+      grid-column: span 3;
+    }
+
+    .lab-card:last-child .lab-card__plate {
+      aspect-ratio: 16 / 10;
+    }
+  }
+
+  /* --------------------------------------------------------------- formats */
+  .labs-formats__layout {
+    row-gap: var(--s-7);
+    align-items: start;
+  }
+
+  .formats {
+    grid-column: 1 / -1;
+    display: grid;
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--c-line);
+  }
+
+  .formats__row {
+    display: grid;
+    grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
+    gap: var(--s-2) var(--s-4);
+    padding-block: var(--s-5);
+    border-block-end: 1px solid var(--c-line);
+    align-items: baseline;
+  }
+
+  .formats__dur {
+    color: var(--c-signal);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .formats__row--online .formats__dur {
+    color: var(--c-bone-faint);
+  }
+
+  .formats__name {
+    font-size: var(--t-h3);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--tr-snug);
+  }
+
+  .formats__body {
+    grid-column: 2;
+    color: var(--c-bone-dim);
+    max-inline-size: 48ch;
+  }
+
+  .group {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--s-3);
+    padding: var(--s-6);
+    background-color: var(--c-ink);
+    border-inline-start: 2px solid var(--c-signal);
+  }
+
+  .group__label {
+    color: var(--c-bone-faint);
+  }
+
+  .group__figure {
+    font-size: var(--t-project);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .group__max {
+    font-size: 0.34em;
+    font-weight: var(--fw-book);
+    letter-spacing: 0;
+    color: var(--c-signal);
+    vertical-align: 0.9em;
+    margin-inline-start: 0.25em;
+  }
+
+  .group__title {
+    font-size: var(--t-h3);
+    font-weight: var(--fw-medium);
+  }
+
+  .group__body {
+    color: var(--c-bone-dim);
+    text-wrap: pretty;
+  }
+
+  .group__flex {
+    color: var(--c-bone-faint);
+    font-size: var(--t-mono);
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 62rem) {
+    .formats {
+      grid-column: 1 / span 7;
+    }
+
+    .formats__row {
+      grid-template-columns: minmax(0, 8rem) minmax(0, 14rem) minmax(0, 1fr);
+    }
+
+    .formats__body {
+      grid-column: 3;
+    }
+
+    .group {
+      grid-column: 9 / span 4;
+      position: sticky;
+      inset-block-start: 7rem;
+    }
+  }
+
+  /* ------------------------------------------------------------ principles */
+  .principles {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-5);
+    margin: 0;
+    padding: 0;
+  }
+
+  .principles__item {
+    font-size: var(--t-section);
+    font-weight: var(--fw-light);
+    letter-spacing: var(--tr-snug);
+    line-height: 1.2;
+  }
+
+  .principles__item:not(:last-child)::after {
+    /* Decorative separator: empty alternative text for assistive tech. */
+    content: '/' / '';
+    margin-inline-start: var(--s-5);
+    color: var(--c-signal);
+  }
+
+  @media (min-width: 48rem) {
+    .principles {
+      grid-column: 4 / span 9;
+    }
+  }
+
+  /* -------------------------------------------------------------- projects */
+  .projects {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--c-line-strong);
+  }
+
+  .projects__row {
+    border-block-end: 1px solid var(--c-line-strong);
+  }
+
+  .projects__link,
+  .projects__row--plain {
+    display: grid;
+    gap: var(--s-2);
+    padding-block: var(--s-5);
+    color: var(--c-bone);
+  }
+
+  .projects__title {
+    font-size: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    font-weight: var(--fw-heavy);
+    letter-spacing: var(--tr-tight);
+    line-height: 1;
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .projects__row--plain .projects__title {
+    color: var(--c-bone-dim);
+    font-weight: var(--fw-medium);
+  }
+
+  .projects__cat {
+    color: var(--c-bone-faint);
+  }
+
+  .projects__link:hover .projects__title,
+  .projects__link:focus-visible .projects__title {
+    color: var(--c-signal);
+  }
+
+  @media (min-width: 62rem) {
+    .projects__link,
+    .projects__row--plain {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+      align-items: baseline;
+    }
+
+    .projects__cat {
+      text-align: end;
+    }
+  }
+
+  /* --------------------------------------------------------------- contact */
+  .labs-contact__inner {
+    display: grid;
+    gap: var(--s-6);
+  }
+
+  .labs-contact__inner > * {
+    grid-column: 1 / -1;
+  }
+
+  .labs-contact__title {
+    font-size: var(--t-display);
+    max-inline-size: 20ch;
+    text-wrap: balance;
+  }
+
+  .labs-contact__grid {
+    display: grid;
+    gap: var(--s-7) var(--col-gap);
+  }
+
+  .labs-contact__person {
+    display: grid;
+    gap: var(--s-2);
+    justify-items: start;
+  }
+
+  .labs-contact__name {
+    font-size: var(--t-h3);
+    margin-block-end: var(--s-2);
+  }
+
+  .labs-contact__line {
+    font-size: var(--t-lead);
+  }
+
+  .labs-contact__sig {
+    margin-block-start: var(--s-4);
+  }
+
+  .labs-contact__actions {
+    display: grid;
+    gap: var(--s-2);
+    justify-items: start;
+    align-content: start;
+  }
+
+  @media (min-width: 62rem) {
+    .labs-contact__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
+
+<script>
+  import { playEnterReveal } from '~/motion/language/enterReveal';
+  import { initScrollReveal } from '~/motion/scrollReveal';
+
+  playEnterReveal(document.querySelector<HTMLElement>('[data-transition-cover]'));
+  initScrollReveal();
+</script>

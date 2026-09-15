@@ -1,0 +1,577 @@
+---
+import SiteFooter from '~/components/contact/SiteFooter.astro';
+import SiteNav from '~/components/navigation/SiteNav.astro';
+import ProjectVisual from '~/components/projects/ProjectVisual.astro';
+import TransitionCover from '~/components/ui/TransitionCover.astro';
+import { site } from '~/config/site';
+import { LAB_FORMATS, LAB_GROUP, LAB_ONLINE, LAB_PDFS, LABS, type Lab } from '~/data/labs';
+import { localePath, t } from '~/i18n';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { getExperiments, getProjects, hasLabDetail } from '~/lib/cms';
+
+/**
+ * LAB DETAIL — /cs/laby/[slug]/
+ *
+ * One page per lab, in the lab's own colour world. Every page answers the
+ * same questions a school asks, in the same order: what is it about, what do
+ * students actually do, what comes out, which subjects it touches, which
+ * formats fit, what the school needs, how big the group is, and who to call.
+ */
+export function getStaticPaths() {
+  return LABS.map((lab) => ({ params: { lang: 'cs', slug: lab.slug }, props: { code: 'cs', lab } }));
+}
+
+interface Props {
+  code: string;
+  lab: Lab;
+}
+
+const { code, lab } = Astro.props;
+
+const index = LABS.findIndex((item) => item.slug === lab.slug);
+const prev = LABS[(index - 1 + LABS.length) % LABS.length]!;
+const next = LABS[(index + 1) % LABS.length]!;
+
+// Related work resolves against the real CMS content. Anything that no longer
+// has a page is dropped rather than rendered as a dead link.
+const [projects, experiments] = await Promise.all([getProjects(code), getExperiments(code)]);
+const related = lab.related
+  .map((item) => {
+    if (item.kind === 'project') {
+      const project = projects.find((p) => p.slug === item.slug);
+      return project
+        ? { href: localePath('cs', `projects/${project.slug}`), title: t(project.title, code), kind: 'Projekt' }
+        : null;
+    }
+    const experiment = experiments.find((e) => (e.slug ?? e.id) === item.slug);
+    return experiment && hasLabDetail(experiment)
+      ? { href: localePath('cs', `lab/${item.slug}`), title: t(experiment.title, code), kind: 'Lab poznámka' }
+      : null;
+  })
+  .filter((item): item is { href: string; title: string; kind: string } => item !== null);
+
+const email = site.contact.email;
+const phone = site.contact.phone;
+const tel = phone ? `tel:${phone.replace(/\s+/g, '')}` : null;
+
+const title = `${lab.name}: ${lab.question} — ${site.author.name}`;
+const description = `${lab.lead} Malá projektová skupina do 12 studentů.`;
+
+const navLinks = [
+  { href: localePath('cs', 'laby'), label: 'Všechny laby', accent: true },
+  { href: '#formaty', label: 'Formáty' },
+  { href: '#kontakt', label: 'Kontakt' },
+  { href: `${localePath('cs')}#about`, label: 'O mně' },
+];
+---
+
+<BaseLayout
+  lang={code}
+  title={title}
+  description={description}
+  altPath={`laby/${lab.slug}`}
+  onlyLocales={['cs']}
+  ogImage="/assets/og-laby.png"
+  ogImageAlt="Nejdeme na zkoušku. Jdeme tvořit. Projektové laby pro střední školy — Denis Mitrović"
+>
+  <TransitionCover />
+  <SiteNav lang={code} links={navLinks} />
+
+  <main
+    id="main"
+    class="lab"
+    style={`--lab-accent:${lab.world.accent}; --lab-second:${lab.world.second}`}
+  >
+    <!-- ================================================================ HERO -->
+    <section class="lab-hero" id="hero">
+      <div class="wrap lab-hero__inner grid12">
+        <p class="mono lab-hero__crumbs" data-reveal>
+          <a class="link hit" href={localePath('cs', 'laby')}>Projektové laby</a>
+          <span aria-hidden="true"> / </span>
+          <span class="lab-hero__glyph" aria-hidden="true">{lab.glyph}</span> {lab.name}
+        </p>
+
+        <h1 class="lab-hero__title is-say" data-reveal style="--reveal-delay:60ms">{lab.question}</h1>
+
+        <p class="lead lab-hero__lead" data-reveal style="--reveal-delay:160ms">{lab.lead}</p>
+
+        <div class="lab-hero__plate" data-reveal data-draw-group style="--reveal-delay:220ms">
+          <ProjectVisual visual={lab.visual} hue={0} seed={`lab-${lab.slug}`} accent={lab.world.accent} />
+        </div>
+
+        <p class="mono lab-hero__group" data-reveal style="--reveal-delay:260ms">{LAB_GROUP.short}</p>
+      </div>
+    </section>
+
+    <!-- ============================================================= DETAIL -->
+    <section class="section section--sm lab-detail">
+      <div class="wrap lab-detail__grid">
+        <div class="block block--wide" data-reveal>
+          <h2 class="mono block__label">Co studenti dělají</h2>
+          <ul class="doing" role="list">
+            {lab.studentsDo.map((item) => <li class="doing__item">{item}</li>)}
+          </ul>
+        </div>
+
+        <div class="block" data-reveal style="--reveal-delay:60ms">
+          <h2 class="mono block__label">Možný výstup</h2>
+          <p class="block__text">{lab.output}</p>
+        </div>
+
+        <div class="block" data-reveal style="--reveal-delay:120ms">
+          <h2 class="mono block__label">Propojení s předměty</h2>
+          <ul class="chips" role="list">
+            {lab.subjects.map((subject) => <li class="chips__item">{subject}</li>)}
+          </ul>
+        </div>
+
+        {
+          lab.note && (
+            <div class="block block--note" data-reveal>
+              <h2 class="mono block__label">{lab.note.title}</h2>
+              <p class="block__text">{lab.note.body}</p>
+            </div>
+          )
+        }
+
+        <div class="block block--wide" id="formaty" data-reveal>
+          <h2 class="mono block__label">Vhodné formáty</h2>
+          <ul class="fit" role="list">
+            {
+              LAB_FORMATS.map((format, i) => {
+                const fits = lab.formats.includes(i);
+                return (
+                  <li class="fit__item" data-fit={fits ? 'yes' : 'no'}>
+                    <span class="fit__name">{format.name}</span>
+                    <span class="mono fit__dur">{format.duration}</span>
+                    <span class="visually-hidden">{fits ? '(vhodné)' : '(méně vhodné)'}</span>
+                  </li>
+                );
+              })
+            }
+            <li class="fit__item" data-fit={lab.online ? 'yes' : 'no'}>
+              <span class="fit__name">{LAB_ONLINE.name}</span>
+              <span class="mono fit__dur">{lab.online ? 'lze' : 'jen osobně'}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="block" data-reveal>
+          <h2 class="mono block__label">Technické požadavky</h2>
+          <p class="block__text">{lab.tech}</p>
+        </div>
+
+        <div class="block" data-reveal style="--reveal-delay:60ms">
+          <h2 class="mono block__label">Velikost skupiny</h2>
+          <p class="block__text"><strong>Malá projektová skupina:</strong> {LAB_GROUP.ideal}.</p>
+          <p class="block__text block__text--dim">{LAB_GROUP.why} {LAB_GROUP.flex}</p>
+        </div>
+
+        {
+          related.length > 0 && (
+            <div class="block block--wide" data-reveal>
+              <h2 class="mono block__label">Souvisí s mou prací</h2>
+              <ul class="related" role="list">
+                {related.map((item) => (
+                  <li>
+                    <a class="related__link" href={item.href}>
+                      <span class="mono related__kind">{item.kind}</span>
+                      <span class="related__title">{item.title}</span>
+                      <span class="related__arrow" aria-hidden="true">&#8594;</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+      </div>
+    </section>
+
+    <!-- ============================================================= CONTACT -->
+    <section class="section section--sm lab-contact" id="kontakt" aria-labelledby="lab-contact-title">
+      <div class="wrap lab-contact__inner">
+        <h2 id="lab-contact-title" class="lab-contact__title is-say" data-reveal>
+          Pojďme z {lab.name} udělat projekt pro vaši školu.
+        </h2>
+        <div class="lab-contact__row" data-reveal style="--reveal-delay:80ms">
+          <div class="lab-contact__person">
+            <p class="lab-contact__name">{site.author.name}</p>
+            {email && <a class="link hit" href={`mailto:${email}?subject=${encodeURIComponent(lab.name)}`}>{email}</a>}
+            {phone && tel && <a class="link hit" href={tel}>{phone}</a>}
+            <p class="lab-contact__sig">Čau lidi, jdeme na to.</p>
+          </div>
+          <div class="lab-contact__actions">
+            <a class="action" href={LAB_PDFS.cards.href} download>
+              Karty labů · PDF <span class="action__arrow" aria-hidden="true">&#8595;</span>
+            </a>
+            <a class="action" href={LAB_PDFS.poster.href} download>
+              Nabídka pro školy · PDF <span class="action__arrow" aria-hidden="true">&#8595;</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== PREV / NEXT -->
+    <nav class="wrap lab-pager" aria-label="Další laby">
+      <a class="lab-pager__link" href={localePath('cs', `laby/${prev.slug}`)} style={`--pager-accent:${prev.world.accent}`}>
+        <span class="mono lab-pager__dir"><span aria-hidden="true">&#8592; </span>Předchozí</span>
+        <span class="lab-pager__name">{prev.name}</span>
+      </a>
+      <a
+        class="lab-pager__link lab-pager__link--next"
+        href={localePath('cs', `laby/${next.slug}`)}
+        style={`--pager-accent:${next.world.accent}`}
+      >
+        <span class="mono lab-pager__dir">Další<span aria-hidden="true"> &#8594;</span></span>
+        <span class="lab-pager__name">{next.name}</span>
+      </a>
+    </nav>
+  </main>
+
+  <SiteFooter lang={code} />
+</BaseLayout>
+
+<style>
+  /* Larger hit area for small inline links on touch screens. */
+  @media (pointer: coarse) {
+    .hit {
+      padding-block: 0.7em;
+      margin-block: -0.7em; /* bigger target, same layout */
+    }
+  }
+
+  /* ------------------------------------------------------------------ hero */
+  .lab-hero {
+    padding-block: clamp(2.5rem, 7vh, 5.5rem) var(--s-section-sm);
+  }
+
+  .lab-hero__inner {
+    row-gap: var(--s-5);
+    align-items: end;
+  }
+
+  .lab-hero__crumbs,
+  .lab-hero__title,
+  .lab-hero__lead,
+  .lab-hero__plate,
+  .lab-hero__group {
+    grid-column: 1 / -1;
+  }
+
+  .lab-hero__crumbs {
+    color: var(--c-bone-faint);
+  }
+
+  .lab-hero__glyph {
+    color: var(--lab-accent);
+    letter-spacing: 0;
+  }
+
+  /* A question, so it follows the weight rule for sentences: light and open.
+     The extra line height keeps Czech diacritics clear of the line above. */
+  .lab-hero__title {
+    font-size: var(--t-statement);
+    line-height: 1.04;
+    color: var(--c-bone);
+    text-wrap: balance;
+    max-inline-size: 16ch;
+  }
+
+  .lab-hero__lead {
+    max-inline-size: 46ch;
+    color: var(--c-bone-dim);
+  }
+
+  .lab-hero__plate {
+    aspect-ratio: 16 / 10;
+    max-inline-size: 100%;
+    overflow: hidden;
+    border-block-end: 2px solid var(--lab-accent);
+  }
+
+  .lab-hero__group {
+    color: var(--lab-accent);
+  }
+
+  @media (min-width: 62rem) {
+    .lab-hero__title {
+      grid-column: 1 / span 8;
+    }
+
+    .lab-hero__lead {
+      grid-column: 1 / span 7;
+      grid-row: 3;
+    }
+
+    .lab-hero__plate {
+      grid-column: 9 / span 4;
+      grid-row: 2 / span 2;
+    }
+
+    .lab-hero__group {
+      grid-column: 1 / span 7;
+    }
+  }
+
+  /* ---------------------------------------------------------------- detail */
+  .lab-detail__grid {
+    display: grid;
+    gap: var(--s-7) var(--col-gap);
+    border-block-start: 1px solid var(--c-line-strong);
+    padding-block-start: var(--s-7);
+  }
+
+  .block {
+    display: grid;
+    gap: var(--s-4);
+    align-content: start;
+  }
+
+  .block__label {
+    font-size: var(--t-mono);
+    font-weight: var(--fw-medium);
+    color: var(--lab-accent);
+  }
+
+  .block__text {
+    max-inline-size: 52ch;
+    text-wrap: pretty;
+  }
+
+  .block__text strong {
+    font-weight: var(--fw-semi);
+  }
+
+  .block__text--dim {
+    color: var(--c-bone-dim);
+  }
+
+  .block--note {
+    padding: var(--s-5);
+    background-color: var(--c-ink);
+    border-inline-start: 2px solid var(--lab-second);
+  }
+
+  .block--note .block__label {
+    color: var(--lab-second);
+  }
+
+  .doing {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .doing__item {
+    position: relative;
+    padding: var(--s-4) 0 var(--s-4) var(--s-6);
+    border-block-end: 1px solid var(--c-line);
+    font-size: var(--t-lead);
+    font-weight: var(--fw-light);
+    line-height: 1.35;
+    text-wrap: pretty;
+  }
+
+  .doing__item::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 1.35em;
+    inline-size: 1.1rem;
+    block-size: 2px;
+    background-color: var(--lab-accent);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    margin: 0;
+    padding: 0;
+  }
+
+  .chips__item {
+    padding: 0.35em 0.9em;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-pill);
+    color: var(--c-bone-dim);
+  }
+
+  .fit {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+    gap: var(--s-2);
+    margin: 0;
+    padding: 0;
+  }
+
+  .fit__item {
+    display: grid;
+    gap: var(--s-3);
+    align-content: space-between;
+    min-block-size: 5.5rem;
+    padding: var(--s-4);
+    border: 1px dashed var(--c-line-strong);
+    color: var(--c-bone-faint);
+  }
+
+  .fit__item[data-fit='yes'] {
+    border-style: solid;
+    border-color: var(--lab-accent);
+    color: var(--c-bone);
+  }
+
+  .fit__item[data-fit='yes'] .fit__dur {
+    color: var(--lab-accent);
+  }
+
+  .fit__name {
+    font-weight: var(--fw-medium);
+    line-height: 1.2;
+  }
+
+  .related {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--c-line);
+  }
+
+  .related__link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--s-1) var(--s-4);
+    padding-block: var(--s-4);
+    border-block-end: 1px solid var(--c-line);
+    color: var(--c-bone);
+    align-items: baseline;
+  }
+
+  .related__kind {
+    grid-column: 1 / -1;
+    color: var(--c-bone-faint);
+  }
+
+  .related__title {
+    font-size: var(--t-h3);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--tr-snug);
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .related__arrow {
+    color: var(--lab-accent);
+  }
+
+  .related__link:hover .related__title,
+  .related__link:focus-visible .related__title {
+    color: var(--lab-accent);
+  }
+
+  @media (min-width: 62rem) {
+    .lab-detail__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .block--wide {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* --------------------------------------------------------------- contact */
+  .lab-contact__inner {
+    display: grid;
+    gap: var(--s-6);
+    border-block-start: 1px solid var(--c-line-strong);
+    padding-block-start: var(--s-7);
+  }
+
+  .lab-contact__title {
+    font-size: var(--t-display);
+    max-inline-size: 22ch;
+    text-wrap: balance;
+  }
+
+  .lab-contact__row {
+    display: grid;
+    gap: var(--s-6) var(--col-gap);
+  }
+
+  .lab-contact__person {
+    display: grid;
+    gap: var(--s-2);
+    justify-items: start;
+  }
+
+  .lab-contact__name {
+    font-size: var(--t-h3);
+    font-weight: var(--fw-heavy);
+    letter-spacing: var(--tr-tight);
+  }
+
+  .lab-contact__sig {
+    font-style: italic;
+    font-weight: var(--fw-light);
+    color: var(--c-bone-dim);
+    margin-block-start: var(--s-3);
+  }
+
+  .lab-contact__actions {
+    display: grid;
+    gap: var(--s-2);
+    justify-items: start;
+    align-content: start;
+  }
+
+  @media (min-width: 62rem) {
+    .lab-contact__row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* ----------------------------------------------------------------- pager */
+  .lab-pager {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--col-gap);
+    padding-block: var(--s-6) var(--s-section-sm);
+  }
+
+  .lab-pager__link {
+    display: grid;
+    gap: var(--s-2);
+    padding-block-start: var(--s-4);
+    border-block-start: 2px solid var(--pager-accent);
+    color: var(--c-bone);
+  }
+
+  .lab-pager__link--next {
+    text-align: end;
+  }
+
+  .lab-pager__dir {
+    color: var(--c-bone-faint);
+  }
+
+  .lab-pager__name {
+    font-size: var(--t-h3);
+    font-weight: var(--fw-medium);
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .lab-pager__link:hover .lab-pager__name,
+  .lab-pager__link:focus-visible .lab-pager__name {
+    color: var(--pager-accent);
+  }
+</style>
+
+<script>
+  import { playEnterReveal } from '~/motion/language/enterReveal';
+  import { initScrollReveal } from '~/motion/scrollReveal';
+
+  playEnterReveal(document.querySelector<HTMLElement>('[data-transition-cover]'));
+  initScrollReveal();
+</script>

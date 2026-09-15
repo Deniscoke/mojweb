@@ -5,6 +5,7 @@ import SiteFooter from '~/components/contact/SiteFooter.astro';
 import Credo from '~/components/hero/Credo.astro';
 import Currently from '~/components/currently/Currently.astro';
 import Hero from '~/components/hero/Hero.astro';
+import SchoolsEntry from '~/components/labs/SchoolsEntry.astro';
 import LabPreview from '~/components/lab/LabPreview.astro';
 import SiteNav from '~/components/navigation/SiteNav.astro';
 import SelectedWork from '~/components/projects/SelectedWork.astro';
@@ -36,6 +37,8 @@ const dict = useTranslations(code);
 
   <main id="main">
     <Hero lang={code} />
+    {/* The project labs are written in Czech only. */}
+    {code === 'cs' && <SchoolsEntry />}
     <Credo lang={code} />
     <SelectedWork lang={code} />
     <WhatIDo lang={code} />

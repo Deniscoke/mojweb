@@ -4,7 +4,7 @@ export const cs: Dictionary = {
   meta: {
     title: 'Denis Mitrović — Dělám z nápadů skutečnost',
     description:
-      'Creative technologist a product builder na pomezí technologií, vzdělávání, AI a kreativní tvorby. Projekty, prototypy a experimenty.',
+      'Zkoumám, jak se člověk učí, tvoří a žije s technologiemi, a stavím z toho reálné projekty. AI, Unreal Engine, pedagogika, pohyb a projektové laby pro střední školy.',
   },
   nav: {
     work: 'Práce',
@@ -39,7 +39,7 @@ export const cs: Dictionary = {
   },
   credo: [
     { word: 'Stavět', hint: 'Weby, digitální produkty, AI, automatizace' },
-    { word: 'Učit', hint: 'Učení, technologie, workshopy, školy' },
+    { word: 'Učit', hint: 'Pedagogika, projektové laby pro střední školy' },
     { word: 'Hýbat se', hint: 'Cirkus, pohyb, snowboarding' },
     { word: 'Zkoumat', hint: 'AI, Unreal, kreativní technologie, experimenty' },
   ],
@@ -62,7 +62,7 @@ export const cs: Dictionary = {
       },
       {
         title: 'Vzdělávání',
-        body: 'Externě pro školy: učení v souladu s mozkem, intuitivní pedagogika, AI ve výuce, školení učitelů.',
+        body: 'Projektové laby pro střední školy: AI, informatika, Unreal Engine, tvorba a otázky o technologiích. Malé skupiny do 12 studentů. Podrobně v sekci Pro školy.',
       },
       {
         title: 'Cirkus',

@@ -1,0 +1,199 @@
+---
+import { LAB_GROUP, LABS } from '~/data/labs';
+import { localePath } from '~/i18n';
+
+/**
+ * PRO ŠKOLY — the schools entry on the Czech homepage.
+ *
+ * Sits directly under the hero. The hero stays about the person; this band is
+ * where the project labs branch off, as the natural consequence of the work
+ * listed further down the page rather than a separate business stuck on top.
+ * Czech only: the labs exist in Czech only.
+ */
+const labsHref = localePath('cs', 'laby');
+---
+
+<section class="section section--sm schools" id="pro-skoly" aria-labelledby="schools-title">
+  <div class="wrap">
+    <div class="schools__frame grid12">
+      <p class="mono section__label schools__label" data-reveal>
+        <span class="section__index" aria-hidden="true">→</span>
+        Pro školy · Projektové laby
+      </p>
+
+      <div class="schools__intro" data-reveal style="--reveal-delay:80ms">
+        <h2 id="schools-title" class="schools__title is-say">Do škol nenosím přednášku. Nosím&nbsp;projekt.</h2>
+        <p class="lead schools__lead">
+          Projektové vzdělávání pro střední školy na pomezí AI, informatiky, tvorby, pedagogiky a světa kolem nás.
+          Vychází z toho, na čem opravdu pracuji.
+        </p>
+      </div>
+
+      <ul class="schools__labs" role="list" data-reveal style="--reveal-delay:160ms">
+        {
+          LABS.map((lab) => (
+            <li style={`--lab-accent:${lab.world.accent}`}>
+              <a class="schools__lab" href={localePath('cs', `laby/${lab.slug}`)}>
+                <span class="mono schools__glyph" aria-hidden="true">{lab.glyph}</span>
+                <span class="schools__lab-name">{lab.name}</span>
+                <span class="schools__lab-q">{lab.question}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="schools__foot" data-reveal style="--reveal-delay:220ms">
+        <a class="action schools__cta" href={labsHref}>
+          Prozkoumat projektové laby
+          <span class="action__arrow" aria-hidden="true">&#8594;</span>
+        </a>
+        <p class="mono schools__group">{LAB_GROUP.short}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .schools__frame {
+    row-gap: var(--s-6);
+    padding-block: clamp(2rem, 4vw, 3.5rem);
+    border-block: 1px solid var(--c-line-strong);
+  }
+
+  .schools__label {
+    grid-column: 1 / -1;
+  }
+
+  .schools__intro {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--s-4);
+  }
+
+  .schools__title {
+    font-size: var(--t-display);
+    max-inline-size: 18ch;
+    text-wrap: balance;
+  }
+
+  .schools__lead {
+    max-inline-size: 46ch;
+  }
+
+  /*
+   * Five entries, laid out on purpose rather than with auto-fit (which left one
+   * or two orphan cells on tablets): one column on phones, two columns with
+   * the fifth entry spanning the row on tablets, five across on wide screens.
+   */
+  .schools__labs {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0 var(--col-gap);
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--c-line);
+  }
+
+  @media (min-width: 36rem) {
+    .schools__labs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .schools__labs > li:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 70rem) {
+    .schools__labs {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .schools__labs > li:last-child {
+      grid-column: auto;
+    }
+  }
+
+  .schools__lab {
+    display: grid;
+    /* Rows hug their content, so every entry in a row starts at the same line. */
+    align-content: start;
+    gap: var(--s-2);
+    block-size: 100%;
+    padding: var(--s-5) var(--s-4) var(--s-5) 0;
+    border-block-end: 1px solid var(--c-line);
+    color: var(--c-bone);
+    position: relative;
+  }
+
+  .schools__lab::before {
+    content: '';
+    position: absolute;
+    inset-block-start: -1px;
+    inset-inline: 0 var(--s-4);
+    block-size: 2px;
+    background-color: var(--lab-accent);
+    transform: scaleX(0.18);
+    transform-origin: left center;
+    transition: transform var(--d-base) var(--e-out);
+  }
+
+  .schools__lab:hover::before,
+  .schools__lab:focus-visible::before {
+    transform: scaleX(1);
+  }
+
+  .schools__glyph {
+    color: var(--lab-accent);
+    font-size: var(--t-body);
+    letter-spacing: 0;
+  }
+
+  .schools__lab-name {
+    font-family: var(--f-mono);
+    font-size: var(--t-mono);
+    letter-spacing: var(--tr-mono);
+    text-transform: uppercase;
+    color: var(--c-bone-dim);
+  }
+
+  .schools__lab-q {
+    font-size: var(--t-h3);
+    font-weight: var(--fw-light);
+    letter-spacing: var(--tr-snug);
+    line-height: 1.12;
+    text-wrap: balance;
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .schools__lab:hover .schools__lab-q,
+  .schools__lab:focus-visible .schools__lab-q {
+    color: var(--lab-accent);
+  }
+
+  .schools__foot {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4) var(--s-6);
+  }
+
+  .schools__group {
+    color: var(--c-bone-faint);
+  }
+
+  @media (min-width: 62rem) {
+    .schools__label {
+      grid-column: 1 / span 3;
+      padding-block-start: 0.6em;
+    }
+
+    .schools__intro {
+      grid-column: 4 / span 9;
+    }
+  }
+</style>
