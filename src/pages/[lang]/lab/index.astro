@@ -1,0 +1,211 @@
+---
+import SiteFooter from '~/components/contact/SiteFooter.astro';
+import SiteNav from '~/components/navigation/SiteNav.astro';
+import TransitionCover from '~/components/ui/TransitionCover.astro';
+import { site } from '~/config/site';
+import { LOCALES, localePath, t, useTranslations } from '~/i18n';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { getExperiments, hasLabDetail } from '~/lib/cms';
+
+/**
+ * THE LAB INDEX — /[lang]/lab/
+ *
+ * The homepage carries a preview of this list; here each entry gets its
+ * question and note. Entries with a written log link through to their own
+ * page; entries that are still only a question stay inline rather than
+ * generating a page with nothing on it.
+ */
+export function getStaticPaths() {
+  return LOCALES.map((locale) => ({
+    params: { lang: locale.route },
+    props: { code: locale.code },
+  }));
+}
+
+const { code } = Astro.props;
+const dict = useTranslations(code);
+const experiments = await getExperiments(code);
+
+const title = `${dict.lab.indexTitle} — ${site.author.name}`;
+---
+
+<BaseLayout lang={code} title={title} description={dict.lab.indexLead} altPath="lab">
+  <TransitionCover />
+  <SiteNav lang={code} />
+
+  <main id="main" class="lab-page">
+    <div class="wrap">
+      <header class="lab-page__head grid12">
+        <p class="mono lab-page__label">{dict.lab.label}</p>
+        <div class="lab-page__intro">
+          <h1 class="lab-page__title is-name">{dict.lab.indexTitle}</h1>
+          <p class="lead">{dict.lab.indexLead}</p>
+        </div>
+      </header>
+
+      <ol class="lab-page__list" role="list">
+        {
+          experiments.map((item, index) => {
+            const detailed = hasLabDetail(item);
+            const href = localePath(code, `lab/${item.slug ?? item.id}`);
+            const num = String(index + 1).padStart(3, '0');
+
+            return (
+              <li class="entry" data-reveal style={`--reveal-delay:${Math.min(index, 6) * 45}ms`}>
+                <span class="mono entry__num">{num}</span>
+
+                <div class="entry__body">
+                  <h2 class="entry__title">
+                    {detailed ? (
+                      <a class="entry__link" href={href}>
+                        {t(item.title, code)}
+                      </a>
+                    ) : (
+                      t(item.title, code)
+                    )}
+                  </h2>
+
+                  {item.question && <p class="entry__question">{t(item.question, code)}</p>}
+                  {!detailed && <p class="mono entry__pending">{dict.lab.noteOnly}</p>}
+                </div>
+
+                <div class="entry__meta">
+                  <span class="mono entry__tag">{item.tag}</span>
+                  <span class="mono entry__state" data-state={item.state}>
+                    {dict.lab.states[item.state]}
+                  </span>
+                </div>
+              </li>
+            );
+          })
+        }
+      </ol>
+    </div>
+  </main>
+
+  <SiteFooter lang={code} />
+</BaseLayout>
+
+<style>
+  .lab-page {
+    padding-block: clamp(2rem, 6vh, 4rem) var(--s-section);
+  }
+
+  .lab-page__head {
+    margin-block-end: clamp(2.5rem, 6vw, 4rem);
+    row-gap: var(--s-4);
+  }
+
+  .lab-page__label {
+    grid-column: 1 / -1;
+    color: var(--c-lab);
+  }
+
+  .lab-page__intro {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--s-4);
+  }
+
+  .lab-page__title {
+    font-size: var(--t-section);
+  }
+
+  .lab-page__list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--c-line-strong);
+  }
+
+  .entry {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: var(--s-3) var(--s-4);
+    padding-block: var(--s-6);
+    border-block-end: 1px solid var(--c-line-strong);
+    align-items: start;
+  }
+
+  .entry__num {
+    color: var(--c-lab);
+    padding-block-start: 0.3em;
+  }
+
+  .entry__body {
+    display: grid;
+    gap: var(--s-3);
+  }
+
+  .entry__title {
+    font-size: clamp(1.125rem, 2.8vw, 1.625rem);
+    font-weight: var(--fw-book);
+    letter-spacing: var(--tr-snug);
+    line-height: 1.15;
+    text-wrap: pretty;
+  }
+
+  .entry__link {
+    color: inherit;
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .entry__link:hover,
+  .entry__link:focus-visible {
+    color: var(--c-lab);
+  }
+
+  .entry__question {
+    color: var(--c-bone-dim);
+    max-inline-size: 54ch;
+    text-wrap: pretty;
+  }
+
+  .entry__pending {
+    color: var(--c-bone-faint);
+  }
+
+  .entry__meta {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-4);
+    color: var(--c-bone-faint);
+  }
+
+  .entry__state[data-state='open-question'] {
+    color: var(--c-lab);
+  }
+
+  @media (min-width: 62rem) {
+    .lab-page__label {
+      grid-column: 1 / span 3;
+    }
+
+    .lab-page__intro {
+      grid-column: 4 / span 8;
+    }
+
+    .entry {
+      grid-template-columns: 3.5rem minmax(0, 1fr) 16rem;
+      gap: var(--s-5);
+      align-items: baseline;
+    }
+
+    .entry__meta {
+      grid-column: 3;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--s-2);
+      text-align: end;
+    }
+  }
+</style>
+
+<script>
+  import { playEnterReveal } from '~/motion/language/enterReveal';
+  import { initScrollReveal } from '~/motion/scrollReveal';
+
+  playEnterReveal(document.querySelector<HTMLElement>('[data-transition-cover]'));
+  initScrollReveal();
+</script>

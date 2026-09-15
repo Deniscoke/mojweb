@@ -1,0 +1,208 @@
+---
+import type { ProjectVisual } from '~/data/projects';
+
+/**
+ * GENERATED PROJECT PLATES
+ * ========================
+ * There are no photographs for this work yet, and a grey box or a stock image
+ * would both be worse than nothing. So each project draws its own plate: a
+ * deterministic figure seeded from the project slug, in a family chosen to
+ * echo what the project actually is (layered clauses, orbiting gimbals, a
+ * practice grid, scan lines, generative flow).
+ *
+ * SIGNATURE MOTIF (motion reference 07, re-implemented)
+ * Stroked elements carry `pathLength="1"` and `data-draw`, which normalises
+ * every path, ellipse and rect to one unit so a single CSS rule can draw all
+ * of them with `stroke-dashoffset` regardless of their real geometry. Filled
+ * elements cannot be drawn, so they arrive on a staggered fade instead. The
+ * frame draws first and gives the whole family a common gesture.
+ *
+ * Rendered once at build time into static SVG. No runtime cost, no requests.
+ */
+
+interface Props {
+  visual: ProjectVisual;
+  hue: number;
+  seed: string;
+  class?: string;
+}
+
+const { visual, hue, seed, class: className = '' } = Astro.props;
+
+/** xmur3 + mulberry32: stable across builds, so the art never flickers. */
+function rng(str: string) {
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i += 1) {
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  let a = h >>> 0;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const random = rng(seed);
+const W = 320;
+const H = 220;
+
+const accent = `oklch(0.74 0.18 ${hue})`;
+const dim = 'rgba(235, 231, 222, 0.24)';
+const faint = 'rgba(235, 231, 222, 0.09)';
+
+type Shape =
+  | { t: 'rect'; x: number; y: number; w: number; h: number; fill: string; d: number }
+  | { t: 'ellipse'; cx: number; cy: number; rx: number; ry: number; stroke: string; rot: number; d: number }
+  | { t: 'circle'; cx: number; cy: number; r: number; fill: string; d: number }
+  | { t: 'path'; d: string; stroke: string; sw: number; delay: number };
+
+const shapes: Shape[] = [];
+
+if (visual === 'strata') {
+  let y = 26;
+  for (let i = 0; i < 11; i += 1) {
+    const h = 4 + Math.round(random() * 9);
+    const w = 60 + Math.round(random() * 190);
+    shapes.push({ t: 'rect', x: 34, y, w, h, fill: i === 3 || i === 8 ? accent : dim, d: i * 45 });
+    y += h + 10;
+  }
+} else if (visual === 'orbit') {
+  for (let i = 0; i < 5; i += 1) {
+    shapes.push({
+      t: 'ellipse',
+      cx: W / 2,
+      cy: H / 2,
+      rx: 30 + i * 22,
+      ry: 12 + i * 9 + random() * 10,
+      stroke: i === 2 ? accent : dim,
+      rot: -40 + i * 22,
+      d: i * 110,
+    });
+  }
+  shapes.push({ t: 'circle', cx: W / 2, cy: H / 2, r: 5, fill: accent, d: 560 });
+} else if (visual === 'grid') {
+  const cols = 14;
+  const rows = 8;
+  const cell = 18;
+  const ox = (W - cols * cell) / 2;
+  const oy = (H - rows * cell) / 2;
+  for (let r = 0; r < rows; r += 1) {
+    for (let c = 0; c < cols; c += 1) {
+      const on = random() > 0.68;
+      shapes.push({
+        t: 'rect',
+        x: ox + c * cell,
+        y: oy + r * cell,
+        w: cell - 6,
+        h: cell - 6,
+        fill: on ? (random() > 0.62 ? accent : dim) : faint,
+        d: (r * cols + c) * 7,
+      });
+    }
+  }
+} else if (visual === 'scan') {
+  for (let i = 0; i < 22; i += 1) {
+    const y = 20 + i * 8.5;
+    const amp = 16 * Math.sin((i / 22) * Math.PI);
+    const d = Array.from({ length: 9 }, (_, k) => {
+      const x = 24 + k * 34;
+      const yy = y + Math.sin(k * 0.9 + i * 0.35) * amp;
+      return `${k === 0 ? 'M' : 'L'}${x.toFixed(1)},${yy.toFixed(1)}`;
+    }).join(' ');
+    shapes.push({ t: 'path', d, stroke: i === 11 ? accent : dim, sw: 1, delay: i * 26 });
+  }
+} else {
+  for (let i = 0; i < 9; i += 1) {
+    const y0 = 30 + i * 20;
+    const c1 = 40 + random() * 60;
+    const c2 = 160 + random() * 90;
+    const y1 = 20 + random() * 180;
+    shapes.push({
+      t: 'path',
+      d: `M12,${H / 2} C${c1},${y0} ${c2},${y1} ${W - 12},${y0}`,
+      stroke: i === 4 ? accent : dim,
+      sw: 1.2,
+      delay: i * 70,
+    });
+  }
+  shapes.push({ t: 'circle', cx: 12, cy: H / 2, r: 4, fill: accent, d: 640 });
+}
+---
+
+<svg
+  class={`plate ${className}`}
+  viewBox={`0 0 ${W} ${H}`}
+  role="presentation"
+  aria-hidden="true"
+  preserveAspectRatio="xMidYMid slice"
+>
+  <rect width={W} height={H} fill="var(--c-ink)"></rect>
+
+  <!-- The frame draws first: the shared gesture across all five families. -->
+  <rect
+    x="0.5"
+    y="0.5"
+    width={W - 1}
+    height={H - 1}
+    fill="none"
+    stroke="var(--c-line-strong)"
+    stroke-width="1"
+    pathLength="1"
+    data-draw
+  ></rect>
+
+  {
+    shapes.map((s) =>
+      s.t === 'rect' ? (
+        <rect
+          x={s.x}
+          y={s.y}
+          width={s.w}
+          height={s.h}
+          fill={s.fill}
+          data-fade-in
+          style={`--draw-delay:${s.d}ms`}
+        />
+      ) : s.t === 'circle' ? (
+        <circle cx={s.cx} cy={s.cy} r={s.r} fill={s.fill} data-fade-in style={`--draw-delay:${s.d}ms`} />
+      ) : s.t === 'ellipse' ? (
+        <ellipse
+          cx={s.cx}
+          cy={s.cy}
+          rx={s.rx}
+          ry={s.ry}
+          fill="none"
+          stroke={s.stroke}
+          stroke-width="1"
+          transform={`rotate(${s.rot} ${s.cx} ${s.cy})`}
+          pathLength="1"
+          data-draw
+          style={`--draw-delay:${s.d}ms`}
+        />
+      ) : (
+        <path
+          d={s.d}
+          fill="none"
+          stroke={s.stroke}
+          stroke-width={s.sw}
+          pathLength="1"
+          data-draw
+          style={`--draw-delay:${s.delay}ms`}
+        />
+      ),
+    )
+  }
+</svg>
+
+<style>
+  .plate {
+    inline-size: 100%;
+    block-size: 100%;
+    display: block;
+    background-color: var(--c-ink);
+  }
+</style>

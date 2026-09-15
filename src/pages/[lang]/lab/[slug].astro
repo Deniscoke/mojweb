@@ -1,0 +1,272 @@
+---
+import MediaFigure from '~/components/media/MediaFigure.astro';
+import SiteFooter from '~/components/contact/SiteFooter.astro';
+import SiteNav from '~/components/navigation/SiteNav.astro';
+import TransitionCover from '~/components/ui/TransitionCover.astro';
+import { site } from '~/config/site';
+import { LOCALES, localePath, t, useTranslations } from '~/i18n';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import {
+  getExperiments,
+  getExperimentBySlug,
+  getProjectBySlug,
+  hasLabDetail,
+} from '~/lib/cms';
+
+/**
+ * LAB DETAIL — /[lang]/lab/[slug]/
+ *
+ * Route slugs come from the same canonical source as projects: published CMS
+ * experiments when Payload is the resolved source, local data otherwise.
+ * Publishing an experiment in the admin is enough to give it a page.
+ *
+ * Only experiments with a written log get a route. An entry that is still
+ * just a question would otherwise produce six near-empty documents, so it
+ * stays on the Lab index instead.
+ */
+export async function getStaticPaths() {
+  const experiments = await getExperiments('en');
+  const slugs = experiments.filter(hasLabDetail).map((e) => e.slug ?? e.id);
+
+  return LOCALES.flatMap((locale) =>
+    slugs.map((slug) => ({
+      params: { lang: locale.route, slug },
+      props: { code: locale.code, slug },
+    })),
+  );
+}
+
+const { code, slug } = Astro.props;
+const dict = useTranslations(code);
+
+const experiment = await getExperimentBySlug(slug, code);
+if (!experiment) throw new Error(`[CMS] No content for routed experiment slug: ${slug}`);
+
+const related = experiment.relatedProjectSlug
+  ? await getProjectBySlug(experiment.relatedProjectSlug, code)
+  : undefined;
+
+const media = experiment.media ?? [];
+
+const heading = t(experiment.title, code);
+const description = experiment.question
+  ? t(experiment.question, code)
+  : experiment.shortNote
+    ? t(experiment.shortNote, code)
+    : heading;
+
+/** Sections are omitted rather than rendered empty — a lab note may end unanswered. */
+const sections = [
+  { id: 'tried', label: dict.lab.headings.tried, body: experiment.whatITried ?? [] },
+  { id: 'happened', label: dict.lab.headings.happened, body: experiment.whatHappened ?? [] },
+  { id: 'next', label: dict.lab.headings.next, body: experiment.nextQuestion ?? [] },
+].filter((s) => s.body.length > 0);
+---
+
+<BaseLayout
+  lang={code}
+  title={`${heading} — ${site.author.name}`}
+  description={description}
+  altPath={`lab/${slug}`}
+>
+  <TransitionCover />
+  <SiteNav lang={code} />
+
+  <main id="main" class="note">
+    <div class="wrap">
+      <a class="mono note__back" href={localePath(code, 'lab')}>
+        <span aria-hidden="true">&larr;</span>
+        {dict.lab.all}
+      </a>
+
+      <header class="note__head grid12">
+        <p class="mono note__id">
+          <span class="note__tag">{experiment.tag}</span>
+          <span class="note__state" data-state={experiment.state}>
+            {dict.lab.states[experiment.state]}
+          </span>
+        </p>
+
+        <h1 class="note__title is-name">{heading}</h1>
+
+        {
+          experiment.question && (
+            <p class="note__question is-say">{t(experiment.question, code)}</p>
+          )
+        }
+      </header>
+
+      {
+        media.length > 0 && (
+          <div class="note__media">
+            {media.map((m, i) => (
+              <MediaFigure item={m} priority={i === 0} />
+            ))}
+          </div>
+        )
+      }
+
+      <div class="note__body">
+        {
+          sections.map((section, i) => (
+            <section class="note__section grid12" data-reveal style={`--reveal-delay:${i * 60}ms`}>
+              <h2 class="mono note__section-label">{section.label}</h2>
+              <div class="note__prose">
+                {section.body.map((p) => (
+                  <p>{t(p, code)}</p>
+                ))}
+              </div>
+            </section>
+          ))
+        }
+      </div>
+
+      {
+        related && (
+          <a class="note__related" href={localePath(code, `projects/${related.slug}`)}>
+            <span class="mono note__related-label">{dict.lab.relatedProject}</span>
+            <span class="note__related-title is-name">{t(related.title, code)}</span>
+          </a>
+        )
+      }
+    </div>
+  </main>
+
+  <SiteFooter lang={code} />
+</BaseLayout>
+
+<style>
+  .note {
+    padding-block: clamp(2rem, 6vh, 4rem) var(--s-section);
+  }
+
+  .note__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-3);
+    color: var(--c-bone-faint);
+    min-block-size: 44px;
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .note__back:hover,
+  .note__back:focus-visible {
+    color: var(--c-lab);
+  }
+
+  .note__head {
+    margin-block: clamp(2rem, 6vw, 3.5rem) clamp(2rem, 5vw, 3rem);
+    row-gap: var(--s-4);
+  }
+
+  .note__id {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: var(--s-5);
+    color: var(--c-bone-faint);
+  }
+
+  .note__state[data-state='open-question'] {
+    color: var(--c-lab);
+  }
+
+  .note__title {
+    grid-column: 1 / -1;
+    /* A step below a project title: a note is not a case study. */
+    font-size: var(--t-display);
+    text-wrap: balance;
+  }
+
+  .note__question {
+    grid-column: 1 / -1;
+    font-size: var(--t-lead);
+    color: var(--c-bone-dim);
+    max-inline-size: 46ch;
+    text-wrap: pretty;
+  }
+
+  .note__media {
+    display: grid;
+    gap: var(--s-6);
+    margin-block-end: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .note__body {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .note__section {
+    row-gap: var(--s-3);
+    align-items: start;
+  }
+
+  .note__section-label {
+    grid-column: 1 / -1;
+    color: var(--c-lab);
+    font-weight: var(--fw-medium);
+  }
+
+  .note__prose {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--s-4);
+    color: var(--c-bone-dim);
+    font-size: var(--t-body);
+    line-height: 1.5;
+    text-wrap: pretty;
+    max-inline-size: 62ch;
+  }
+
+  .note__related {
+    display: grid;
+    gap: var(--s-3);
+    margin-block-start: clamp(3rem, 8vw, 6rem);
+    padding-block-start: var(--s-5);
+    border-block-start: 1px solid var(--c-line);
+    color: var(--c-bone);
+  }
+
+  .note__related-label {
+    color: var(--c-bone-faint);
+    font-family: var(--f-mono);
+    font-size: var(--t-mono);
+    letter-spacing: var(--tr-mono);
+    text-transform: uppercase;
+  }
+
+  .note__related-title {
+    font-size: var(--t-project);
+    transition: color var(--d-base) var(--e-out);
+  }
+
+  .note__related:hover .note__related-title,
+  .note__related:focus-visible .note__related-title {
+    color: var(--c-signal);
+  }
+
+  @media (min-width: 62rem) {
+    .note__id,
+    .note__title,
+    .note__question {
+      grid-column: 1 / span 9;
+    }
+
+    .note__section-label {
+      grid-column: 1 / span 3;
+      padding-block-start: 0.3em;
+    }
+
+    .note__prose {
+      grid-column: 4 / span 7;
+    }
+  }
+</style>
+
+<script>
+  import { playEnterReveal } from '~/motion/language/enterReveal';
+  import { initScrollReveal } from '~/motion/scrollReveal';
+
+  playEnterReveal(document.querySelector<HTMLElement>('[data-transition-cover]'));
+  initScrollReveal();
+</script>

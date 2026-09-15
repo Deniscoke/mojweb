@@ -1,0 +1,133 @@
+---
+import { getExperiments } from '~/lib/cms';
+import { localePath, t, useTranslations } from '~/i18n';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+const dict = useTranslations(lang);
+const experiments = await getExperiments(lang);
+
+/**
+ * THE LAB — a notebook, not a second project grid.
+ *
+ * v0.2 leans into the index/log register: three-digit entry numbers, a state
+ * marker, a tag, and a right-hand note column. It shares the type scale,
+ * spacing scale and colour system with the rest of the site, so it reads as
+ * another room in the same building rather than another building. The only
+ * thing it does differently is the cold accent, which appears nowhere else.
+ *
+ * This is a preview. The full list, with each question and note, lives at
+ * /[lang]/lab/ and the entries that have a written log link on from there.
+ */
+---
+
+<section class="section lab" id="lab" aria-labelledby="lab-title">
+  <div class="wrap">
+    <header class="section__head grid12" data-reveal>
+      <p class="mono section__label">
+        <span class="section__index">03</span>
+        {dict.lab.label}
+      </p>
+      <div class="section__intro">
+        <h2 id="lab-title">{dict.lab.title}</h2>
+        <p class="lead">{dict.lab.lead}</p>
+      </div>
+    </header>
+
+    <ol class="lab__list" role="list">
+      {
+        experiments.map((item, index) => (
+          <li class="lab__item" data-reveal style={`--reveal-delay:${Math.min(index, 6) * 45}ms`}>
+            <span class="mono lab__num">{String(index + 1).padStart(3, '0')}</span>
+            <span class="lab__title">{t(item.title, lang)}</span>
+            <span class="mono lab__tag">{item.tag}</span>
+            <span class="mono lab__state" data-state={item.state}>
+              {dict.lab.states[item.state]}
+            </span>
+          </li>
+        ))
+      }
+    </ol>
+
+    <a class="action lab__all" href={localePath(lang, 'lab')}>
+      {dict.lab.all}
+      <span class="action__arrow" aria-hidden="true">&#8594;</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .lab {
+    background-color: var(--c-ink);
+    border-block: 1px solid var(--c-line);
+  }
+
+  .lab__list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+  }
+
+  .lab__item {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    gap: var(--s-2) var(--s-4);
+    padding-block: var(--s-5);
+    border-block-start: 1px solid var(--c-line-strong);
+    align-items: baseline;
+  }
+
+  .lab__item:last-child {
+    border-block-end: 1px solid var(--c-line-strong);
+  }
+
+  .lab__num {
+    color: var(--c-lab);
+  }
+
+  .lab__title {
+    font-size: clamp(1.0625rem, 2.6vw, 1.5rem);
+    font-weight: var(--fw-book);
+    letter-spacing: var(--tr-snug);
+    line-height: 1.2;
+    text-wrap: pretty;
+  }
+
+  .lab__tag,
+  .lab__state {
+    grid-column: 2;
+    color: var(--c-bone-faint);
+  }
+
+  .lab__state::before {
+    content: '→ ';
+  }
+
+  .lab__state[data-state='open-question'] {
+    color: var(--c-lab);
+  }
+
+  .lab__all {
+    margin-block-start: var(--s-6);
+  }
+
+  @media (min-width: 48rem) {
+    .lab__item {
+      grid-template-columns: 3.5rem minmax(0, 1fr) 10rem 9rem;
+      gap: var(--s-5);
+      align-items: baseline;
+    }
+
+    .lab__tag {
+      grid-column: 3;
+    }
+
+    .lab__state {
+      grid-column: 4;
+      text-align: end;
+    }
+  }
+</style>

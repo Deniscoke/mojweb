@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.astro/
+.next/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+.playwright-mcp/
+
+# Payload CMS
+cms/data/
+cms/media/
+cms/.next/
+cms/src/app/(payload)/admin/importMap.js
+cms/src/payload-types.ts

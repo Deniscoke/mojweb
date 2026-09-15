@@ -1,0 +1,251 @@
+@import './tokens.css';
+@import './reset.css';
+@import './typography.css';
+@import './motion.css';
+
+/**
+ * GLOBAL LAYOUT + CHROME
+ * ======================
+ * Layout primitives and the few genuinely global affordances. Everything else
+ * is scoped to its component.
+ */
+
+body {
+  overflow-x: clip;
+}
+
+/**
+ * A single fixed grain plate over the whole page. Rasterised once by the
+ * browser and never animated — texture without a render loop.
+ */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0.26;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* ------------------------------------------------------------- primitives */
+
+.wrap {
+  inline-size: min(100% - var(--gutter) * 2, var(--w-max));
+  margin-inline: auto;
+}
+
+/**
+ * The editorial grid. Twelve columns exist so that things can be placed
+ * off-centre on purpose — the v0.1 page was a stack of full-width blocks,
+ * which is what made it read as a template.
+ */
+.grid12 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--col-gap);
+}
+
+@media (min-width: 48rem) {
+  .grid12 {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+
+/* Section rhythm: three weights, so the page can signal what matters. */
+.section {
+  padding-block: var(--s-section);
+  position: relative;
+}
+
+.section--lg {
+  padding-block: var(--s-section-lg);
+}
+
+.section--sm {
+  padding-block: var(--s-section-sm);
+}
+
+.section__head {
+  margin-block-end: clamp(2.5rem, 5vw, 4.5rem);
+  align-items: start;
+}
+
+.section__label {
+  color: var(--c-bone-faint);
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  grid-column: span 4;
+}
+
+.section__index {
+  color: var(--c-signal);
+}
+
+.section__intro {
+  grid-column: span 4;
+  display: grid;
+  gap: var(--s-4);
+}
+
+@media (min-width: 48rem) {
+  .section__label {
+    grid-column: 1 / span 3;
+    /* Optically aligned to the heading's cap height rather than its box. */
+    padding-block-start: 0.5em;
+  }
+
+  .section__intro {
+    grid-column: 4 / span 9;
+  }
+}
+
+.rule {
+  block-size: 1px;
+  inline-size: 100%;
+  background-color: var(--c-line);
+  border: 0;
+}
+
+/* --------------------------------------------------------------- controls */
+
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 3px;
+  border-radius: var(--r-1);
+}
+
+@media (pointer: coarse) {
+  .touch-target {
+    min-block-size: 44px;
+    min-inline-size: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.link {
+  position: relative;
+  display: inline-block;
+  color: var(--c-bone);
+  padding-block-end: 0.1em;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 1px;
+  background-color: currentColor;
+  transform: scaleX(var(--link-scale, 1));
+  transform-origin: right center;
+  transition: transform var(--d-fast) var(--e-out);
+}
+
+@media (hover: hover) {
+  .link {
+    --link-scale: 0;
+  }
+
+  .link:hover,
+  .link:focus-visible {
+    --link-scale: 1;
+    color: var(--c-signal);
+  }
+
+  .link::after {
+    transform-origin: left center;
+  }
+}
+
+/**
+ * The one button style on the site, and it is a rule rather than a pill:
+ * a monospaced label over a hairline that extends on hover. Pills everywhere
+ * was on the brief's list of things to avoid.
+ */
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-block-size: 44px;
+  padding-block: var(--s-3);
+  font-family: var(--f-mono);
+  font-size: var(--t-mono);
+  letter-spacing: var(--tr-mono);
+  text-transform: uppercase;
+  color: var(--c-bone);
+  background: none;
+  border: 0;
+  border-block-end: 1px solid var(--c-line-strong);
+  transition: color var(--d-fast) var(--e-out), border-color var(--d-fast) var(--e-out);
+}
+
+.action:hover,
+.action:focus-visible {
+  color: var(--c-signal);
+  border-block-end-color: var(--c-signal);
+}
+
+.action__arrow {
+  transition: transform var(--d-base) var(--e-out);
+}
+
+.action:hover .action__arrow {
+  transform: translate3d(0.25em, -0.25em, 0);
+}
+
+/* ------------------------------------------------------------------ misc */
+
+.skip-link {
+  position: absolute;
+  inset-block-start: var(--s-3);
+  inset-inline-start: var(--s-3);
+  z-index: calc(var(--z-transition) + 1);
+  padding: var(--s-3) var(--s-4);
+  background-color: var(--c-bone);
+  color: var(--c-void);
+  border-radius: var(--r-1);
+}
+
+.working-note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--c-bone-faint);
+}
+
+.working-note::before {
+  content: '';
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: var(--r-pill);
+  background-color: var(--c-signal);
+  flex: none;
+}
+
+/* Monospaced key/value readout, used by the hero and the project pages. */
+.readout {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+}
+
+.readout__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding-block: var(--s-2);
+  border-block-start: 1px solid var(--c-line);
+}
+
+.readout__key {
+  color: var(--c-bone-faint);
+}
+
+.readout__value {
+  color: var(--c-bone-dim);
+  text-align: end;
+}

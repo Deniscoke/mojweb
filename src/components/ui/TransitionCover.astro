@@ -1,0 +1,20 @@
+---
+/**
+ * The single element shared by both halves of the language transition.
+ * Rendered identically on the gate and on every locale page — that identity
+ * is what lets a real document navigation read as one continuous motion.
+ *
+ * The panels are the v0.2 upgrade: a staggered column sweep instead of one
+ * sliding rectangle. It animates nothing but `transform`, so it is cheaper
+ * than the wipe it replaces as well as more distinctive.
+ */
+const PANEL_COUNT = 6;
+---
+
+<div class="transition-cover" data-transition-cover aria-hidden="true">
+  <div class="transition-cover__panels" data-panels style={`--panel-count:${PANEL_COUNT}`}>
+    {Array.from({ length: PANEL_COUNT }, () => <span class="transition-cover__panel" />)}
+  </div>
+  <span class="transition-cover__rule"></span>
+  <span class="transition-cover__label"></span>
+</div>

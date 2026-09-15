@@ -1,0 +1,26 @@
+{
+  "name": "irl",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "typecheck": "astro check",
+    "og": "node scripts/build-og.mjs",
+    "cms:snapshot-fallback": "npm --prefix cms run snapshot:fallback"
+  },
+  "dependencies": {
+    "astro": "^5.14.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@fontsource-variable/inter-tight": "^5.2.5",
+    "@fontsource-variable/jetbrains-mono": "^5.2.5",
+    "sharp": "^0.35.4",
+    "typescript": "^5.9.2"
+  }
+}

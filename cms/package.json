@@ -1,0 +1,45 @@
+{
+  "name": "irl-cms",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev -p 3000",
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "seed": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/index.ts",
+    "typecheck": "tsc --noEmit",
+    "content:titles": "cross-env NODE_OPTIONS=--no-deprecation tsx src/content/titles.ts",
+    "content:movement": "cross-env NODE_OPTIONS=--no-deprecation tsx src/content/movement.ts",
+    "restructure": "cross-env NODE_OPTIONS=--no-deprecation tsx src/content/restructure.ts",
+    "media:import": "cross-env NODE_OPTIONS=--no-deprecation tsx src/content/media.ts",
+    "content:import": "cross-env NODE_OPTIONS=--no-deprecation tsx src/content/import.ts",
+    "test:cms-fixtures:up": "cross-env NODE_OPTIONS=--no-deprecation tsx src/test/fixtures/projectRoutes.ts up",
+    "test:cms-fixtures:down": "cross-env NODE_OPTIONS=--no-deprecation tsx src/test/fixtures/projectRoutes.ts down",
+    "test:cms-lab:up": "cross-env NODE_OPTIONS=--no-deprecation tsx src/test/fixtures/labRoutes.ts up",
+    "test:cms-lab:down": "cross-env NODE_OPTIONS=--no-deprecation tsx src/test/fixtures/labRoutes.ts down",
+    "test:cms-marker:set": "cross-env NODE_OPTIONS=--no-deprecation tsx src/test/fixtures/sourceMarker.ts set",
+    "test:cms-marker:reset": "cross-env NODE_OPTIONS=--no-deprecation tsx src/test/fixtures/sourceMarker.ts reset",
+    "snapshot:fallback": "cross-env NODE_OPTIONS=--no-deprecation tsx src/content/snapshotFallback.ts"
+  },
+  "dependencies": {
+    "@payloadcms/db-sqlite": "3.88.0",
+    "@payloadcms/next": "3.88.0",
+    "@payloadcms/richtext-lexical": "3.88.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "^17.4.2",
+    "graphql": "^16.10.0",
+    "next": "15.4.11",
+    "payload": "3.88.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.2"
+  }
+}

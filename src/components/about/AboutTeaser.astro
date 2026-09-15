@@ -1,0 +1,120 @@
+---
+import { useTranslations } from '~/i18n';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+const dict = useTranslations(lang);
+
+/**
+ * ABOUT — a story, not a bio block.
+ *
+ * The arc the brief describes (education → experimentation → technology →
+ * products) is rendered as an actual visible progression rather than being
+ * left implicit in the prose. These four words are labels for the narrative,
+ * not claims about roles or dates — deliberately, since no dates, titles or
+ * employers have been provided.
+ */
+const arc = ['Education', 'Experimentation', 'Technology', 'Products'];
+---
+
+<section class="section section--lg about" id="about" aria-labelledby="about-title">
+  <div class="wrap">
+    <header class="section__head grid12" data-reveal>
+      <p class="mono section__label">
+        <span class="section__index">04</span>
+        {dict.about.label}
+      </p>
+      <div class="section__intro">
+        <h2 id="about-title">{dict.about.title}</h2>
+      </div>
+    </header>
+
+    <ol class="about__arc" role="list" data-reveal>
+      {
+        arc.map((step, i) => (
+          <li class="about__step">
+            <span class="mono about__step-num">{String(i + 1).padStart(2, '0')}</span>
+            <span class="mono about__step-name">{step}</span>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="about__body grid12">
+      <blockquote class="about__pull is-say" data-reveal>
+        <p>{dict.about.pull}</p>
+      </blockquote>
+
+      <div class="about__prose" data-reveal style="--reveal-delay:120ms">
+        {dict.about.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about__arc {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s-4) var(--col-gap);
+    margin: 0 0 clamp(2.5rem, 6vw, 4.5rem);
+    padding: 0;
+  }
+
+  .about__step {
+    display: grid;
+    gap: var(--s-2);
+    padding-block-start: var(--s-3);
+    border-block-start: 1px solid var(--c-line);
+  }
+
+  .about__step-num {
+    color: var(--c-signal);
+  }
+
+  .about__step-name {
+    color: var(--c-bone);
+    letter-spacing: var(--tr-mono);
+  }
+
+  .about__body {
+    row-gap: clamp(2rem, 5vw, 3rem);
+  }
+
+  .about__pull {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: var(--t-display);
+    max-inline-size: 20ch;
+    text-wrap: balance;
+  }
+
+  .about__prose {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--s-5);
+    color: var(--c-bone-dim);
+    font-size: var(--t-body);
+    max-inline-size: 46ch;
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 48rem) {
+    .about__arc {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 62rem) {
+    .about__pull {
+      grid-column: 1 / span 6;
+    }
+
+    .about__prose {
+      grid-column: 8 / span 5;
+    }
+  }
+</style>

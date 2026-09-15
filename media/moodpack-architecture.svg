@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720" role="img"
+     aria-label="Mood Pack 3D architecture: a Gaussian Splat scan is imported into an Unreal Engine 5.8 editor plugin, which builds an invisible collision shell from the scan mesh and parents splat, collision and anchors under one World Root so a first-person character can walk. An optional AI Director layer sends typed sentences to a separate Mood Pack server over HTTP and receives scene actions; without that server the AI commands are disabled and every local feature still works.">
+  <title>Mood Pack 3D — architecture</title>
+
+  <defs>
+    <style>
+      .bg    { fill: #08080a; }
+      .panel { fill: #101014; stroke: #23232b; stroke-width: 1; }
+      .opt   { fill: #101014; stroke: #34343e; stroke-width: 1; stroke-dasharray: 5 4; }
+      .mono  { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+               font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; fill: #6b6862; }
+      .h     { font-family: 'Inter Tight', Inter, system-ui, sans-serif; font-size: 19px; font-weight: 600;
+               letter-spacing: -0.01em; fill: #ebe7de; }
+      .b     { font-family: 'Inter Tight', Inter, system-ui, sans-serif; font-size: 13.5px; font-weight: 300;
+               fill: #a7a29a; }
+      .sig   { fill: #ff4a1c; }
+      .lab   { fill: #74e9b6; }
+      .flow  { stroke: #34343e; stroke-width: 1.5; fill: none; }
+      .flow-opt { stroke: #34343e; stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
+      .rule  { stroke: #23232b; stroke-width: 1; }
+    </style>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#34343e"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="720"/>
+
+  <!-- header -->
+  <text class="mono" x="56" y="52">Mood Pack 3D · architecture</text>
+  <line class="rule" x1="56" y1="70" x2="1144" y2="70"/>
+
+  <!-- ── INPUT ─────────────────────────────────────────────── -->
+  <text class="mono" x="56" y="112">01 · Input — you bring your own scan</text>
+
+  <rect class="panel" x="56" y="130" width="290" height="92" rx="2"/>
+  <text class="h" x="78" y="164">Gaussian Splat scan</text>
+  <text class="b" x="78" y="190">.ply — Mood Pack NanoGS renderer</text>
+  <text class="b" x="78" y="208">.lcc2 XGrids — vendor plugin</text>
+
+  <!-- ── PLUGIN ────────────────────────────────────────────── -->
+  <text class="mono" x="440" y="112">02 · Unreal Engine 5.8 editor plugin — runs offline</text>
+
+  <rect class="panel" x="440" y="130" width="704" height="300" rx="2"/>
+
+  <rect class="panel" x="470" y="164" width="300" height="86" rx="2"/>
+  <text class="h" x="492" y="196">Collision shell</text>
+  <text class="b" x="492" y="220">Invisible, built from the scan mesh</text>
+  <text class="b" x="492" y="238">and aligned to the splat</text>
+
+  <rect class="panel" x="806" y="164" width="308" height="86" rx="2"/>
+  <text class="h" x="828" y="196">First-person character</text>
+  <text class="b" x="828" y="220">Spawned so you can press Play</text>
+  <text class="b" x="828" y="238">and walk the scan</text>
+
+  <rect class="panel" x="470" y="282" width="644" height="112" rx="2"/>
+  <text class="mono" x="492" y="312">World Root · MoodPackSplatWorldRoot</text>
+  <text class="b" x="492" y="342">Splat, collision shell and teleport anchors are parented to one root.</text>
+  <text class="b" x="492" y="362">Each arrives through a different importer with different conventions,</text>
+  <text class="b" x="492" y="382">so a shared root is what keeps them moving together.</text>
+
+  <!-- input -> plugin -->
+  <path class="flow" d="M346 176 L440 176" marker-end="url(#a)"/>
+
+  <!-- ── WHY ───────────────────────────────────────────────── -->
+  <rect class="panel" x="56" y="254" width="290" height="176" rx="2"/>
+  <text class="mono sig" x="78" y="286">The problem it solves</text>
+  <text class="b" x="78" y="318">Splat scans carry no collision,</text>
+  <text class="b" x="78" y="338">so you cannot stand on them.</text>
+  <text class="b" x="78" y="368">Mood Pack derives a shell from</text>
+  <text class="b" x="78" y="388">the scan&#8217;s own mesh — the scan</text>
+  <text class="b" x="78" y="408">itself is never relit or rebuilt.</text>
+
+  <!-- ── AI DIRECTOR (optional) ────────────────────────────── -->
+  <text class="mono lab" x="56" y="490">03 · AI Director — optional layer</text>
+
+  <rect class="opt" x="56" y="508" width="290" height="118" rx="2"/>
+  <text class="h" x="78" y="542">A typed sentence</text>
+  <text class="b" x="78" y="568">Turned into scene actions:</text>
+  <text class="b" x="78" y="588">lighting, weather, characters,</text>
+  <text class="b" x="78" y="608">camera moves, sound.</text>
+
+  <rect class="opt" x="440" y="508" width="330" height="118" rx="2"/>
+  <text class="mono" x="462" y="538">HTTP · MOODPACK_SERVER</text>
+  <text class="h" x="462" y="570">Mood Pack server</text>
+  <text class="b" x="462" y="596">A separate service you run or</text>
+  <text class="b" x="462" y="614">connect to. Defaults to localhost.</text>
+
+  <rect class="opt" x="814" y="508" width="330" height="118" rx="2"/>
+  <text class="mono" x="836" y="538">Third-party providers</text>
+  <text class="h" x="836" y="570">Paid AI credits</text>
+  <text class="b" x="836" y="596">Costs sit between you and that</text>
+  <text class="b" x="836" y="614">provider. Mood Pack resells none.</text>
+
+  <path class="flow-opt" d="M346 567 L440 567" marker-end="url(#a)"/>
+  <path class="flow-opt" d="M770 567 L814 567" marker-end="url(#a)"/>
+  <!-- server returns actions up into the editor -->
+  <path class="flow-opt" d="M605 508 L605 430" marker-end="url(#a)"/>
+  <text class="mono lab" x="618" y="470">scene actions</text>
+
+  <!-- ── FOOTER: the honest bit ────────────────────────────── -->
+  <line class="rule" x1="56" y1="656" x2="1144" y2="656"/>
+  <text class="mono" x="56" y="684">Without the server</text>
+  <text class="b" x="240" y="685">The panel reports it as unavailable and the AI commands switch off. Import, collision and walking are unaffected.</text>
+</svg>

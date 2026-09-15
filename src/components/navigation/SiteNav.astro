@@ -1,0 +1,291 @@
+---
+import { site } from '~/config/site';
+import { LOCALES, getLocale, localePath, useTranslations } from '~/i18n';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+const dict = useTranslations(lang);
+const current = getLocale(lang);
+
+const links = [
+  { href: '#work', label: dict.nav.work },
+  { href: '#lab', label: dict.nav.lab },
+  { href: '#about', label: dict.nav.about },
+  { href: '#contact', label: dict.nav.contact },
+];
+
+/**
+ * No hamburger. Four short words in a monospaced row fit on a 320px screen,
+ * so the mobile navigation is the same navigation — one row lower — instead
+ * of a menu button hiding four links behind an extra tap and a focus trap.
+ */
+---
+
+<a class="skip-link visually-hidden" href="#main">{dict.nav.skipToContent}</a>
+
+<div class="nav-sentinel" data-nav-sentinel aria-hidden="true"></div>
+
+<header class="nav" data-nav>
+  <div class="nav__inner">
+    <a class="nav__brand" href={localePath(current.route)} aria-label={dict.nav.home}>
+      <span class="nav__mark">{site.brandMark}</span>
+    </a>
+
+    <nav class="nav__links" aria-label={dict.nav.home}>
+      {
+        links.map((link) => (
+          <a class="mono nav__link touch-target" href={link.href}>
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <details class="lang" data-lang-menu>
+      <summary class="mono lang__toggle touch-target" aria-label={dict.footer.languageLabel}>
+        <span aria-hidden="true">{current.label}</span>
+        <span class="lang__caret" aria-hidden="true"></span>
+      </summary>
+      <div class="lang__panel">
+        <p class="mono lang__title">{dict.nav.language}</p>
+        <ul class="lang__list" role="list">
+          {
+            LOCALES.map((locale) => (
+              <li>
+                <a
+                  class="lang__item touch-target"
+                  href={localePath(locale.route)}
+                  hreflang={locale.htmlLang}
+                  lang={locale.htmlLang}
+                  aria-current={locale.code === lang ? 'true' : undefined}
+                  data-lang-pick={locale.code}
+                >
+                  <span class="mono lang__code">{locale.label}</span>
+                  <span class="lang__name">{locale.name}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </details>
+  </div>
+</header>
+
+<style>
+  .nav-sentinel {
+    position: absolute;
+    inset-block-start: 0;
+    block-size: 1px;
+    inline-size: 1px;
+  }
+
+  .nav {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--z-nav);
+    background-color: color-mix(in srgb, var(--c-void) 82%, transparent);
+    transition:
+      background-color var(--d-base) var(--e-out),
+      border-color var(--d-base) var(--e-out);
+    border-block-end: 1px solid transparent;
+  }
+
+  /* Only once the page has actually scrolled does the bar assert itself. */
+  .nav[data-stuck] {
+    background-color: color-mix(in srgb, var(--c-void) 94%, transparent);
+    border-block-end-color: var(--c-line);
+    backdrop-filter: blur(8px);
+  }
+
+  .nav__inner {
+    inline-size: min(100% - var(--gutter) * 2, var(--w-max));
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--s-3);
+    /* The v0.1 nav ate 138px of an 844px phone screen. Two tight rows and no
+       divider bring that down to roughly 90px of permanently sticky chrome. */
+    padding-block: var(--s-2);
+  }
+
+  .nav__mark {
+    font-family: var(--f-mono);
+    font-size: var(--t-mono);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--c-bone);
+  }
+
+  .nav__links {
+    display: flex;
+    justify-content: flex-start;
+    gap: clamp(0.75rem, 3vw, 2.25rem);
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-block-start: var(--s-1);
+  }
+
+  .nav__link {
+    color: var(--c-bone-dim);
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .nav__link:hover,
+  .nav__link:focus-visible {
+    color: var(--c-signal);
+  }
+
+  /* --------------------------------------------------- language switcher */
+
+  .lang {
+    position: relative;
+    justify-self: end;
+  }
+
+  .lang__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    color: var(--c-bone);
+    cursor: pointer;
+    list-style: none;
+    padding-inline: var(--s-2);
+  }
+
+  .lang__toggle::-webkit-details-marker {
+    display: none;
+  }
+
+  .lang__caret {
+    inline-size: 0.45em;
+    block-size: 0.45em;
+    border-inline-end: 1px solid currentColor;
+    border-block-end: 1px solid currentColor;
+    rotate: 45deg;
+    translate: 0 -0.15em;
+    transition: rotate var(--d-fast) var(--e-out);
+  }
+
+  .lang[open] .lang__caret {
+    rotate: -135deg;
+    translate: 0 0.1em;
+  }
+
+  .lang__panel {
+    position: absolute;
+    inset-block-start: calc(100% + var(--s-3));
+    inset-inline-end: 0;
+    min-inline-size: 13rem;
+    padding: var(--s-4);
+    background-color: var(--c-ink);
+    border: 1px solid var(--c-line-strong);
+    display: grid;
+    gap: var(--s-3);
+  }
+
+  .lang__title {
+    color: var(--c-bone-faint);
+  }
+
+  .lang__list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .lang__item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-3);
+    padding-block: var(--s-2);
+    color: var(--c-bone-dim);
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .lang__item:hover,
+  .lang__item:focus-visible {
+    color: var(--c-bone);
+  }
+
+  .lang__item[aria-current] {
+    color: var(--c-signal);
+  }
+
+  .lang__code {
+    inline-size: 2.25rem;
+    flex: none;
+  }
+
+  .lang__name {
+    font-size: var(--t-mono);
+  }
+
+  /**
+   * On a phone the two-row nav costs ~121px of an 844px screen, permanently,
+   * and 44px touch targets are not negotiable. So the section links — which
+   * matter most before you have started reading — fold away once the page is
+   * scrolled, leaving brand and language. Scrolling back to the top brings
+   * them back. No JavaScript: the sticky observer already sets `data-stuck`.
+   */
+  @media (max-width: 47.99rem) {
+    .nav[data-stuck] .nav__links {
+      display: none;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .nav__inner {
+      grid-template-columns: 1fr auto 1fr;
+      padding-block: var(--s-4);
+    }
+
+    .nav__links {
+      grid-column: 2;
+      grid-row: 1;
+      justify-content: center;
+      padding-block-start: 0;
+    }
+  }
+</style>
+
+<script>
+  import { rememberLocale } from '~/i18n/memory';
+
+  // Sticky state without a scroll listener: a 1px sentinel at the top of the
+  // document reports when it leaves the viewport.
+  const nav = document.querySelector<HTMLElement>('[data-nav]');
+  const sentinel = document.querySelector('[data-nav-sentinel]');
+
+  if (nav && sentinel && 'IntersectionObserver' in window) {
+    new IntersectionObserver(
+      ([entry]) => nav.toggleAttribute('data-stuck', !entry?.isIntersecting),
+      { threshold: 0 },
+    ).observe(sentinel);
+  }
+
+  const menu = document.querySelector<HTMLDetailsElement>('[data-lang-menu]');
+  if (menu) {
+    // Switching language from inside the site updates the memory too, so the
+    // gate stays in sync with what the visitor actually reads.
+    menu.querySelectorAll<HTMLAnchorElement>('[data-lang-pick]').forEach((link) => {
+      link.addEventListener('click', () => rememberLocale(link.dataset.langPick ?? ''));
+    });
+
+    document.addEventListener('click', (event) => {
+      if (menu.open && !menu.contains(event.target as Node)) menu.open = false;
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && menu.open) {
+        menu.open = false;
+        menu.querySelector<HTMLElement>('summary')?.focus();
+      }
+    });
+  }
+</script>

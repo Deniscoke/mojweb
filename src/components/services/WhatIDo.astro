@@ -1,0 +1,91 @@
+---
+import { useTranslations } from '~/i18n';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+const dict = useTranslations(lang);
+---
+
+<section class="section section--sm what" id="what" aria-labelledby="what-title">
+  <div class="wrap">
+    <header class="section__head grid12" data-reveal>
+      <p class="mono section__label">
+        <span class="section__index">02</span>
+        {dict.services.label}
+      </p>
+      <div class="section__intro">
+        <h2 id="what-title">{dict.services.title}</h2>
+        <p class="lead">{dict.services.lead}</p>
+      </div>
+    </header>
+
+    <ol class="what__list" role="list">
+      {
+        dict.services.items.map((item, index) => (
+          <li class="what__item" data-reveal style={`--reveal-delay:${index * 80}ms`}>
+            <span class="mono what__index">{String(index + 1).padStart(2, '0')}</span>
+            <h3 class="what__title">{item.title}</h3>
+            <p class="what__body">{item.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .what__list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    counter-reset: none;
+  }
+
+  .what__item {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: var(--s-3) var(--s-4);
+    padding-block: var(--s-6);
+    border-block-start: 1px solid var(--c-line);
+    align-items: start;
+  }
+
+  .what__item:last-child {
+    border-block-end: 1px solid var(--c-line);
+  }
+
+  .what__index {
+    color: var(--c-bone-faint);
+    padding-block-start: 0.45em;
+  }
+
+  .what__title {
+    font-size: var(--t-h3);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--tr-snug);
+  }
+
+  .what__body {
+    grid-column: 2;
+    color: var(--c-bone-dim);
+    max-inline-size: 52ch;
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 62rem) {
+    .what__item {
+      grid-template-columns: 4rem minmax(0, 22rem) minmax(0, 1fr);
+      gap: var(--s-6);
+      align-items: baseline;
+      padding-block: var(--s-7);
+    }
+
+    .what__body {
+      grid-column: 3;
+    }
+  }
+</style>

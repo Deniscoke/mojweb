@@ -1,0 +1,128 @@
+---
+import type { MediaItem } from '~/data/projects';
+
+interface Props {
+  item: MediaItem;
+  /** First item on a page loads eagerly; the rest stay lazy. */
+  priority?: boolean;
+}
+
+const { item, priority = false } = Astro.props;
+
+/**
+ * EVIDENCE, not decoration.
+ *
+ * Two rules this component exists to enforce:
+ *
+ * 1. `alt` is never invented. When no alt text was written in the CMS the
+ *    image is marked `aria-hidden` and given an empty alt, which is the
+ *    correct way to say "decorative or undescribed" — far better than
+ *    announcing a filename to a screen reader.
+ * 2. Diagrams and screenshots are framed differently. A diagram needs padding
+ *    and a light ground to be readable; a screenshot is the artefact itself
+ *    and runs edge to edge.
+ */
+const isVideo = item.kind === 'video' || item.mimeType.startsWith('video/');
+const described = Boolean(item.alt);
+
+const ratio = item.width && item.height ? `${item.width} / ${item.height}` : undefined;
+---
+
+<figure class="media" data-kind={item.kind}>
+  <div class="media__frame" style={ratio ? `--media-ratio:${ratio}` : undefined}>
+    {
+      isVideo ? (
+        <video
+          class="media__el"
+          src={item.url}
+          controls
+          preload="metadata"
+          playsinline
+          width={item.width ?? undefined}
+          height={item.height ?? undefined}
+        />
+      ) : (
+        <img
+          class="media__el"
+          src={item.url}
+          alt={item.alt ?? ''}
+          aria-hidden={described ? undefined : 'true'}
+          width={item.width ?? undefined}
+          height={item.height ?? undefined}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+        />
+      )
+    }
+  </div>
+
+  {
+    (item.caption || item.credit) && (
+      <figcaption class="media__caption">
+        {item.caption}
+        {item.credit && <span class="media__credit">{item.credit}</span>}
+      </figcaption>
+    )
+  }
+</figure>
+
+<style>
+  .media {
+    margin: 0;
+    display: grid;
+    gap: var(--s-3);
+  }
+
+  .media__frame {
+    aspect-ratio: var(--media-ratio, 16 / 10);
+    overflow: hidden;
+    background-color: var(--c-ink);
+    border: 1px solid var(--c-line);
+  }
+
+  .media__el {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /**
+   * A diagram is information, not an artefact: it needs air and must never be
+   * cropped by an object-fit cover.
+   *
+   * The ground is the raised ink surface rather than bone, because portfolio
+   * diagrams are authored in the site's own palette (see
+   * docs/diagram-style.md). A light frame would put a white slab in the
+   * middle of a dark page for no reason.
+   */
+  .media[data-kind='diagram'] .media__frame {
+    background-color: var(--c-ink);
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+  }
+
+  .media[data-kind='diagram'] .media__el {
+    object-fit: contain;
+  }
+
+  /* Long enough to be a sentence, so it is set as one — the mono micro-label
+     register is for two or three words, not for a line of prose. */
+  .media__caption {
+    color: var(--c-bone-faint);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    font-size: var(--t-small, 0.875rem);
+    line-height: 1.45;
+    text-wrap: pretty;
+    max-inline-size: 68ch;
+  }
+
+  .media__credit {
+    color: var(--c-bone-dim);
+  }
+
+  .media__credit::before {
+    content: '— ';
+  }
+</style>

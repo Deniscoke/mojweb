@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!--
+    OPEN GRAPH SOURCE
+    Edit this file, then run `npm run og` to regenerate
+    public/assets/og-default.png.
+
+    Deliberately set in a system grotesque rather than Inter Tight: the SVG is
+    rasterised outside the browser, where the self-hosted webfont is not
+    available. Keeping the source honest about that beats a PNG that silently
+    renders in a fallback face anyway.
+  -->
+  <rect width="1200" height="630" fill="#08080a"/>
+
+  <g stroke="#23232b" stroke-width="1">
+    <path d="M80 0v630M380 0v630M680 0v630M980 0v630"/>
+    <path d="M0 96h1200M0 534h1200"/>
+  </g>
+
+  <text x="80" y="66" font-family="Consolas, 'DejaVu Sans Mono', monospace" font-size="20"
+        letter-spacing="6" fill="#6b6862">IRL</text>
+  <text x="1120" y="66" text-anchor="end" font-family="Consolas, 'DejaVu Sans Mono', monospace"
+        font-size="20" letter-spacing="6" fill="#6b6862">EN CS SK ES SR TR</text>
+
+  <text x="76" y="270" font-family="Arial, Helvetica, sans-serif" font-weight="bold"
+        font-size="126" letter-spacing="-6" fill="#ebe7de">DENIS</text>
+  <text x="76" y="386" font-family="Arial, Helvetica, sans-serif" font-weight="bold"
+        font-size="126" letter-spacing="-6" fill="#ebe7de">MITROVIĆ</text>
+  <text x="80" y="470" font-family="Arial, Helvetica, sans-serif" font-weight="300"
+        font-size="54" letter-spacing="-1" fill="#a7a29a">I make ideas real.</text>
+
+  <text x="80" y="586" font-family="Consolas, 'DejaVu Sans Mono', monospace" font-size="20"
+        letter-spacing="5" fill="#ff4a1c">TECHNOLOGY × EDUCATION × AI × CREATIVE WORK</text>
+</svg>

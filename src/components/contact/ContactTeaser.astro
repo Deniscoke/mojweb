@@ -1,0 +1,151 @@
+---
+import { site } from '~/config/site';
+import { useTranslations } from '~/i18n';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+const dict = useTranslations(lang);
+
+/**
+ * CONTACT — the closing statement.
+ *
+ * Nothing here is invented. `site.contact` ships with nulls, and a null
+ * simply does not render: an honest "contact details are being added" beats a
+ * plausible-looking address that bounces, and a CTA with no destination is
+ * worse than no CTA.
+ *
+ * This is the second and last use of the SVG line-drawing motif (motion
+ * reference 07). A single long stroke closes the page — the same gesture the
+ * project plates open with.
+ */
+const email = site.contact.email;
+const links = site.contact.links.filter((link) => Boolean(link.href));
+---
+
+<section class="section section--lg contact" id="contact" aria-labelledby="contact-title">
+  <div class="wrap contact__inner">
+    <p class="mono section__label" data-reveal>
+      <span class="section__index">06</span>
+      {dict.contact.label}
+    </p>
+
+    <h2 id="contact-title" class="contact__title is-say" data-reveal style="--reveal-delay:80ms">
+      {dict.contact.title}
+    </h2>
+
+    <!-- The closing stroke. Draws once, when the section arrives. -->
+    <svg
+      class="contact__stroke"
+      viewBox="0 0 1000 60"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      data-reveal
+      data-draw-group
+      style="--reveal-delay:160ms"
+    >
+      <path
+        d="M0,58 C220,58 260,6 500,6 C740,6 780,58 1000,58"
+        fill="none"
+        stroke="var(--c-signal)"
+        stroke-width="1.5"
+        pathLength="1"
+        data-draw></path>
+    </svg>
+
+    <p class="lead contact__lead" data-reveal style="--reveal-delay:200ms">{dict.contact.lead}</p>
+
+    <div class="contact__actions" data-reveal style="--reveal-delay:260ms">
+      {
+        email ? (
+          <a class="action" href={`mailto:${email}`}>
+            {dict.contact.emailCta}
+            <span class="action__arrow" aria-hidden="true">
+              &#8599;
+            </span>
+          </a>
+        ) : (
+          <p class="mono working-note">{dict.contact.pending}</p>
+        )
+      }
+    </div>
+
+    {
+      links.length > 0 && (
+        <div class="contact__elsewhere" data-reveal style="--reveal-delay:320ms">
+          <p class="mono contact__elsewhere-label">{dict.contact.elsewhere}</p>
+          <ul class="contact__links" role="list">
+            {links.map((link) => (
+              <li>
+                <a class="link" href={link.href!} target="_blank" rel="noopener noreferrer me">
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .contact__inner {
+    display: grid;
+    gap: var(--s-5);
+    justify-items: start;
+  }
+
+  /**
+   * The shared `.section__label` carries `grid-column: span 4` for the
+   * 12-column contexts it usually lives in. Here it silently gives this grid
+   * four implicit tracks, and the auto-placed children then flow across them.
+   * On a phone the last child lands past the right edge of the viewport, so
+   * below the mobile breakpoint everything is pinned to one column.
+   */
+  @media (max-width: 47.99rem) {
+    .contact__inner > * {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .contact__title {
+    font-size: var(--t-display);
+    max-inline-size: 16ch;
+    text-wrap: balance;
+  }
+
+  .contact__stroke {
+    inline-size: 100%;
+    block-size: clamp(2.5rem, 6vw, 4rem);
+    overflow: visible;
+  }
+
+  .contact__lead {
+    max-inline-size: 40ch;
+  }
+
+  .contact__actions {
+    margin-block-start: var(--s-2);
+  }
+
+  .contact__elsewhere {
+    display: grid;
+    gap: var(--s-3);
+    margin-block-start: var(--s-5);
+  }
+
+  .contact__elsewhere-label {
+    color: var(--c-bone-faint);
+  }
+
+  .contact__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-5);
+    margin: 0;
+    padding: 0;
+  }
+</style>

@@ -1,0 +1,258 @@
+---
+import Readout from '~/components/ui/Readout.astro';
+import { site } from '~/config/site';
+import { getExperiments, getProjects } from '~/lib/cms';
+import { getLocale, useTranslations } from '~/i18n';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+const dict = useTranslations(lang);
+const locale = getLocale(lang);
+
+const [projects, experiments] = await Promise.all([
+  getProjects(lang),
+  getExperiments(lang),
+]);
+
+const [firstName, ...rest] = site.author.name.split(' ');
+const lastName = rest.join(' ');
+
+const readout = [
+  { key: 'Locale', value: locale.label, accent: true },
+  { key: 'Projects', value: String(projects.length).padStart(2, '0') },
+  { key: 'Live', value: String(projects.filter((p) => p.status.includes('live')).length).padStart(2, '0') },
+  { key: 'Experiments', value: String(experiments.length).padStart(2, '0') },
+];
+---
+
+<section class="hero" id="hero" data-hero>
+  <!-- Column rules. The editorial grid, made faintly visible. -->
+  <div class="hero__rules grid12" aria-hidden="true">
+    {Array.from({ length: 12 }, () => <span />)}
+  </div>
+
+  <div class="wrap hero__inner grid12">
+    <p class="mono hero__role" data-reveal>{site.author.role}</p>
+
+    <div class="hero__block">
+      <h1 class="hero__name is-name" data-reveal-lines>
+        <span class="line"><span class="line__inner">{firstName}</span></span>
+        <span class="line"
+          ><span class="line__inner" style="--reveal-delay:90ms">{lastName}</span></span
+        >
+      </h1>
+
+      <p class="hero__statement is-say" data-reveal style="--reveal-delay:280ms">
+        {dict.hero.statement}
+      </p>
+    </div>
+
+    <p class="mono hero__disciplines" data-reveal style="--reveal-delay:400ms" data-parallax="0.4">
+      {site.author.disciplines.join('  ·  ')}
+    </p>
+
+    <div class="hero__aside" data-reveal style="--reveal-delay:460ms" data-parallax="0.8">
+      <Readout rows={readout} />
+      <p class="hero__intro">{dict.hero.intro}</p>
+    </div>
+
+    <a class="mono hero__cue" href="#work" data-reveal style="--reveal-delay:560ms">
+      <span class="hero__cue-line" aria-hidden="true"></span>
+      {dict.hero.scrollCue}
+    </a>
+  </div>
+</section>
+
+<style>
+  .hero {
+    min-block-size: 86svb;
+    display: flex;
+    align-items: center;
+    padding-block: clamp(4rem, 10vh, 8rem) var(--s-8);
+    position: relative;
+  }
+
+  /* ---------------------------------------------------------- column rules */
+
+  .hero__rules {
+    position: absolute;
+    inset-block: 0;
+    inset-inline: 0;
+    inline-size: min(100% - var(--gutter) * 2, var(--w-max));
+    margin-inline: auto;
+    pointer-events: none;
+    /* Faded top and bottom so the grid reads as a watermark of the layout
+       rather than as a table. */
+    mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 65%, transparent);
+  }
+
+  .hero__rules > span {
+    border-inline-start: 1px solid var(--c-line);
+    opacity: 0.55;
+  }
+
+  .hero__rules > span:first-child {
+    border-inline-start: 0;
+  }
+
+  @media (max-width: 47.99rem) {
+    .hero__rules {
+      display: none;
+    }
+  }
+
+  /* ------------------------------------------------------------ composition */
+
+  .hero__inner {
+    position: relative;
+    row-gap: clamp(1.25rem, 3.5vh, 2.5rem);
+    align-content: center;
+  }
+
+  .hero__role,
+  .hero__block,
+  .hero__disciplines,
+  .hero__aside,
+  .hero__cue {
+    grid-column: 1 / -1;
+  }
+
+  .hero__role {
+    color: var(--c-bone-faint);
+  }
+
+  .hero__name {
+    font-size: var(--t-mega);
+  }
+
+  .hero__statement {
+    font-size: var(--t-statement);
+    color: var(--c-bone);
+    text-wrap: balance;
+    max-inline-size: 18ch;
+    /* Indented off the name's left edge. The offset is the composition. */
+    margin-inline-start: clamp(0rem, 6vw, 9rem);
+    margin-block-start: 0.12em;
+  }
+
+  .hero__disciplines {
+    color: var(--c-signal);
+    letter-spacing: 0.2em;
+  }
+
+  .hero__intro {
+    color: var(--c-bone-dim);
+    font-size: var(--t-body);
+    text-wrap: pretty;
+    margin-block-start: var(--s-4);
+  }
+
+  .hero__cue {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-3);
+    color: var(--c-bone-faint);
+    justify-self: start;
+    min-block-size: 44px;
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .hero__cue-line {
+    inline-size: 3rem;
+    block-size: 1px;
+    background-color: currentColor;
+    transform-origin: left center;
+    transition: transform var(--d-base) var(--e-out);
+  }
+
+  .hero__cue:hover,
+  .hero__cue:focus-visible {
+    color: var(--c-bone);
+  }
+
+  .hero__cue:hover .hero__cue-line {
+    transform: scaleX(1.4);
+  }
+
+  /**
+   * DESKTOP — the magazine cover.
+   * The name block takes the left nine columns, the technical readout sits in
+   * the last three. That right column was empty in v0.1 and it is the single
+   * biggest reason the hero read as a landing page rather than as a designed
+   * page.
+   */
+  @media (min-width: 62rem) {
+    .hero__role {
+      grid-column: 1 / span 9;
+    }
+
+    .hero__block {
+      grid-column: 1 / span 10;
+    }
+
+    .hero__disciplines {
+      grid-column: 1 / span 7;
+      align-self: end;
+    }
+
+    .hero__aside {
+      grid-column: 10 / span 3;
+      grid-row: 3 / span 2;
+      align-self: end;
+    }
+
+    .hero__cue {
+      grid-column: 1 / span 3;
+    }
+  }
+
+  /**
+   * MOBILE — not the desktop composition at a smaller size.
+   * The readout moves under the disciplines line and becomes a two-column
+   * strip, and the statement loses its indent so the block reads as one
+   * left-aligned column with a clear top-to-bottom order.
+   */
+  @media (max-width: 61.99rem) {
+    .hero {
+      min-block-size: 0;
+      padding-block: clamp(2.5rem, 8vh, 5rem) var(--s-7);
+    }
+
+    .hero__statement {
+      margin-inline-start: 0;
+      max-inline-size: 14ch;
+    }
+
+    .hero__aside :global(.readout) {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--col-gap);
+    }
+  }
+</style>
+
+<script>
+  import { initHeroPointerField } from '~/motion/hero/pointerField';
+  import { REVEAL_EVENT } from '~/motion/language/enterReveal';
+
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+
+  if (hero) {
+    /**
+     * The hero waits for the language transition to hand over. Revealing it
+     * underneath the cover would waste the one moment the whole entry
+     * experience exists to set up.
+     */
+    const reveal = () => {
+      hero.querySelectorAll<HTMLElement>('[data-reveal], [data-reveal-lines]').forEach((el) => {
+        el.classList.add('is-revealed');
+      });
+      initHeroPointerField(hero);
+    };
+
+    document.addEventListener(REVEAL_EVENT, reveal, { once: true });
+  }
+</script>

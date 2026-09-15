@@ -1,0 +1,82 @@
+---
+import { useTranslations } from '~/i18n';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+const dict = useTranslations(lang);
+
+/**
+ * BUILD · TEACH · MOVE · EXPLORE
+ *
+ * A hinge between the hero and the work: the disciplines line names fields,
+ * this names actions. It sits on the raised ink surface with a rule top and
+ * bottom, so it reads as a caesura rather than as another section — it has no
+ * heading, no index number and nothing to click.
+ *
+ * Deliberately no new motion. It uses the same `data-reveal` the rest of the
+ * page uses and nothing else.
+ */
+const words = dict.credo;
+
+---
+
+<section class="credo" aria-label={words.map((w) => w.word).join(' · ')}>
+  <div class="wrap">
+    <ol class="credo__list" role="list">
+      {
+        words.map((word, i) => (
+          <li class="credo__item" data-reveal style={`--reveal-delay:${i * 70}ms`}>
+            <span class="credo__word">{word.word}</span>
+            <span class="mono credo__hint">{word.hint}</span>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .credo {
+    background-color: var(--c-ink);
+    border-block: 1px solid var(--c-line);
+    padding-block: clamp(1.75rem, 5vw, 3.25rem);
+  }
+
+  .credo__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: clamp(1.5rem, 4vw, 3rem);
+    margin: 0;
+    padding: 0;
+  }
+
+  .credo__item {
+    display: grid;
+    gap: var(--s-2);
+    align-content: start;
+  }
+
+  .credo__word {
+    font-size: clamp(1.375rem, 3.4vw, 2.25rem);
+    font-weight: var(--fw-semi);
+    letter-spacing: var(--tr-tight);
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--c-bone);
+  }
+
+  /**
+   * The hint is what stops the four verbs from being decoration: it names the
+   * actual domains each one covers, so the band summarises the site rather
+   * than asserting a slogan.
+   */
+  .credo__hint {
+    color: var(--c-bone-faint);
+    text-transform: none;
+    letter-spacing: var(--tr-mono);
+    text-wrap: pretty;
+  }
+</style>

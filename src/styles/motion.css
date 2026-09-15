@@ -1,0 +1,174 @@
+/**
+ * MOTION LAYER
+ * ============
+ * Shared motion primitives only. Anything specific to one component lives in
+ * that component's scoped <style>.
+ *
+ * Two rules hold everywhere:
+ *  1. Only `transform`, `opacity`, `filter`, `clip-path` and
+ *     `stroke-dashoffset` are animated.
+ *  2. Every hidden-until-revealed state is gated behind `html.js`, so a
+ *     no-JS visitor gets the full document immediately.
+ */
+
+/* ------------------------------------------------------ LEVEL 3: micro */
+
+.js [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-shift, 1.25rem), 0);
+  transition:
+    opacity var(--d-slow) var(--e-out),
+    transform var(--d-slow) var(--e-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.js [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* Per-line reveal used by the hero and headings. See `.line` in typography. */
+.js [data-reveal-lines] .line__inner {
+  display: block;
+  transform: translate3d(0, 105%, 0);
+  transition: transform var(--d-signature) var(--e-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.js [data-reveal-lines].is-revealed .line__inner {
+  transform: none;
+}
+
+/* ------------------------------- SIGNATURE MOTIF: SVG line drawing --------
+ *
+ * Adapted from motion reference 07 (Tom Miller, "Golden Ratio") — the
+ * principle, not the code. Every drawable element carries `pathLength="1"`,
+ * which normalises paths, ellipses and rects to a single unit so one CSS rule
+ * animates all of them regardless of their real geometry.
+ *
+ * Used in exactly two places: the project plates and the contact ending.
+ */
+.js [data-draw] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset var(--d-draw) var(--e-out);
+  transition-delay: var(--draw-delay, 0ms);
+}
+
+.js .is-drawn [data-draw],
+.js [data-draw].is-drawn {
+  stroke-dashoffset: 0;
+}
+
+/* Filled shapes cannot be drawn, so they arrive instead. */
+.js [data-fade-in] {
+  opacity: 0;
+  transition: opacity var(--d-base) var(--e-out);
+  transition-delay: var(--draw-delay, 0ms);
+}
+
+.js .is-drawn [data-fade-in] {
+  opacity: 1;
+}
+
+/* ------------------------------------- LEVEL 1: the language transition */
+
+/**
+ * One element, two jobs: on the gate it closes over the chosen language, on
+ * the destination it opens to reveal the homepage. Both pages paint it
+ * identically, which is what makes a real document navigation read as one
+ * continuous move.
+ *
+ * v0.2 replaces the single sliding rectangle with a column of panels. A
+ * staggered set of panels is both more distinctive and cheaper than a wipe:
+ * it animates nothing but `transform`.
+ */
+.transition-cover {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-transition);
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  visibility: hidden;
+  contain: strict;
+}
+
+.transition-cover[data-state='in'],
+.transition-cover[data-state='out'] {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.transition-cover__panels {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--panel-count, 6), 1fr);
+}
+
+.transition-cover__panel {
+  background-color: var(--c-void);
+  transform: scaleY(0);
+  transform-origin: bottom center;
+  will-change: transform;
+  /* Hairline seams keep the panels legible as panels rather than as one
+     black rectangle, at zero animation cost. */
+  box-shadow: 1px 0 0 rgb(255 255 255 / 0.04);
+}
+
+.transition-cover__label {
+  position: relative;
+  font-family: var(--f-display), 'Inter Tight Fallback';
+  font-size: var(--t-gate);
+  font-weight: var(--fw-heavy);
+  letter-spacing: var(--tr-mega);
+  line-height: 1;
+  color: var(--c-bone);
+  opacity: 0;
+}
+
+.transition-cover__rule {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 50%;
+  block-size: 1px;
+  background-color: var(--c-signal);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The signature moment collapses to a plain crossfade. The route still
+     changes and the content still arrives — it stops being a performance. */
+  .transition-cover__label {
+    display: none;
+  }
+}
+
+/* ------------------------------------ LEVEL 1: the gate greeting morph ----
+ *
+ * Adapted from motion reference 04 (Kara Bharat, "CSS Only - Morph Effect").
+ * The principle: blur the layer, then push alpha through a hard threshold, so
+ * blurred glyphs fuse and separate like liquid instead of cross-fading.
+ *
+ * Progressive enhancement in three tiers:
+ *   baseline  — per-glyph displacement + blur (v0.1, works everywhere)
+ *   enhanced  — the threshold filter, only where it is affordable
+ *   reduced   — no morph at all
+ *
+ * The filter is removed the moment the sequence ends. A full-width SVG
+ * threshold filter is the most expensive thing on the first screen, and it
+ * has no reason to still be there once the chooser is up.
+ */
+.gate__morph.is-gooey {
+  filter: url('#irl-threshold');
+}
+
+.gate__morph.is-gooey .gate__glyph {
+  /* Under the threshold filter the per-glyph blur is what fuses the letters,
+     so the glyphs move as one word rather than as separate characters. */
+  will-change: filter, opacity;
+}

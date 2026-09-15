@@ -1,0 +1,26 @@
+---
+import LanguageGate from '~/components/intro/LanguageGate.astro';
+import { site } from '~/config/site';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+
+/**
+ * `/` — the entry gate.
+ *
+ * It carries real metadata and six real, crawlable links, so it works as the
+ * x-default hub for the six localized documents without competing with them
+ * for the same queries.
+ */
+const title = `${site.brand} — ${site.tagline}`;
+const description = `${site.author.name}. ${site.statement} Choose your language: English, Čeština, Slovenčina, Español, Srpski, Türkçe.`;
+---
+
+<BaseLayout lang="gate" variant="gate" title={title} description={description} bodyClass="is-gate">
+  <LanguageGate />
+</BaseLayout>
+
+<style is:global>
+  /* The gate owns the viewport: nothing scrolls behind it. */
+  body.is-gate {
+    overflow: hidden;
+  }
+</style>

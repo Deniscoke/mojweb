@@ -1,0 +1,527 @@
+---
+import MediaFigure from '~/components/media/MediaFigure.astro';
+import SiteFooter from '~/components/contact/SiteFooter.astro';
+import SiteNav from '~/components/navigation/SiteNav.astro';
+import ProjectVisual from '~/components/projects/ProjectVisual.astro';
+import Readout from '~/components/ui/Readout.astro';
+import TransitionCover from '~/components/ui/TransitionCover.astro';
+import { site } from '~/config/site';
+import { LOCALES, localePath, t, useTranslations } from '~/i18n';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import {
+  getProjectRouteSlugs,
+  getProjects,
+  getProjectBySlug,
+  getNeighbourProject,
+  getExperimentsForProject,
+  hasLabDetail,
+  maturityOf,
+} from '~/lib/cms';
+
+/**
+ * PROJECT DETAIL — /[lang]/projects/[slug]/
+ *
+ * The slug set comes from whichever source this build resolved. With Payload
+ * reachable, publishing a project in the admin is enough to give it a page in
+ * every locale on the next build — no source edit involved. Drafts are
+ * filtered out at the query level, so an unpublished project has no route to
+ * be found at.
+ */
+export async function getStaticPaths() {
+  const slugs = await getProjectRouteSlugs();
+
+  return LOCALES.flatMap((locale) =>
+    slugs.map((slug) => ({
+      params: { lang: locale.route, slug },
+      props: { code: locale.code, slug },
+    })),
+  );
+}
+
+const { code, slug } = Astro.props;
+const dict = useTranslations(code);
+
+const [allProjects, project, next, relatedExperiments] = await Promise.all([
+  getProjects(code),
+  getProjectBySlug(slug, code),
+  getNeighbourProject(slug, code),
+  getExperimentsForProject(slug, code),
+]);
+
+/**
+ * The route only exists because this slug was in the resolved source, so a
+ * miss here means the source changed mid-build rather than a bad link.
+ */
+if (!project) throw new Error(`[CMS] No content for routed project slug: ${slug}`);
+
+/** A single-project site has no next project to point at. */
+const showNext = next && next.slug !== slug;
+
+const index = allProjects.findIndex((p) => p.slug === slug) + 1;
+const maturity = maturityOf(project);
+const isLive = project.status.includes('live');
+const detail = project.detail;
+const untranslated = Boolean(detail && !detail.written.includes(code));
+
+const statusText = project.status.map((s) => dict.work.status[s]).join(' / ');
+
+const readoutRows = [
+  { key: dict.project.statusLabel, value: statusText, accent: isLive },
+  { key: dict.project.disciplines, value: (detail?.disciplines ?? []).join(', ') || '—' },
+];
+
+const title = `${t(project.title, code)} — ${site.author.name}`;
+const description = t(project.description, code);
+
+/**
+ * Evidence, in the order it was attached in the CMS.
+ *
+ * The first item is promoted into the plate slot at the top of the page: when
+ * a real artefact exists it should be the first thing seen, and the generated
+ * plate goes back to being what it always was — a stand-in for projects that
+ * have nothing to show yet.
+ */
+const media = project.media ?? [];
+const heroMedia = media[0];
+const restMedia = media.slice(1);
+---
+
+<BaseLayout
+  lang={code}
+  title={title}
+  description={description}
+  altPath={`projects/${project.slug}`}
+>
+  <TransitionCover />
+  <SiteNav lang={code} />
+
+  <main id="main" class="project-page">
+    <div class="wrap">
+      <a class="mono project-page__back" href={`${localePath(code)}#work`}>
+        <span aria-hidden="true">&larr;</span>
+        {dict.project.backToWork}
+      </a>
+
+      <header class="project-page__head grid12">
+        <p class="mono project-page__index">
+          <span class="section__index">{String(index).padStart(2, '0')}</span>
+          {t(project.category, code)}
+        </p>
+
+        <div class="project-page__title-block">
+          <h1 class="project-page__title is-name">{t(project.title, code)}</h1>
+          {
+            detail && (
+              <p class="project-page__subtitle is-say">{t(detail.subtitle, code)}</p>
+            )
+          }
+        </div>
+
+        <div class="project-page__meta">
+          <Readout rows={readoutRows} />
+          <span class="project-page__meter" aria-hidden="true">
+            {[1, 2, 3, 4].map((step) => (
+              <span class="project-page__tick" data-on={step <= maturity ? '' : undefined} />
+            ))}
+          </span>
+          {
+            project.href && (
+              <a
+                class="action project-page__visit"
+                href={project.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {dict.project.visit}
+                <span class="action__arrow" aria-hidden="true">
+                  &#8599;
+                </span>
+              </a>
+            )
+          }
+        </div>
+      </header>
+
+      <div class="project-page__plate" data-reveal data-draw-group data-has-evidence={heroMedia ? '' : undefined}>
+        {
+          heroMedia ? (
+            <MediaFigure item={heroMedia} priority />
+          ) : (
+            <ProjectVisual visual={project.visual} hue={project.hue} seed={project.slug} />
+          )
+        }
+      </div>
+
+      {
+        detail?.question && (
+          <section class="project-page__question grid12" data-reveal aria-label="Driving question">
+            <p class="project-page__question-text is-say">
+              {t(detail.question, untranslated ? 'en' : code)}
+            </p>
+          </section>
+        )
+      }
+
+      {untranslated && <p class="mono working-note project-page__note">{dict.project.untranslated}</p>}
+
+      <div class="project-page__body">
+        {
+          detail ? (
+            detail.sections.map((section, i) => (
+              <section class="project-page__section grid12" data-reveal style={`--reveal-delay:${i * 60}ms`}>
+                <h2 class="mono project-page__section-label">
+                  {dict.project.headings[section.id]}
+                </h2>
+                <div class="project-page__prose">
+                  {section.body.map((paragraph) => (
+                    <p>{t(paragraph, untranslated ? 'en' : code)}</p>
+                  ))}
+                </div>
+              </section>
+            ))
+          ) : (
+            <section class="project-page__section grid12" data-reveal>
+              <h2 class="mono project-page__section-label">{dict.project.headings.overview}</h2>
+              <div class="project-page__prose">
+                <p>{t(project.description, code)}</p>
+              </div>
+            </section>
+          )
+        }
+      </div>
+
+      {
+        restMedia.length > 0 && (
+          <section class="project-page__evidence" data-reveal>
+            <h2 class="mono project-page__evidence-label">{dict.project.evidence}</h2>
+            <div class="project-page__media">
+              {restMedia.map((m) => (
+                <MediaFigure item={m} />
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      {
+        relatedExperiments.length > 0 && (
+          <section class="project-page__related grid12" data-reveal>
+            <h2 class="mono project-page__section-label">{dict.project.relatedExperiments}</h2>
+            <ul class="project-page__related-list" role="list">
+              {relatedExperiments.map((e) => {
+                const label = t(e.title, code);
+                return (
+                  <li class="related">
+                    {hasLabDetail(e) ? (
+                      <a class="related__link" href={localePath(code, `lab/${e.slug ?? e.id}`)}>
+                        <span class="related__title">{label}</span>
+                        <span class="mono related__state" data-state={e.state}>
+                          {dict.lab.states[e.state]}
+                        </span>
+                      </a>
+                    ) : (
+                      <span class="related__link related__link--static">
+                        <span class="related__title">{label}</span>
+                        <span class="mono related__state" data-state={e.state}>
+                          {dict.lab.states[e.state]}
+                        </span>
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        showNext && (
+          <a class="project-page__next" href={localePath(code, `projects/${next.slug}`)}>
+            <span class="mono project-page__next-label">{dict.project.next}</span>
+            <span class="project-page__next-title is-name">{t(next.title, code)}</span>
+          </a>
+        )
+      }
+    </div>
+  </main>
+
+  <SiteFooter lang={code} />
+</BaseLayout>
+
+<style>
+  .project-page {
+    padding-block: clamp(2rem, 6vh, 4rem) var(--s-section);
+  }
+
+  .project-page__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-3);
+    color: var(--c-bone-faint);
+    min-block-size: 44px;
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .project-page__back:hover,
+  .project-page__back:focus-visible {
+    color: var(--c-signal);
+  }
+
+  .project-page__head {
+    margin-block: clamp(2rem, 6vw, 4rem) clamp(2rem, 5vw, 3.5rem);
+    row-gap: var(--s-5);
+  }
+
+  .project-page__index {
+    grid-column: 1 / -1;
+    color: var(--c-bone-faint);
+    display: flex;
+    gap: var(--s-3);
+  }
+
+  .project-page__title-block {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--s-4);
+  }
+
+  .project-page__title {
+    font-size: var(--t-mega);
+  }
+
+  .project-page__subtitle {
+    font-size: var(--t-display);
+    color: var(--c-bone-dim);
+    max-inline-size: 22ch;
+  }
+
+  .project-page__meta {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--s-4);
+    align-content: start;
+  }
+
+  .project-page__meter {
+    display: flex;
+    gap: 3px;
+  }
+
+  .project-page__tick {
+    inline-size: 18px;
+    block-size: 2px;
+    background-color: var(--c-line-strong);
+  }
+
+  .project-page__tick[data-on] {
+    background-color: var(--c-bone-dim);
+  }
+
+  .project-page__visit {
+    justify-self: start;
+  }
+
+  .project-page__plate {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    margin-block-end: var(--s-7);
+  }
+
+  /* A real artefact keeps its own proportions instead of being cropped to the
+     generated plate's 16:9. */
+  .project-page__plate[data-has-evidence] {
+    aspect-ratio: auto;
+    overflow: visible;
+  }
+
+  .project-page__note {
+    display: inline-flex;
+    margin-block-end: var(--s-6);
+  }
+
+  .project-page__body {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .project-page__section {
+    row-gap: var(--s-3);
+    align-items: start;
+  }
+
+  .project-page__section-label {
+    grid-column: 1 / -1;
+    color: var(--c-bone-faint);
+    font-weight: var(--fw-medium);
+  }
+
+  .project-page__prose {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--s-4);
+    color: var(--c-bone-dim);
+    font-size: var(--t-lead);
+    font-weight: var(--fw-light);
+    line-height: 1.34;
+    letter-spacing: var(--tr-snug);
+    text-wrap: pretty;
+  }
+
+  .project-page__next {
+    display: grid;
+    gap: var(--s-3);
+    margin-block-start: clamp(3rem, 9vw, 7rem);
+    padding-block-start: var(--s-5);
+    border-block-start: 1px solid var(--c-line);
+    color: var(--c-bone);
+  }
+
+  .project-page__next-label {
+    color: var(--c-bone-faint);
+    font-family: var(--f-mono);
+    font-size: var(--t-mono);
+    letter-spacing: var(--tr-mono);
+    text-transform: uppercase;
+  }
+
+  .project-page__next-title {
+    font-size: var(--t-project);
+    transition: color var(--d-base) var(--e-out);
+  }
+
+  .project-page__next:hover .project-page__next-title,
+  .project-page__next:focus-visible .project-page__next-title {
+    color: var(--c-signal);
+  }
+
+  /* ------------------------------------------------- driving question */
+
+  .project-page__question {
+    margin-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .project-page__question-text {
+    grid-column: 1 / -1;
+    font-size: var(--t-display);
+    color: var(--c-bone);
+    text-wrap: balance;
+    max-inline-size: 24ch;
+    border-inline-start: 2px solid var(--c-signal);
+    padding-inline-start: clamp(1rem, 3vw, 2rem);
+  }
+
+  /* ------------------------------------------------------------ evidence */
+
+  .project-page__evidence {
+    margin-block-start: clamp(3rem, 7vw, 5rem);
+    display: grid;
+    gap: var(--s-5);
+  }
+
+  .project-page__evidence-label {
+    color: var(--c-bone-faint);
+    font-weight: var(--fw-medium);
+  }
+
+  .project-page__media {
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 3rem);
+  }
+
+  /* --------------------------------------------------- related experiments */
+
+  .project-page__related {
+    margin-block-start: clamp(3rem, 7vw, 5rem);
+    row-gap: var(--s-4);
+    align-items: start;
+  }
+
+  .project-page__related-list {
+    grid-column: 1 / -1;
+    display: grid;
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--c-line);
+  }
+
+  .related__link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-3) var(--s-5);
+    padding-block: var(--s-4);
+    border-block-end: 1px solid var(--c-line);
+    color: var(--c-bone);
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .related__link:hover,
+  .related__link:focus-visible {
+    color: var(--c-lab);
+  }
+
+  /* An experiment with no written log is listed but not linked. */
+  .related__link--static {
+    color: var(--c-bone-dim);
+  }
+
+  .related__title {
+    text-wrap: pretty;
+  }
+
+  .related__state {
+    color: var(--c-bone-faint);
+    flex: none;
+  }
+
+  .related__state[data-state='open-question'] {
+    color: var(--c-lab);
+  }
+
+  @media (min-width: 62rem) {
+    .project-page__question-text {
+      grid-column: 4 / span 7;
+    }
+
+    .project-page__related-list {
+      grid-column: 4 / span 7;
+    }
+
+    .project-page__related .project-page__section-label {
+      grid-column: 1 / span 3;
+      padding-block-start: 0.35em;
+    }
+
+    .project-page__index {
+      grid-column: 1 / span 8;
+    }
+
+    .project-page__title-block {
+      grid-column: 1 / span 8;
+    }
+
+    .project-page__meta {
+      grid-column: 10 / span 3;
+      grid-row: 2;
+    }
+
+    .project-page__section-label {
+      grid-column: 1 / span 3;
+      padding-block-start: 0.35em;
+    }
+
+    .project-page__prose {
+      grid-column: 4 / span 7;
+    }
+  }
+</style>
+
+<script>
+  import { playEnterReveal } from '~/motion/language/enterReveal';
+  import { initScrollReveal } from '~/motion/scrollReveal';
+
+  playEnterReveal(document.querySelector<HTMLElement>('[data-transition-cover]'));
+  initScrollReveal();
+</script>

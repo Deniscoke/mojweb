@@ -1,0 +1,36 @@
+---
+/**
+ * Monospaced key/value readout.
+ *
+ * Used for the hero's technical column and for project metadata. Every value
+ * it ever renders is derived from real data in `src/data` — it is a readout,
+ * not decorative "technical-looking" text. Invented coordinates or fake build
+ * numbers would be exactly the kind of detail that makes a portfolio feel
+ * dishonest up close.
+ */
+interface Props {
+  rows: { key: string; value: string; accent?: boolean }[];
+  class?: string;
+}
+
+const { rows, class: className = '' } = Astro.props;
+---
+
+<dl class={`readout mono ${className}`}>
+  {
+    rows.map((row) => (
+      <div class="readout__row">
+        <dt class="readout__key">{row.key}</dt>
+        <dd class="readout__value" data-accent={row.accent ? '' : undefined}>
+          {row.value}
+        </dd>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .readout__value[data-accent] {
+    color: var(--c-signal);
+  }
+</style>

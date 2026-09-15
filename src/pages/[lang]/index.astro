@@ -1,0 +1,61 @@
+---
+import AboutTeaser from '~/components/about/AboutTeaser.astro';
+import ContactTeaser from '~/components/contact/ContactTeaser.astro';
+import SiteFooter from '~/components/contact/SiteFooter.astro';
+import Credo from '~/components/hero/Credo.astro';
+import Currently from '~/components/currently/Currently.astro';
+import Hero from '~/components/hero/Hero.astro';
+import LabPreview from '~/components/lab/LabPreview.astro';
+import SiteNav from '~/components/navigation/SiteNav.astro';
+import SelectedWork from '~/components/projects/SelectedWork.astro';
+import WhatIDo from '~/components/services/WhatIDo.astro';
+import TransitionCover from '~/components/ui/TransitionCover.astro';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { LOCALES, useTranslations } from '~/i18n';
+
+/**
+ * One statically generated document per locale: /en/, /cs/, /sk/, /es/,
+ * /sr/, /tr/. Adding a language to `LOCALES` adds a route here with no other
+ * change — which is the whole point of keeping the registry separate from
+ * the dictionaries.
+ */
+export function getStaticPaths() {
+  return LOCALES.map((locale) => ({
+    params: { lang: locale.route },
+    props: { code: locale.code },
+  }));
+}
+
+const { code } = Astro.props;
+const dict = useTranslations(code);
+---
+
+<BaseLayout lang={code} title={dict.meta.title} description={dict.meta.description}>
+  <TransitionCover />
+  <SiteNav lang={code} />
+
+  <main id="main">
+    <Hero lang={code} />
+    <Credo lang={code} />
+    <SelectedWork lang={code} />
+    <WhatIDo lang={code} />
+    <LabPreview lang={code} />
+    <AboutTeaser lang={code} />
+    <Currently lang={code} />
+    <ContactTeaser lang={code} />
+  </main>
+
+  <SiteFooter lang={code} />
+</BaseLayout>
+
+<script>
+  import { playEnterReveal } from '~/motion/language/enterReveal';
+  import { initScrollReveal } from '~/motion/scrollReveal';
+
+  const cover = document.querySelector<HTMLElement>('[data-transition-cover]');
+
+  // Order matters: the reveal owns the first moment of the page, and every
+  // other module hangs off the event it dispatches.
+  playEnterReveal(cover);
+  initScrollReveal();
+</script>

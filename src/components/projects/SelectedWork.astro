@@ -1,0 +1,305 @@
+---
+import ProjectVisual from '~/components/projects/ProjectVisual.astro';
+import { getFeaturedProjects, maturityOf } from '~/lib/cms';
+import { localePath, t, useTranslations } from '~/i18n';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+const dict = useTranslations(lang);
+const featuredProjects = await getFeaturedProjects(lang);
+
+/**
+ * SELECTED WORK — the core of the homepage.
+ *
+ * Two v0.2 decisions worth naming:
+ *
+ * 1. Status is expressed typographically, not with badges. Each row carries a
+ *    four-tick maturity meter (experiment → prototype → in development →
+ *    live) and only `live` is allowed the accent colour. You can read the
+ *    difference between the five projects at a glance without five coloured
+ *    pills competing with the titles.
+ *
+ * 2. The per-project hue is confined to the plate. In v0.1 it also coloured
+ *    the category line, which put five different colours down one list —
+ *    the exact "colour funfair" the brief warned about.
+ */
+---
+
+<section class="section section--lg work" id="work" data-work aria-labelledby="work-title">
+  <div class="wrap">
+    <header class="section__head grid12" data-reveal>
+      <p class="mono section__label">
+        <span class="section__index">01</span>
+        {dict.work.label}
+      </p>
+      <div class="section__intro">
+        <h2 id="work-title">{dict.work.title}</h2>
+        <p class="lead">{dict.work.lead}</p>
+      </div>
+    </header>
+
+    <ul class="work__list" role="list">
+      {
+        featuredProjects.map((project, index) => {
+          const maturity = maturityOf(project);
+          const isLive = project.status.includes('live');
+          const statusText = project.status.map((s) => dict.work.status[s]).join(' / ');
+          return (
+            <li
+              class="project"
+              data-project-row
+              data-reveal
+              data-draw-group
+              data-live={isLive ? '' : undefined}
+              style={`--reveal-delay:${index * 70}ms; --project-hue:${project.hue}`}
+            >
+              <a class="project__link" href={localePath(lang, `projects/${project.slug}`)}>
+                <span class="project__head">
+                  <span class="mono project__index">{String(index + 1).padStart(2, '0')}</span>
+                  <span class="mono project__category">{t(project.category, lang)}</span>
+                </span>
+
+                <span class="project__body">
+                  <h3 class="project__title">{t(project.title, lang)}</h3>
+                  <span class="project__desc">{t(project.description, lang)}</span>
+                </span>
+
+                <span class="project__meta">
+                  <span class="mono project__status">{statusText}</span>
+                  <span class="project__meter" aria-hidden="true">
+                    {[1, 2, 3, 4].map((step) => (
+                      <span class="project__tick" data-on={step <= maturity ? '' : undefined} />
+                    ))}
+                  </span>
+                </span>
+
+                <span class="project__plate">
+                  <ProjectVisual visual={project.visual} hue={project.hue} seed={project.slug} />
+                </span>
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .work {
+    /* Anchors the fixed-position preview plate to the pointer. */
+    --preview-x: 50vw;
+    --preview-y: 50vh;
+  }
+
+  .work__list {
+    display: grid;
+    gap: var(--s-7);
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--c-line);
+  }
+
+  .project {
+    position: relative;
+  }
+
+  .project__link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+    padding-block: var(--s-5) var(--s-6);
+    border-block-end: 1px solid var(--c-line);
+    color: inherit;
+  }
+
+  .project__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-4);
+    color: var(--c-bone-faint);
+  }
+
+  .project__index {
+    color: var(--c-bone-dim);
+  }
+
+  .project__category {
+    color: var(--c-bone-faint);
+  }
+
+  .project__title {
+    font-size: var(--t-project);
+    font-weight: var(--fw-semi);
+    letter-spacing: var(--tr-tight);
+    line-height: 0.98;
+    margin-block-end: 0.35em;
+    transition: color var(--d-base) var(--e-out);
+  }
+
+  .project__desc {
+    display: block;
+    color: var(--c-bone-dim);
+    max-inline-size: 46ch;
+    text-wrap: pretty;
+  }
+
+  .project__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+  }
+
+  .project__status {
+    color: var(--c-bone-faint);
+  }
+
+  .project[data-live] .project__status {
+    color: var(--c-signal);
+  }
+
+  /* Four ticks: experiment, prototype, in development, live. */
+  .project__meter {
+    display: flex;
+    gap: 3px;
+    flex: none;
+  }
+
+  .project__tick {
+    inline-size: 14px;
+    block-size: 2px;
+    background-color: var(--c-line-strong);
+  }
+
+  .project__tick[data-on] {
+    background-color: var(--c-bone-dim);
+  }
+
+  .project[data-live] .project__tick[data-on] {
+    background-color: var(--c-signal);
+  }
+
+  /* ------------------------------------------------ MOBILE / TOUCH LAYOUT */
+
+  /**
+   * The plate is a real, visible part of the card here. Touch devices get the
+   * project's artwork without needing a pointer they do not have.
+   */
+  .project__plate {
+    display: block;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    order: -1;
+  }
+
+  /* -------------------------------------------------- DESKTOP / FINE POINTER */
+
+  @media (min-width: 62rem) and (hover: hover) and (pointer: fine) {
+    .work__list {
+      gap: 0;
+    }
+
+    .project__link {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 16rem);
+      align-items: end;
+      gap: var(--s-4) var(--s-6);
+      padding-block: var(--s-6);
+      transition: padding-inline-start var(--d-base) var(--e-out);
+    }
+
+    .project__head {
+      grid-column: 1 / -1;
+    }
+
+    .project__link:hover,
+    .project__link:focus-visible {
+      padding-inline-start: var(--s-5);
+    }
+
+    /* The one place the project hue touches the layout: a hairline that
+       appears along the row on hover. */
+    .project::before {
+      content: '';
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: 0;
+      inline-size: 2px;
+      background-color: oklch(0.74 0.18 var(--project-hue));
+      transform: scaleY(0);
+      transform-origin: bottom center;
+      transition: transform var(--d-base) var(--e-out);
+    }
+
+    .project:hover::before,
+    .project:has(:focus-visible)::before {
+      transform: scaleY(1);
+    }
+
+    .project__meta {
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--s-3);
+    }
+
+    /* The plate leaves the flow entirely and follows the cursor. Because it
+       was already out of flow at rest, showing it causes no layout shift. */
+    .project__plate {
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+      inline-size: 21rem;
+      aspect-ratio: 16 / 11;
+      z-index: var(--z-sticky);
+      pointer-events: none;
+      opacity: 0;
+      order: 0;
+      /* transform is driven by the eased pointer loop and must not be
+         double-smoothed by CSS; scale and rotate are separate properties so
+         they can transition on their own. */
+      transform: translate3d(calc(var(--preview-x) - 50%), calc(var(--preview-y) - 50%), 0);
+      scale: 0.94;
+      rotate: -3deg;
+      transition:
+        opacity var(--d-fast) var(--e-out),
+        scale var(--d-base) var(--e-out),
+        rotate var(--d-base) var(--e-out);
+      box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.6);
+    }
+
+    .project[data-preview-active] .project__plate {
+      opacity: 1;
+      scale: 1;
+      rotate: 0deg;
+    }
+
+    /* Keyboard users are not hovering, so the plate anchors to the row
+       instead of to a cursor that is not there. */
+    .project:has(:focus-visible) .project__plate {
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-end: 0;
+      inset-inline-start: auto;
+      inline-size: 16rem;
+      transform: translate3d(0, -50%, 0);
+      opacity: 1;
+      scale: 1;
+      rotate: 0deg;
+    }
+
+    .project__link:hover .project__title {
+      color: oklch(0.82 0.15 var(--project-hue));
+    }
+  }
+</style>
+
+<script>
+  import { initProjectPointerPreview } from '~/motion/projects/pointerPreview';
+
+  const section = document.querySelector<HTMLElement>('[data-work]');
+  if (section) initProjectPointerPreview(section);
+</script>

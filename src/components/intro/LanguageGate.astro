@@ -1,0 +1,342 @@
+---
+import TransitionCover from '~/components/ui/TransitionCover.astro';
+import { site } from '~/config/site';
+import { GREETING_SEQUENCE, LOCALES, localePath } from '~/i18n/locales';
+
+/**
+ * THE ENTRY GATE
+ * ==============
+ * `/` is not a homepage. It is a fullscreen decision, and the decision is the
+ * only thing on it.
+ *
+ * v0.2 composition note: the v0.1 gate centred everything and left a large,
+ * unstructured gap between the greeting and the chooser — the space read as
+ * an accident rather than a pause. The chooser is now a full-width editorial
+ * row under a hairline, which gives that space a job.
+ *
+ * Every greeting is rendered into the DOM at build time. Without JavaScript
+ * the first one shows and the six language links are immediately usable — the
+ * gate degrades to a plain, crawlable language index.
+ */
+
+const greetings = GREETING_SEQUENCE;
+---
+
+<div class="gate" data-gate>
+  <!-- Threshold filter for the enhanced morph tier. Referenced by CSS as
+       url(#irl-threshold); inert until .is-gooey is applied. -->
+  <svg class="gate__defs" aria-hidden="true" focusable="false" width="0" height="0">
+    <defs>
+      <filter id="irl-threshold" x="-20%" y="-40%" width="140%" height="180%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"></feGaussianBlur>
+        <feColorMatrix
+          in="blur"
+          type="matrix"
+          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9"></feColorMatrix>
+      </filter>
+    </defs>
+  </svg>
+
+  <header class="gate__bar">
+    <span class="mono gate__brand">{site.brand}</span>
+    <span class="mono gate__meta">Entry &middot; {LOCALES.length} languages</span>
+  </header>
+
+  <main class="gate__stage" id="main">
+    <h1 class="visually-hidden">
+      {site.brand} — {site.tagline}. {site.author.name}. Choose your language.
+    </h1>
+
+    <div class="gate__morph" data-morph aria-hidden="true">
+      {
+        greetings.map((word, wordIndex) => (
+          <span class="gate__word" data-word data-active={wordIndex === 0 ? '' : undefined}>
+            {word.split('').map((char) => (
+              <span class="gate__glyph" data-glyph>
+                {char}
+              </span>
+            ))}
+          </span>
+        ))
+      }
+    </div>
+  </main>
+
+  <nav class="gate__choose" data-choose aria-label="Language">
+    <div class="gate__choose-head">
+      <p class="mono gate__prompt" data-transition-fade>Choose your language</p>
+      <button class="mono gate__skip" type="button" data-skip>Skip intro</button>
+    </div>
+
+    <ul class="gate__options" role="list">
+      {
+        LOCALES.map((locale) => (
+          <li class="gate__option-item">
+            <a
+              class="gate__option touch-target"
+              href={localePath(locale.route)}
+              hreflang={locale.htmlLang}
+              lang={locale.htmlLang}
+              data-lang-option={locale.code}
+              data-lang-label={locale.label}
+              data-astro-prefetch="hover"
+            >
+              <span class="gate__option-label is-name" data-lang-mark>
+                {locale.label}
+              </span>
+              <span class="mono gate__option-name">{locale.name}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+
+  <footer class="gate__bar gate__bar--end">
+    <p class="mono gate__tagline" data-transition-fade>{site.tagline}</p>
+    <p class="mono gate__author" data-transition-fade>{site.author.name}</p>
+  </footer>
+</div>
+
+<TransitionCover />
+
+<style>
+  .gate {
+    min-block-size: 100svb;
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    gap: clamp(1rem, 3vh, 2rem);
+    padding: var(--gutter);
+    position: relative;
+  }
+
+  .gate__defs {
+    position: absolute;
+    inline-size: 0;
+    block-size: 0;
+    pointer-events: none;
+  }
+
+  .gate__bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--s-4);
+    color: var(--c-bone-faint);
+  }
+
+  .gate__brand {
+    color: var(--c-bone);
+    font-weight: 700;
+  }
+
+  .gate__stage {
+    display: grid;
+    place-items: center;
+    min-block-size: 0;
+  }
+
+  /* ------------------------------------------------------------- the morph */
+
+  .gate__morph {
+    position: relative;
+    display: grid;
+    place-items: center;
+    inline-size: 100%;
+    /* A fixed box: every greeting is absolutely positioned inside it, so
+       swapping HELLO for MERHABA never changes layout. */
+    block-size: 1.02em;
+    font-size: var(--t-gate);
+    font-weight: var(--fw-heavy);
+    line-height: 1;
+    letter-spacing: var(--tr-mega);
+  }
+
+  .gate__word {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    opacity: 0;
+  }
+
+  .gate__word[data-active] {
+    opacity: 1;
+  }
+
+  .gate__glyph {
+    display: inline-block;
+    will-change: transform, opacity;
+  }
+
+  /* ---------------------------------------------------------- the chooser */
+
+  .gate__choose {
+    display: grid;
+    gap: clamp(0.75rem, 2vh, 1.25rem);
+    inline-size: 100%;
+    border-block-start: 1px solid var(--c-line);
+    padding-block-start: clamp(0.75rem, 2vh, 1.5rem);
+    transition:
+      opacity var(--d-slow) var(--e-out),
+      transform var(--d-slow) var(--e-out);
+  }
+
+  /* Hidden until the morph finishes — but only when JS can reveal it again. */
+  :global(.js) .gate:not([data-ready]) .gate__choose {
+    opacity: 0;
+    transform: translate3d(0, 1rem, 0);
+    pointer-events: none;
+  }
+
+  .gate__choose-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--s-4);
+  }
+
+  .gate__prompt {
+    color: var(--c-bone-faint);
+  }
+
+  .gate__options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(0.5rem, 2vh, 1.5rem) var(--col-gap);
+    inline-size: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .gate__option {
+    display: grid;
+    gap: 0.2em;
+    padding-block: var(--s-2);
+    color: var(--c-bone-dim);
+  }
+
+  .gate__option-label {
+    display: block;
+    /* Deliberately large. On the v0.1 gate the options were a fifth the size
+       of the greeting, which made the actual decision feel like a footnote. */
+    font-size: clamp(2.25rem, 7vw, 4.5rem);
+    line-height: 0.9;
+    color: var(--c-bone);
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .gate__option-name {
+    color: var(--c-bone-faint);
+    font-size: var(--t-micro);
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  /* The remembered language is marked, never auto-selected. */
+  .gate__option[data-remembered] .gate__option-name {
+    color: var(--c-signal);
+  }
+
+  @media (hover: hover) {
+    .gate__option:hover .gate__option-label,
+    .gate__option:focus-visible .gate__option-label {
+      color: var(--c-signal);
+    }
+
+    .gate__option:hover .gate__option-name,
+    .gate__option:focus-visible .gate__option-name {
+      color: var(--c-bone);
+    }
+  }
+
+  .gate__skip {
+    color: var(--c-bone-faint);
+    font-family: var(--f-mono);
+    font-size: var(--t-mono);
+    letter-spacing: var(--tr-mono);
+    text-transform: uppercase;
+    min-block-size: 44px;
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .gate__skip:hover,
+  .gate__skip:focus-visible {
+    color: var(--c-bone);
+  }
+
+  .gate[data-ready] .gate__skip {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .gate__author {
+    color: var(--c-bone-faint);
+  }
+
+  /* Six across, left-aligned, once there is room. */
+  @media (min-width: 48rem) {
+    .gate__options {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .gate__meta,
+    .gate__author {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { recallLocale } from '~/i18n/memory';
+  import { createGreetingMorph } from '~/motion/language/greetingMorph';
+  import { initEnterTransition } from '~/motion/language/enterTransition';
+
+  const gate = document.querySelector<HTMLElement>('[data-gate]');
+  const morphRoot = gate?.querySelector<HTMLElement>('[data-morph]');
+  const cover = document.querySelector<HTMLElement>('[data-transition-cover]');
+
+  if (gate && morphRoot && cover) {
+    // Language memory: mark the last choice, do not act on it.
+    const remembered = recallLocale();
+    if (remembered) {
+      gate
+        .querySelector<HTMLElement>(`[data-lang-option="${CSS.escape(remembered)}"]`)
+        ?.setAttribute('data-remembered', '');
+    }
+
+    const morph = createGreetingMorph(morphRoot);
+
+    const reveal = () => {
+      gate.setAttribute('data-ready', '');
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerdown', onPointer);
+    };
+
+    // Any intent to interact ends the intro. Nobody should have to wait for
+    // an animation before they can use a language link.
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Tab' || event.key === 'Escape' || event.key === 'Enter') morph.skip();
+    };
+    const onPointer = () => morph.skip();
+
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('pointerdown', onPointer, { once: true });
+    gate.querySelector<HTMLElement>('[data-skip]')?.addEventListener('click', () => morph.skip());
+
+    morphRoot.addEventListener('morph:done', reveal, { once: true });
+
+    // Last line of defence. Whatever happens to the animation, the six
+    // language links become usable within a few seconds of arriving.
+    window.setTimeout(() => {
+      if (!gate.hasAttribute('data-ready')) morph.skip();
+    }, 5000);
+
+    void morph.play();
+
+    initEnterTransition({ root: gate, cover });
+  }
+</script>

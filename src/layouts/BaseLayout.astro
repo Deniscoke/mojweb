@@ -1,0 +1,140 @@
+---
+import { site } from '~/config/site';
+import { ENTER_FLAG_SNIPPET } from '~/i18n/memory';
+import { LOCALES, getLocale } from '~/i18n/locales';
+import '~/styles/global.css';
+
+interface Props {
+  /** Locale code, or 'gate' for the language entry page. */
+  lang: string;
+  htmlLang?: string;
+  title: string;
+  description: string;
+  /** The gate has no navigation chrome and no enter-reveal cover. */
+  variant?: 'site' | 'gate';
+  bodyClass?: string;
+  /**
+   * Sub-path after the locale segment, e.g. `projects/pravo365`. Drives the
+   * hreflang set so a project page points at its own translations rather than
+   * at six homepages.
+   */
+  altPath?: string;
+}
+
+const {
+  lang,
+  htmlLang,
+  title,
+  description,
+  variant = 'site',
+  bodyClass = '',
+  altPath = '',
+} = Astro.props;
+
+const htmlLangAttr = htmlLang ?? (variant === 'gate' ? 'en' : getLocale(lang).htmlLang);
+const canonical = new URL(Astro.url.pathname, site.url).href;
+const ogImage = new URL(site.ogImage, site.url).href;
+
+const sub = altPath.replace(/^\/+|\/+$/g, '');
+const alternates = LOCALES.map((locale) => ({
+  hreflang: locale.htmlLang,
+  href: new URL(sub ? `/${locale.route}/${sub}/` : `/${locale.route}/`, site.url).href,
+}));
+
+/**
+ * One inline script, before first paint, doing only what must happen before
+ * first paint: mark that JS is available (the CSS motion layer is gated on
+ * it) and raise the entering flag so the transition panels are already opaque
+ * when the browser paints. Everything else is deferred module script.
+ */
+const bootScript = `document.documentElement.classList.add('js');${
+  variant === 'site' ? ENTER_FLAG_SNIPPET : ''
+}`;
+---
+
+<!doctype html>
+<html lang={htmlLangAttr} data-variant={variant}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    {alternates.map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
+    <link rel="alternate" hreflang="x-default" href={new URL('/', site.url).href} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.brand} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    {variant === 'site' && <meta property="og:locale" content={getLocale(lang).htmlLang} />}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#08080a" />
+    <meta name="color-scheme" content="dark" />
+
+    <!--
+      Both cuts of the display face are preloaded, and the reason is the name
+      itself: the c-acute in "Mitrović" is U+0107, which lives in latin-ext,
+      not latin. Every page renders that name at display size, so both files
+      are on the critical path of every page whatever we do here — measured,
+      not assumed. Preloading only the smaller latin cut left the larger,
+      always-needed one to be discovered from CSS a round trip later, and made
+      Chrome warn that the preload went unused on locales whose visible text
+      is mostly latin-ext.
+
+      This changes when the files start downloading, not how many bytes are
+      fetched. The mono face is deliberately not preloaded: it sets small
+      labels, so arriving a beat later costs nothing.
+    -->
+    <link
+      rel="preload"
+      href="/assets/fonts/inter-tight-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/assets/fonts/inter-tight-latin-ext-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <script is:inline set:html={bootScript} />
+  </head>
+
+  <body class={bodyClass} data-lang={lang}>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  /* Painted before the reveal module loads, so the cover is opaque on the
+     very first frame of the destination page. */
+  html[data-entering] .transition-cover {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  html[data-entering] .transition-cover__panel {
+    transform: scaleY(1);
+  }
+
+  html[data-entering] .transition-cover__label {
+    opacity: 1;
+  }
+
+  html[data-entering] body {
+    /* Nothing under the cover should be able to scroll while it is up. */
+    overflow: hidden;
+  }
+</style>

@@ -1,0 +1,156 @@
+/**
+ * DESIGN TOKENS
+ * =============
+ * One committed palette (dark, warm-neutral), a single warm signal, and a
+ * single cold "lab" accent. Two accents for two kinds of content is a system.
+ *
+ * The type scale is organised by ROLE, not by heading level. The v0.1 scale
+ * had the hero statement, every section heading and every project title
+ * within 4px of each other at the same weight, which meant nothing on the
+ * page could be louder than anything else. Sizes below are ordered by how
+ * loud that role is allowed to be, and the order is the design.
+ *
+ * All motion durations are `calc(<time> * var(--motion-mult))`. One
+ * `prefers-reduced-motion` block at the bottom collapses the whole CSS
+ * motion layer at once.
+ */
+
+:root {
+  /* ---------------------------------------------------------------- colour */
+  --c-void: #08080a; /* page ground */
+  --c-ink: #101014; /* raised surface */
+  --c-ink-2: #17171d; /* hover surface */
+
+  --c-bone: #ebe7de; /* primary text — warm, not pure white */
+  --c-bone-dim: #a7a29a;
+  --c-bone-faint: #6b6862;
+
+  --c-signal: #ff4a1c; /* the accent. Live status, links, focus. */
+  --c-signal-ink: #1a0703; /* text on signal */
+  --c-lab: #74e9b6; /* the cold accent. Lab only. */
+
+  --c-line: #23232b;
+  --c-line-strong: #34343e;
+
+  --c-focus: #ffd166;
+
+  /* -------------------------------------------------------------- typeface */
+  --f-display: 'Inter Tight Variable', 'Inter Tight', ui-sans-serif, system-ui,
+    -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', 'Cascadia Mono',
+    'Segoe UI Mono', Menlo, Consolas, monospace;
+
+  /**
+   * WEIGHT IS A RULE, NOT A DECORATION.
+   *   Names and nouns are heavy.   (Denis Mitrović, Pravo365)
+   *   Sentences and questions are light.  ("I make ideas real.")
+   * That single contrast does more identity work than any effect, and it is
+   * free — the faces are variable.
+   */
+  --fw-light: 300;
+  --fw-book: 400;
+  --fw-medium: 500;
+  --fw-semi: 600;
+  --fw-heavy: 640;
+
+  /* ----------------------------------------------------- type scale by role */
+  --t-micro: clamp(0.625rem, 0.6rem + 0.12vw, 0.6875rem);
+  --t-mono: clamp(0.6875rem, 0.66rem + 0.14vw, 0.75rem);
+  --t-body: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --t-lead: clamp(1.125rem, 1rem + 0.7vw, 1.5rem);
+  --t-h3: clamp(1.25rem, 1.05rem + 1vw, 1.75rem);
+
+  /* Section headings are wayfinding. They should be quiet. */
+  --t-section: clamp(1.5rem, 1.05rem + 1.6vw, 2.5rem);
+
+  /* Project titles are the core content of the homepage. They are loud. */
+  --t-project: clamp(2.25rem, 1.1rem + 3.6vw, 4.25rem);
+
+  /* The hero's spoken line. Loud, but the name above it is louder. */
+  --t-statement: clamp(2rem, 1rem + 4.6vw, 5.25rem);
+
+  /* Closing statements and questions — contact. */
+  --t-display: clamp(1.75rem, 1rem + 2.6vw, 3.5rem);
+
+  /**
+   * The hero name block. The lower bound is deliberately well above what the
+   * vw term produces on a phone: "MITROVIĆ" is only eight characters, so a
+   * 390px screen has room for a genuinely large name, and shrinking the one
+   * signature element to its arithmetic minimum was making mobile feel like a
+   * reduction of the desktop rather than its own composition.
+   */
+  --t-mega: clamp(3.25rem, 0.6rem + 8.2vw, 8.5rem);
+
+  /* The gate greeting is alone on a black screen and may go bigger. */
+  --t-gate: clamp(3.25rem, 0.5rem + 13.5vw, 15rem);
+
+  --lh-tight: 0.86;
+  --lh-snug: 1.06;
+  --lh-body: 1.55;
+
+  --tr-mega: -0.055em;
+  --tr-tight: -0.04em;
+  --tr-snug: -0.02em;
+  /* One tracking value for every monospaced label on the site. */
+  --tr-mono: 0.16em;
+
+  /* ----------------------------------------------------------------- space */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+
+  /* Three section rhythms, so the page can signal what matters. */
+  --s-section-sm: clamp(3rem, 5.5vw, 5.5rem);
+  --s-section: clamp(4.5rem, 8vw, 9rem);
+  --s-section-lg: clamp(6rem, 12vw, 13rem);
+
+  /* ---------------------------------------------------------------- layout */
+  --gutter: clamp(1.25rem, 4.5vw, 3.5rem);
+  --col-gap: clamp(0.75rem, 1.6vw, 1.75rem);
+  --w-max: 92rem;
+  --w-text: 34rem;
+  --w-lead: 44rem;
+
+  /* Sharp by default. This is a lab, not a card catalogue. */
+  --r-0: 0px;
+  --r-1: 2px;
+  --r-pill: 999px;
+
+  /* ---------------------------------------------------------------- motion */
+  --motion-mult: 1;
+
+  --d-instant: calc(110ms * var(--motion-mult));
+  --d-fast: calc(220ms * var(--motion-mult));
+  --d-base: calc(420ms * var(--motion-mult));
+  --d-slow: calc(760ms * var(--motion-mult));
+  --d-draw: calc(1100ms * var(--motion-mult));
+  --d-signature: calc(1200ms * var(--motion-mult));
+
+  /* expo-out: fast departure, long settle. The house easing. */
+  --e-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --e-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --e-in: cubic-bezier(0.5, 0, 0.75, 0);
+
+  /* ---------------------------------------------------------------- layers */
+  --z-ambient: 0;
+  --z-content: 1;
+  --z-sticky: 30;
+  --z-nav: 50;
+  --z-menu: 70;
+  --z-gate: 90;
+  --z-transition: 100;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    /* Not 0: a hair of duration keeps transitionend/finish events firing,
+       which several progressive-enhancement paths depend on. */
+    --motion-mult: 0.012;
+  }
+}

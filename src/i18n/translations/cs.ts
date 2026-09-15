@@ -1,0 +1,159 @@
+import type { Dictionary } from '../dictionary';
+
+export const cs: Dictionary = {
+  meta: {
+    title: 'Denis Mitrović — Dělám z nápadů skutečnost',
+    description:
+      'Creative technologist a product builder na pomezí technologií, vzdělávání, AI a kreativní tvorby. Projekty, prototypy a experimenty.',
+  },
+  nav: {
+    work: 'Práce',
+    lab: 'Lab',
+    about: 'O mně',
+    contact: 'Kontakt',
+    openMenu: 'Otevřít menu',
+    closeMenu: 'Zavřít menu',
+    language: 'Jazyk',
+    skipToContent: 'Přejít na obsah',
+    home: 'Domů',
+  },
+  hero: {
+    statement: 'Dělám z nápadů skutečnost.',
+    intro: 'Pět projektů, osm otevřených otázek a záznam toho, co se mezi tím dělo.',
+    scrollCue: 'Scrollujte',
+  },
+  work: {
+    label: 'Vybraná práce',
+    title: 'Na čem pracuji',
+    lead: 'Něco z toho běží. Něco zůstane experimentem.',
+    viewProject: 'Otevřít projekt',
+    noLinkYet: 'Zatím neveřejné',
+    statusLabel: 'Stav',
+    status: {
+      live: 'Live',
+      'in-development': 'Ve vývoji',
+      prototype: 'Prototyp',
+      experiment: 'Experiment',
+      ongoing: 'Průběžně',
+    },
+  },
+  credo: [
+    { word: 'Stavět', hint: 'Weby, digitální produkty, AI, automatizace' },
+    { word: 'Učit', hint: 'Učení, technologie, workshopy, školy' },
+    { word: 'Hýbat se', hint: 'Cirkus, pohyb, snowboarding' },
+    { word: 'Zkoumat', hint: 'AI, Unreal, kreativní technologie, experimenty' },
+  ],
+  services: {
+    label: 'S čím pomůžu',
+    title: 'Kde můžu být užitečný',
+    lead: 'Některé z toho se překrývají. To zajímavé bývá mezi nimi.',
+    items: [
+      {
+        title: 'Weby',
+        body: 'Kompletní stránky, redesigny a landing pages — nebo stávající web rychlejší a snáz spravovatelný.',
+      },
+      {
+        title: 'AI a automatizace',
+        body: 'AI, která dělá práci, co se dá zkontrolovat, plus API integrace, automatizace a instalatérina pod tím.',
+      },
+      {
+        title: 'Workshopy',
+        body: 'Setkání, kde lidé něco postaví, místo aby koukali na slajdy.',
+      },
+      {
+        title: 'Vzdělávání',
+        body: 'Externě pro školy: učení v souladu s mozkem, intuitivní pedagogika, AI ve výuce, školení učitelů.',
+      },
+      {
+        title: 'Cirkus',
+        body: 'Cirkusové a pohybové workshopy pro děti a mládež, pravidelně i krátkodobě.',
+      },
+      {
+        title: 'Snowboarding',
+        body: 'Výuka snowboardingu pro začátečníky — děti i dospělé, na Vysočině.',
+      },
+      {
+        title: 'Konzultace',
+        body: 'Nejasný nápad nebo problém, který ještě nemá tvar. Můžeme začít tam.',
+      },
+    ],
+  },
+  lab: {
+    label: 'Lab',
+    title: 'Otevřené otázky',
+    lead: 'Otázky, na které jsem si zatím neodpověděl.',
+    indexTitle: 'Lab',
+    indexLead: 'Experimenty, poznámky a otázky. Kratší a surovější než projekty a někdy bez odpovědi.',
+    all: 'Všechny experimenty',
+    open: 'Otevřít poznámku',
+    states: {
+      'open-question': 'Otevřená otázka',
+      'in-progress': 'Probíhá',
+      ongoing: 'Průběžně',
+    },
+    headings: {
+      tried: 'Co jsem zkusil',
+      happened: 'Co se stalo',
+      next: 'Další otázka',
+    },
+    relatedProject: 'Související projekt',
+    noteOnly: 'Zatím bez zápisu.',
+  },
+  about: {
+    label: 'O mně',
+    title: 'Jak to vzniklo',
+    paragraphs: [
+      'Několik let intenzivního učení se ukázalo jako nezvykle praktická laboratoř: místo, kde je vidět, jak se lidé doopravdy učí, co je u toho udrží a jak sahají po technologiích, když jim za ně nikdo nedává známku.',
+      'Pohyb učí to samé z druhé strany. V cirkuse a na snowboardu je pokrok fyzický, opakovaný a dost nesentimentální — zkusíš to, nejde to, změníš jednu věc, jdeš znovu.',
+      'V technologiích běží ta smyčka nejrychleji: z nápadu se stane systém nebo produkt a zpětná vazba přijde v hodinách, ne za sezónu. Jsou na jednom webu proto, že je to stejný návyk aplikovaný na jiný materiál.',
+    ],
+    pull: 'Není to učitel, který přešel do IT — je to člověk, který propojuje obory a mění neurčité nápady v něco, co jde otestovat.',
+  },
+  currently: {
+    label: 'Právě teď',
+    kinds: {
+      building: 'Právě stavím',
+      exploring: 'Právě zkoumám',
+      experimenting: 'Právě experimentuji s',
+      thinking: 'Právě přemýšlím o',
+    },
+  },
+  contact: {
+    label: 'Spolupráce',
+    title: 'Máte něco v hlavě?',
+    lead: 'Pojďme si o tom promluvit. Nedodělané myšlenky vítány — obvykle právě tam začíná to zajímavé.',
+    emailCta: 'Napište mi',
+    pending: 'Kontaktní údaje se doplňují.',
+    elsewhere: 'Jinde',
+  },
+  project: {
+    backToWork: 'Všechny projekty',
+    next: 'Další projekt',
+    visit: 'Otevřít web',
+    disciplines: 'Disciplíny',
+    statusLabel: 'Stav',
+    untranslated: 'Tato case study zatím není přeložená. Zobrazuje se anglicky.',
+    headings: {
+      overview: 'Přehled',
+      context: 'Kontext',
+      idea: 'Nápad',
+      process: 'Proces',
+      technology: 'Technologie',
+      experiments: 'Experimenty',
+      state: 'Aktuální stav',
+      learning: 'Co jsem se naučil',
+      practice: 'Co to obnáší',
+      people: 'Pro koho',
+      availability: 'K dispozici pro',
+    },
+    relatedExperiments: 'Související experimenty',
+    evidence: 'Doklady',
+    mediaPending: 'Zatím nezachyceno',
+  },
+  footer: {
+    colophon: 'Tenhle web vzniká stejně jako projekty: ručně, na světle a pořád se mění.',
+    backToTop: 'Nahoru',
+    languageLabel: 'Změnit jazyk',
+    workingTranslation: 'Tento překlad je pracovní verze.',
+  },
+};

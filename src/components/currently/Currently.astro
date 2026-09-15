@@ -1,0 +1,107 @@
+---
+import { getCurrently } from '~/lib/cms';
+import { t, useTranslations } from '~/i18n';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+const dict = useTranslations(lang);
+
+const { items: currently, updatedLabel: currentlyUpdated } = await getCurrently(lang);
+const year = currentlyUpdated.slice(0, 4);
+---
+
+<section class="section currently" id="currently" aria-labelledby="currently-title">
+  <div class="wrap">
+    <header class="currently__head" data-reveal>
+      <h2 id="currently-title" class="currently__now is-name">
+        Now
+        <span class="currently__year">/ {year}</span>
+      </h2>
+      <p class="mono currently__stamp">
+        <time datetime={currentlyUpdated}>{dict.currently.label} &middot; {currentlyUpdated}</time>
+      </p>
+    </header>
+
+    <dl class="currently__list">
+      {
+        currently.map((item, index) => (
+          <div class="currently__row" data-reveal style={`--reveal-delay:${index * 60}ms`}>
+            <dt class="mono currently__label">{dict.currently.kinds[item.kind]}</dt>
+            <dd class="currently__value">
+              {item.href ? (
+                <a class="link" href={item.href} target="_blank" rel="noopener noreferrer">
+                  {t(item.value, lang)}
+                </a>
+              ) : (
+                t(item.value, lang)
+              )}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<style>
+  .currently__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-4);
+    margin-block-end: var(--s-6);
+  }
+
+  .currently__now {
+    font-size: var(--t-section);
+  }
+
+  .currently__year {
+    color: var(--c-signal);
+  }
+
+  .currently__stamp {
+    color: var(--c-bone-faint);
+  }
+
+  .currently__list {
+    margin: 0;
+    display: grid;
+  }
+
+  .currently__row {
+    display: grid;
+    gap: var(--s-2);
+    padding-block: var(--s-5);
+    border-block-start: 1px solid var(--c-line);
+  }
+
+  .currently__row:last-child {
+    border-block-end: 1px solid var(--c-line);
+  }
+
+  .currently__label {
+    color: var(--c-bone-faint);
+  }
+
+  .currently__value {
+    margin: 0;
+    font-size: clamp(1.375rem, 4vw, 2.25rem);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--tr-snug);
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  @media (min-width: 48rem) {
+    .currently__row {
+      grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+      gap: var(--s-6);
+      align-items: baseline;
+    }
+  }
+</style>

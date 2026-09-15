@@ -1,0 +1,169 @@
+/**
+ * TYPOGRAPHY
+ * ==========
+ * Two variable faces, both OFL-licensed and self-hosted from /public — no
+ * third-party font requests at runtime.
+ *
+ *   Inter Tight  — display + UI. Tight tracking survives being set at 15rem.
+ *   JetBrains Mono — labels, metadata, statuses. Carries the "lab" register.
+ *
+ * Only the `latin` and `latin-ext` subsets ship. latin-ext is not optional:
+ * ć (Mitrović), ř/ě (CS), ş/ğ (TR) and č/š (SK/SR) all live there, so three of
+ * six locales would fall back without it.
+ */
+
+@font-face {
+  font-family: 'Inter Tight Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('/assets/fonts/inter-tight-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter Tight Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('/assets/fonts/inter-tight-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+    U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url('/assets/fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url('/assets/fonts/jetbrains-mono-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+    U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+
+/**
+ * Metric-matched fallback. The hero is set at up to 8.5rem, so an unadjusted
+ * fallback would produce a very visible reflow when the real face swaps in.
+ */
+@font-face {
+  font-family: 'Inter Tight Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Liberation Sans');
+  size-adjust: 97%;
+  ascent-override: 96%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+body {
+  font-family: var(--f-display), 'Inter Tight Fallback';
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  font-weight: var(--fw-book);
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  color: var(--c-bone);
+  background-color: var(--c-void);
+}
+
+/* --------------------------------------------------------------- utilities */
+
+.mono {
+  font-family: var(--f-mono);
+  font-size: var(--t-mono);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tr-mono);
+  text-transform: uppercase;
+  font-feature-settings: 'kern' 1;
+}
+
+/**
+ * The weight rule.
+ * `.is-name` — proper nouns: a person, a product. Heavy, tight.
+ * `.is-say`  — sentences and questions the site speaks. Light, open.
+ * Applying these two consistently is most of the visual identity.
+ */
+.is-name {
+  font-weight: var(--fw-heavy);
+  letter-spacing: var(--tr-mega);
+  line-height: var(--lh-tight);
+  text-transform: uppercase;
+}
+
+.is-say {
+  font-weight: var(--fw-light);
+  letter-spacing: var(--tr-tight);
+  line-height: 0.98;
+}
+
+.lead {
+  font-size: var(--t-lead);
+  font-weight: var(--fw-light);
+  line-height: 1.28;
+  letter-spacing: var(--tr-snug);
+  color: var(--c-bone-dim);
+  max-inline-size: var(--w-lead);
+  text-wrap: pretty;
+}
+
+.prose {
+  max-inline-size: var(--w-text);
+  text-wrap: pretty;
+  hanging-punctuation: first last;
+}
+
+.prose > * + * {
+  margin-block-start: var(--s-5);
+}
+
+h1,
+h2,
+h3 {
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tr-tight);
+  text-wrap: balance;
+}
+
+h2 {
+  font-size: var(--t-section);
+}
+
+h3 {
+  font-size: var(--t-h3);
+}
+
+/**
+ * MASKED LINE — used by every line-reveal on the site.
+ *
+ * `overflow: hidden` is what makes the reveal work, and it is also what
+ * silently clipped the acute accent off Ć in "MITROVIĆ" in v0.1. At
+ * line-height 0.86 the glyph box overflows its content box by roughly
+ * 0.18em at the top, so the mask has to be grown on BOTH sides and pulled
+ * back with negative margins, which expands what is painted without moving
+ * anything in layout.
+ *
+ * Three of six locales are full of diacritics. This is not a detail.
+ */
+.line {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.24em 0.16em;
+  margin-block: -0.24em -0.16em;
+}
+
+::selection {
+  background-color: var(--c-signal);
+  color: var(--c-signal-ink);
+}

@@ -1,0 +1,98 @@
+---
+import { site } from '~/config/site';
+import { getLocale, useTranslations } from '~/i18n';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+const dict = useTranslations(lang);
+const locale = getLocale(lang);
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <div class="footer__col">
+      <p class="mono footer__brand">{site.brand}</p>
+      <p class="footer__colophon">{dict.footer.colophon}</p>
+    </div>
+
+    <div class="footer__col footer__col--end">
+      {
+        locale.quality === 'working' && (
+          <p class="mono working-note footer__working">{dict.footer.workingTranslation}</p>
+        )
+      }
+      <p class="mono footer__legal">
+        &copy; {year} {site.author.name}
+      </p>
+      <a class="mono footer__top" href="#hero">{dict.footer.backToTop}</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-block-start: 1px solid var(--c-line);
+    padding-block: var(--s-6) var(--s-7);
+  }
+
+  .footer__inner {
+    display: grid;
+    gap: var(--s-5);
+  }
+
+  .footer__col {
+    display: grid;
+    gap: var(--s-3);
+    align-content: start;
+  }
+
+  .footer__brand {
+    font-weight: 700;
+    letter-spacing: 0.2em;
+  }
+
+  .footer__colophon {
+    color: var(--c-bone-faint);
+    font-size: var(--t-mono);
+    max-inline-size: 40ch;
+    text-wrap: pretty;
+  }
+
+  .footer__legal,
+  .footer__top {
+    color: var(--c-bone-faint);
+  }
+
+  .footer__top {
+    justify-self: start;
+    min-block-size: 44px;
+    display: inline-flex;
+    align-items: center;
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .footer__top:hover,
+  .footer__top:focus-visible {
+    color: var(--c-bone);
+  }
+
+  @media (min-width: 48rem) {
+    .footer__inner {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+    }
+
+    .footer__col--end {
+      justify-items: end;
+      text-align: end;
+    }
+
+    .footer__top {
+      justify-self: end;
+    }
+  }
+</style>
