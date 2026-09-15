@@ -5,59 +5,61 @@ import ProjectVisual from '~/components/projects/ProjectVisual.astro';
 import Readout from '~/components/ui/Readout.astro';
 import TransitionCover from '~/components/ui/TransitionCover.astro';
 import { site } from '~/config/site';
-import { LAB_FORMATS, LAB_GROUP, LAB_ONLINE, LAB_PDFS, LAB_PRINCIPLES, LABS, SCHOOL_YEAR } from '~/data/labs';
-import { localePath, t } from '~/i18n';
+import { LAB_PDFS, LABS, SCHOOL_YEAR } from '~/data/labs';
+import { LOCALES, localePath, t } from '~/i18n';
+import { getLabsCopy } from '~/i18n/labs';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import { getProjects } from '~/lib/cms';
 
 /**
- * PROJEKTOVÉ LABY — /cs/laby/
+ * PROJECT LABS — /[lang]/laby/
  *
- * The landing page for schools. Visitors from the e-mail and the PDF poster
- * are linked here directly, so this page has to work without the homepage:
- * who, what, for whom and how to get in touch, in the first screen.
- *
- * Czech only for now — getStaticPaths returns `cs` alone.
+ * The landing page for schools, in every language of the site. Visitors from
+ * the e-mail and the PDF poster are linked here directly, so this page has to
+ * work without the homepage: who, what, for whom and how to get in touch, in
+ * the first screen. All copy comes from src/i18n/labs/<lang>.json.
  */
 export function getStaticPaths() {
-  return [{ params: { lang: 'cs' }, props: { code: 'cs' } }];
+  return LOCALES.map((locale) => ({ params: { lang: locale.route }, props: { code: locale.code } }));
 }
 
 const { code } = Astro.props;
+const copy = getLabsCopy(code);
 const projects = await getProjects(code);
 
 const email = site.contact.email;
 const phone = site.contact.phone;
 const tel = phone ? `tel:${phone.replace(/\s+/g, '')}` : null;
 
-const title = 'Projektové laby pro střední školy — Denis Mitrović';
-const description =
-  'Nejdeme na zkoušku. Jdeme tvořit. Projektové vzdělávání pro střední školy: AI, informatika, Unreal Engine, tvorba, pedagogika a otázky o technologiích. Malé skupiny do 12 studentů.';
+const title = `${copy.meta.title} — ${site.author.name}`;
+
+// The labs share image carries Czech text, so only Czech and Slovak use it.
+const ogImage = code === 'cs' || code === 'sk' ? '/assets/og-laby.png' : undefined;
+const ogImageAlt = ogImage ? copy.meta.ogAlt : undefined;
 
 const navLinks = [
-  { href: '#laby', label: 'Laby' },
-  { href: '#formaty', label: 'Formáty' },
-  { href: '#projekty', label: 'Projekty' },
-  { href: '#kontakt', label: 'Kontakt' },
-  { href: `${localePath('cs')}#about`, label: 'O mně' },
+  { href: '#laby', label: copy.nav.labs },
+  { href: '#formaty', label: copy.nav.formats },
+  { href: '#projekty', label: copy.nav.projects },
+  { href: '#kontakt', label: copy.nav.contact },
+  { href: `${localePath(code)}#about`, label: copy.nav.about },
 ];
 
 const readout = [
-  { key: 'Pro', value: 'střední školy', accent: true },
-  { key: 'Skupina', value: 'do 12 studentů' },
-  { key: 'Formáty', value: '90 min – pololetí' },
-  { key: 'Školní rok', value: SCHOOL_YEAR },
+  { key: copy.readout.forKey, value: copy.readout.forValue, accent: true },
+  { key: copy.readout.groupKey, value: copy.readout.groupValue },
+  { key: copy.readout.formatsKey, value: copy.readout.formatsValue },
+  { key: copy.readout.yearKey, value: SCHOOL_YEAR },
 ];
 ---
 
 <BaseLayout
   lang={code}
   title={title}
-  description={description}
+  description={copy.meta.description}
   altPath="laby"
-  onlyLocales={['cs']}
-  ogImage="/assets/og-laby.png"
-  ogImageAlt="Nejdeme na zkoušku. Jdeme tvořit. Projektové laby pro střední školy — Denis Mitrović"
+  ogImage={ogImage}
+  ogImageAlt={ogImageAlt}
 >
   <TransitionCover />
   <SiteNav lang={code} links={navLinks} />
@@ -66,30 +68,25 @@ const readout = [
     <!-- ================================================================ HERO -->
     <section class="labs-hero" id="hero">
       <div class="wrap labs-hero__inner grid12">
-        <p class="mono labs-hero__label" data-reveal>Pro školy · Projektové laby · <span class="nowrap">{site.author.name}</span></p>
+        <p class="mono labs-hero__label" data-reveal>{copy.hero.label} · <span class="nowrap">{site.author.name}</span></p>
 
         <h1 class="labs-hero__title is-say" data-reveal-lines>
-          <span class="line"><span class="line__inner">Nejdeme na zkoušku.</span></span>
-          <span class="line"><span class="line__inner labs-hero__accent" style="--reveal-delay:90ms">Jdeme tvořit.</span></span>
+          <span class="line"><span class="line__inner">{copy.hero.line1}</span></span>
+          <span class="line"><span class="line__inner labs-hero__accent" style="--reveal-delay:90ms">{copy.hero.line2}</span></span>
         </h1>
 
         <div class="labs-hero__body" data-reveal style="--reveal-delay:240ms">
-          <p class="lead">
-            Projektové vzdělávání pro střední školy na pomezí AI, informatiky, tvorby, pedagogiky a světa kolem nás.
-          </p>
-          <p class="labs-hero__credo">
-            Technologie nejsou cíl. Jsou to nástroje, se kterými můžeme tvořit, přemýšlet, zkoumat a hledat řešení,
-            která mají smysl.
-          </p>
+          <p class="lead">{copy.hero.lead}</p>
+          <p class="labs-hero__credo">{copy.hero.credo}</p>
           <div class="labs-hero__actions">
-            <a class="action" href="#laby">Prozkoumat projektové laby <span class="action__arrow" aria-hidden="true">&#8595;</span></a>
-            <a class="action" href="#kontakt">Domluvit projekt <span class="action__arrow" aria-hidden="true">&#8594;</span></a>
+            <a class="action" href="#laby">{copy.hero.ctaExplore} <span class="action__arrow" aria-hidden="true">&#8595;</span></a>
+            <a class="action" href="#kontakt">{copy.hero.ctaContact} <span class="action__arrow" aria-hidden="true">&#8594;</span></a>
           </div>
         </div>
 
         <div class="labs-hero__aside" data-reveal style="--reveal-delay:340ms">
           <Readout rows={readout} />
-          <a class="mono labs-hero__pdf link hit" href={LAB_PDFS.poster.href} download>{LAB_PDFS.poster.label}</a>
+          <a class="mono labs-hero__pdf link hit" href={LAB_PDFS.poster} download>{copy.contact.heroPdf}</a>
         </div>
       </div>
     </section>
@@ -99,23 +96,15 @@ const readout = [
       <div class="wrap grid12">
         <p class="mono section__label" data-reveal>
           <span class="section__index">01</span>
-          Proč to dělám
+          {copy.manifest.label}
         </p>
         <div class="labs-manifest__body" data-reveal style="--reveal-delay:80ms">
-          <h2 id="manifest-title" class="labs-manifest__title is-say">Do škol nenosím přednášku. Nosím&nbsp;projekt.</h2>
+          <h2 id="manifest-title" class="labs-manifest__title is-say">{copy.manifest.title}</h2>
           <div class="labs-manifest__cols">
-            <p>
-              Čau, jsem Denis. Osm let jsem se věnoval výuce informatiky, tělesné výchovy a projektovému vzdělávání.
-              Dnes se intenzivně věnuji AI, digitálním produktům, Unreal Engine a experimentům na pomezí technologií,
-              vzdělávání a společnosti.
-            </p>
-            <p>
-              Pedagogika pro mě není minulá profese, ale jeden z pilířů. Zajímá mě, jak se člověk učí, co podporuje
-              motivaci, jak vzniká prostředí, kde se nebojí experimentovat, a jak propojit hru se skutečnou prací.
-              Studenti se u mě ptají, zkouší, tvoří, ověřují a odcházejí s výstupem, který má smysl.
-            </p>
+            <p>{copy.manifest.p1}</p>
+            <p>{copy.manifest.p2}</p>
           </div>
-          <p class="labs-manifest__sig">Čau lidi, jdeme na to.</p>
+          <p class="labs-manifest__sig">{copy.manifest.signature}</p>
         </div>
       </div>
     </section>
@@ -126,13 +115,11 @@ const readout = [
         <header class="section__head grid12" data-reveal>
           <p class="mono section__label">
             <span class="section__index">02</span>
-            Pět vstupních cest
+            {copy.list.label}
           </p>
           <div class="section__intro">
-            <h2 id="labs-title">Projektové laby</h2>
-            <p class="lead">
-              Nejde o pět kurzů. Je to jeden projektový prostor a pět různých cest, kterými se do něj dá vstoupit.
-            </p>
+            <h2 id="labs-title">{copy.list.title}</h2>
+            <p class="lead">{copy.list.lead}</p>
           </div>
         </header>
 
@@ -145,7 +132,7 @@ const readout = [
                 data-draw-group
                 style={`--reveal-delay:${index * 70}ms; --lab-accent:${lab.world.accent}; --lab-second:${lab.world.second}`}
               >
-                <a class="lab-card__link" href={localePath('cs', `laby/${lab.slug}`)}>
+                <a class="lab-card__link" href={localePath(code, `laby/${lab.slug}`)}>
                   <div class="lab-card__plate">
                     <ProjectVisual visual={lab.visual} hue={0} seed={`lab-${lab.slug}`} accent={lab.world.accent} />
                   </div>
@@ -153,10 +140,10 @@ const readout = [
                     <span class="lab-card__glyph" aria-hidden="true">{lab.glyph}</span>
                     {lab.name}
                   </p>
-                  <h3 class="lab-card__q">{lab.question}</h3>
-                  <p class="lab-card__short">{lab.short}</p>
+                  <h3 class="lab-card__q">{copy.labs[lab.slug].question}</h3>
+                  <p class="lab-card__short">{copy.labs[lab.slug].short}</p>
                   <span class="mono lab-card__more">
-                    Detail labu <span aria-hidden="true">&#8594;</span>
+                    {copy.list.more} <span aria-hidden="true">&#8594;</span>
                   </span>
                 </a>
               </li>
@@ -172,18 +159,18 @@ const readout = [
         <header class="section__head grid12" data-reveal>
           <p class="mono section__label">
             <span class="section__index">03</span>
-            Formáty spolupráce
+            {copy.formats.label}
           </p>
           <div class="section__intro">
-            <h2 id="formats-title">Od workshopu po ateliér</h2>
-            <p class="lead">Délku a hloubku domluvíme podle školy, studentů i rozvrhu.</p>
+            <h2 id="formats-title">{copy.formats.title}</h2>
+            <p class="lead">{copy.formats.lead}</p>
           </div>
         </header>
 
         <div class="labs-formats__layout grid12">
           <ol class="formats" role="list">
             {
-              LAB_FORMATS.map((format, index) => (
+              copy.formats.items.map((format, index) => (
                 <li class="formats__row" data-reveal style={`--reveal-delay:${index * 60}ms`}>
                   <span class="mono formats__dur">{format.duration}</span>
                   <h3 class="formats__name">{format.name}</h3>
@@ -192,20 +179,20 @@ const readout = [
               ))
             }
             <li class="formats__row formats__row--online" data-reveal style="--reveal-delay:320ms">
-              <span class="mono formats__dur">kdekoli</span>
-              <h3 class="formats__name">{LAB_ONLINE.name}</h3>
-              <p class="formats__body">{LAB_ONLINE.body}</p>
+              <span class="mono formats__dur">{copy.formats.anywhere}</span>
+              <h3 class="formats__name">{copy.formats.onlineName}</h3>
+              <p class="formats__body">{copy.formats.onlineBody}</p>
             </li>
           </ol>
 
           <aside class="group" data-reveal style="--reveal-delay:120ms" aria-labelledby="group-title">
-            <p class="mono group__label" id="group-title">Velikost skupiny</p>
+            <p class="mono group__label" id="group-title">{copy.group.label}</p>
             <p class="group__figure is-name">
-              6–10 <span class="group__max">max. 12</span>
+              6–10 <span class="group__max">{copy.group.max}</span>
             </p>
-            <p class="group__title">Malá projektová skupina</p>
-            <p class="group__body">{LAB_GROUP.why}</p>
-            <p class="group__flex">{LAB_GROUP.flex}</p>
+            <p class="group__title">{copy.group.title}</p>
+            <p class="group__body">{copy.group.why}</p>
+            <p class="group__flex">{copy.group.flex}</p>
           </aside>
         </div>
       </div>
@@ -216,10 +203,10 @@ const readout = [
       <div class="wrap grid12">
         <p class="mono section__label" data-reveal>
           <span class="section__index">04</span>
-          <span id="principles-title">Jak pracujeme</span>
+          <span id="principles-title">{copy.principles.label}</span>
         </p>
         <ul class="principles" role="list" data-reveal style="--reveal-delay:80ms">
-          {LAB_PRINCIPLES.map((principle) => <li class="principles__item">{principle}</li>)}
+          {copy.principles.items.map((principle) => <li class="principles__item">{principle}</li>)}
         </ul>
       </div>
     </section>
@@ -230,11 +217,11 @@ const readout = [
         <header class="section__head grid12" data-reveal>
           <p class="mono section__label">
             <span class="section__index">05</span>
-            Reálné projekty
+            {copy.projects.label}
           </p>
           <div class="section__intro">
-            <h2 id="projects-title">Tohle nejsou témata, o kterých jen přednáším</h2>
-            <p class="lead">Jsou to oblasti, ve kterých skutečně pracuji. Laby z nich přímo vycházejí.</p>
+            <h2 id="projects-title">{copy.projects.title}</h2>
+            <p class="lead">{copy.projects.lead}</p>
           </div>
         </header>
 
@@ -242,7 +229,7 @@ const readout = [
           {
             projects.map((project, index) => (
               <li class="projects__row" data-reveal style={`--reveal-delay:${index * 60}ms`}>
-                <a class="projects__link" href={localePath('cs', `projects/${project.slug}`)}>
+                <a class="projects__link" href={localePath(code, `projects/${project.slug}`)}>
                   <span class="projects__title">{t(project.title, code)}</span>
                   <span class="mono projects__cat">{t(project.category, code)}</span>
                 </a>
@@ -251,11 +238,11 @@ const readout = [
           }
           <li class="projects__row projects__row--plain" data-reveal>
             <span class="projects__title">Usage</span>
-            <span class="mono projects__cat">Experimentální projekt · ve vývoji · základ Usage Labu</span>
+            <span class="mono projects__cat">{copy.projects.usageMeta}</span>
           </li>
           <li class="projects__row projects__row--plain" data-reveal>
             <span class="projects__title">Invok</span>
-            <span class="mono projects__cat">Vzdělávací produkt · ve vývoji · základ Invok Labu</span>
+            <span class="mono projects__cat">{copy.projects.invokMeta}</span>
           </li>
         </ul>
       </div>
@@ -266,10 +253,10 @@ const readout = [
       <div class="wrap labs-contact__inner">
         <p class="mono section__label" data-reveal>
           <span class="section__index">06</span>
-          Kontakt
+          {copy.contact.label}
         </p>
         <h2 id="contact-title" class="labs-contact__title is-say" data-reveal style="--reveal-delay:80ms">
-          Pojďme společně vymyslet projekt pro vaši školu.
+          {copy.contact.title}
         </h2>
 
         <div class="labs-contact__grid" data-reveal style="--reveal-delay:160ms">
@@ -277,20 +264,20 @@ const readout = [
             <p class="labs-contact__name is-name">{site.author.name}</p>
             {email && <a class="link labs-contact__line hit" href={`mailto:${email}`}>{email}</a>}
             {phone && tel && <a class="link labs-contact__line hit" href={tel}>{phone}</a>}
-            <p class="labs-contact__sig">Čau lidi, jdeme na to.</p>
+            <p class="labs-contact__sig">{copy.contact.signature}</p>
           </div>
 
           <div class="labs-contact__actions">
             {email && (
-              <a class="action" href={`mailto:${email}?subject=${encodeURIComponent('Projektové laby pro naši školu')}`}>
-                Napsat e-mail <span class="action__arrow" aria-hidden="true">&#8599;</span>
+              <a class="action" href={`mailto:${email}?subject=${encodeURIComponent(copy.contact.mailSubject)}`}>
+                {copy.contact.emailCta} <span class="action__arrow" aria-hidden="true">&#8599;</span>
               </a>
             )}
-            <a class="action" href={LAB_PDFS.poster.href} download>
-              Stáhnout nabídku pro školy · PDF <span class="action__arrow" aria-hidden="true">&#8595;</span>
+            <a class="action" href={LAB_PDFS.poster} download>
+              {copy.contact.pdfPoster} <span class="action__arrow" aria-hidden="true">&#8595;</span>
             </a>
-            <a class="action" href={LAB_PDFS.cards.href} download>
-              Karty pěti labů · PDF <span class="action__arrow" aria-hidden="true">&#8595;</span>
+            <a class="action" href={LAB_PDFS.cards} download>
+              {copy.contact.pdfCards} <span class="action__arrow" aria-hidden="true">&#8595;</span>
             </a>
           </div>
         </div>

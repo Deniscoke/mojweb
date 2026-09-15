@@ -19,12 +19,6 @@ interface Props {
    * at six homepages.
    */
   altPath?: string;
-  /**
-   * Restrict the hreflang set to these locale codes. Pages that exist in only
-   * some languages (the Czech project labs) must not point at translations
-   * that were never generated.
-   */
-  onlyLocales?: string[];
   /** Open Graph image path relative to /public. Defaults to the site image. */
   ogImage?: string;
   ogImageAlt?: string;
@@ -38,7 +32,6 @@ const {
   variant = 'site',
   bodyClass = '',
   altPath = '',
-  onlyLocales,
   ogImage: ogImagePath = site.ogImage,
   ogImageAlt = `${site.author.name} — ${site.tagline}`,
 } = Astro.props;
@@ -58,9 +51,8 @@ const canonical = absolute(Astro.url.pathname);
 const ogImage = absolute(ogImagePath) ?? ogImagePath;
 
 const sub = altPath.replace(/^\/+|\/+$/g, '');
-const alternateLocales = onlyLocales ? LOCALES.filter((locale) => onlyLocales.includes(locale.code)) : LOCALES;
 const alternates = origin
-  ? alternateLocales.map((locale) => ({
+  ? LOCALES.map((locale) => ({
       hreflang: locale.htmlLang,
       href: new URL(sub ? `/${locale.route}/${sub}/` : `/${locale.route}/`, origin).href,
     }))
@@ -68,7 +60,7 @@ const alternates = origin
 // x-default points at the language gate, which only lists the locale
 // homepages — so only those pages (and the gate) may name it. Subpages would
 // get an annotation without a return link, which search engines drop.
-const xDefault = origin && !onlyLocales && sub === '' ? new URL('/', origin).href : null;
+const xDefault = origin && sub === '' ? new URL('/', origin).href : null;
 
 /** Open Graph expects language_TERRITORY, not a BCP 47 tag. */
 const OG_LOCALES: Record<string, string> = {

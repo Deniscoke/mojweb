@@ -1,0 +1,256 @@
+{
+  "navLabel": "Para centros",
+  "entry": {
+    "label": "Para centros educativos · Labs de proyectos",
+    "title": "A los centros no llevo una clase magistral. Llevo un proyecto.",
+    "lead": "Educación por proyectos para centros de secundaria, en la frontera entre AI, informática, creación, pedagogía y el mundo que nos rodea. Nace de aquello en lo que realmente trabajo.",
+    "cta": "Explorar los labs de proyectos"
+  },
+  "meta": {
+    "title": "Labs de proyectos para centros de secundaria",
+    "description": "No venimos a examinarnos. Venimos a crear. Educación por proyectos para centros de secundaria: AI, informática, Unreal Engine, creación, pedagogía y preguntas sobre la tecnología. Grupos pequeños de hasta 12 estudiantes.",
+    "ogAlt": "No venimos a examinarnos. Venimos a crear. Labs de proyectos para centros de secundaria — Denis Mitrović",
+    "detailSuffix": "Grupo de proyecto pequeño, de hasta 12 estudiantes."
+  },
+  "nav": {
+    "labs": "Labs",
+    "formats": "Formatos",
+    "projects": "Proyectos",
+    "contact": "Contacto",
+    "about": "Sobre mí",
+    "allLabs": "Todos los labs"
+  },
+  "hero": {
+    "label": "Para centros educativos · Labs de proyectos",
+    "line1": "No venimos a examinarnos.",
+    "line2": "Venimos a crear.",
+    "lead": "Educación por proyectos para centros de secundaria, en la frontera entre AI, informática, creación, pedagogía y el mundo que nos rodea.",
+    "credo": "Las tecnologías no son el fin. Son herramientas con las que podemos crear, pensar, explorar y buscar soluciones que tengan sentido.",
+    "ctaExplore": "Explorar los labs de proyectos",
+    "ctaContact": "Organizar un proyecto"
+  },
+  "readout": {
+    "forKey": "Para",
+    "forValue": "secundaria",
+    "groupKey": "Grupo",
+    "groupValue": "hasta 12 estudiantes",
+    "formatsKey": "Formatos",
+    "formatsValue": "90 min – semestre",
+    "yearKey": "Curso escolar"
+  },
+  "manifest": {
+    "label": "Por qué lo hago",
+    "title": "A los centros no llevo una clase magistral. Llevo un proyecto.",
+    "p1": "Hola, soy Denis. Durante ocho años me dediqué a la docencia de informática y educación física, y a la educación por proyectos. Hoy me dedico de lleno a la AI, a los productos digitales, a Unreal Engine y a experimentos en la frontera entre la tecnología, la educación y la sociedad.",
+    "p2": "Para mí, la pedagogía no es una profesión que dejé atrás, sino uno de mis pilares. Me interesa cómo aprende una persona, qué alimenta la motivación, cómo se crea un entorno en el que no da miedo experimentar y cómo unir el juego con el trabajo real. Conmigo, los estudiantes preguntan, prueban, crean, verifican y se van con un resultado que tiene sentido.",
+    "signature": "¡Hola a todos, vamos allá!"
+  },
+  "list": {
+    "label": "Cinco vías de entrada",
+    "title": "Labs de proyectos",
+    "lead": "No son cinco cursos. Es un único espacio de proyectos y cinco vías distintas para entrar en él.",
+    "more": "Ver el lab"
+  },
+  "formats": {
+    "label": "Formatos de colaboración",
+    "title": "Del taller al atelier",
+    "lead": "La duración y la profundidad las acordamos según el centro, los estudiantes y el horario.",
+    "items": [
+      {
+        "duration": "90–120 min",
+        "name": "Taller",
+        "body": "Un aperitivo de uno de los labs: un primer prototipo, un experimento o una pregunta a la que se puede volver."
+      },
+      {
+        "duration": "1 día",
+        "name": "Día de proyecto",
+        "body": "Del planteamiento inicial a un pequeño resultado acabado en un solo día."
+      },
+      {
+        "duration": "2–5 días",
+        "name": "Programa intensivo",
+        "body": "Un proyecto real con presentación y reflexión sobre el resultado al final."
+      },
+      {
+        "duration": "semanas",
+        "name": "Bloque de proyecto",
+        "body": "Sesiones periódicas y un proyecto que crece junto con el equipo."
+      },
+      {
+        "duration": "semestre +",
+        "name": "Atelier externo",
+        "body": "Acompañamiento regular y a largo plazo de proyectos de estudiantes."
+      }
+    ],
+    "anywhere": "donde sea",
+    "onlineName": "Online / híbrido",
+    "onlineBody": "La mayoría de los formatos se pueden impartir online o de forma combinada. Unreal AI Lab, solo presencial."
+  },
+  "group": {
+    "label": "Tamaño del grupo",
+    "max": "máx. 12",
+    "title": "Grupo de proyecto pequeño",
+    "short": "Grupo de proyecto pequeño · hasta 12 estudiantes",
+    "ideal": "idealmente 6–10 estudiantes, como máximo 12",
+    "why": "Un grupo más pequeño deja espacio para el acompañamiento individual, la conversación, la experimentación y el trabajo en equipo real, en lugar de un taller expositivo.",
+    "flex": "Los grupos más grandes se pueden valorar caso por caso, por ejemplo dividiendo a los estudiantes en varios equipos o bloques de proyecto."
+  },
+  "principles": {
+    "label": "Cómo trabajamos",
+    "items": [
+      "juego + trabajo real",
+      "el estudiante es el autor",
+      "verificamos la AI",
+      "el desacuerdo es legítimo",
+      "aprende la persona entera",
+      "la tecnología no es obligatoria",
+      "saber apagar la tecnología",
+      "un resultado real, no ejercicios para el cajón"
+    ]
+  },
+  "projects": {
+    "label": "Proyectos reales",
+    "title": "No son temas sobre los que solo doy charlas",
+    "lead": "Son áreas en las que trabajo de verdad. Los labs parten directamente de ellas.",
+    "usageMeta": "Proyecto experimental · en desarrollo · base del Usage Lab",
+    "invokMeta": "Producto educativo · en desarrollo · base del Invok Lab"
+  },
+  "contact": {
+    "label": "Contacto",
+    "title": "Pensemos juntos un proyecto para vuestro centro.",
+    "emailCta": "Escribir un correo",
+    "mailSubject": "Labs de proyectos para nuestro centro",
+    "pdfPoster": "Descargar la propuesta para centros · PDF (en checo)",
+    "pdfCards": "Fichas de los cinco labs · PDF (en checo)",
+    "heroPdf": "Propuesta para centros · póster A4 (PDF, en checo)",
+    "signature": "¡Hola a todos, vamos allá!"
+  },
+  "detail": {
+    "crumbs": "Labs de proyectos",
+    "doing": "Qué hacen los estudiantes",
+    "output": "Posible resultado",
+    "subjects": "Relación con asignaturas",
+    "formats": "Formatos adecuados",
+    "fitYes": "(adecuado)",
+    "fitNo": "(menos adecuado)",
+    "onlineYes": "posible",
+    "onlineNo": "solo presencial",
+    "tech": "Requisitos técnicos",
+    "group": "Tamaño del grupo",
+    "groupStrong": "Grupo de proyecto pequeño:",
+    "related": "Relacionado con mi trabajo",
+    "kindProject": "Proyecto",
+    "kindLab": "Nota del lab",
+    "contactTitle": "Hagamos de {lab} un proyecto para vuestro centro.",
+    "pdfCards": "Fichas de los labs · PDF (en checo)",
+    "pdfPoster": "Propuesta para centros · PDF (en checo)",
+    "pagerLabel": "Otros labs",
+    "prev": "Anterior",
+    "next": "Siguiente"
+  },
+  "labs": {
+    "ai-builder": {
+      "question": "De la idea a un producto que funciona",
+      "short": "Prompt, contexto, Git, API, bases de datos, despliegue. Lo que hizo la AI, lo verificamos y lo explicamos.",
+      "lead": "El estudiante no aprende solo a escribir prompts. Entiende el camino que va de una idea a un producto digital que funciona. Aquí la AI no es una autoridad: crea algo, pero el estudiante tiene que entender qué ha pasado, verificarlo, corregirlo y explicarlo.",
+      "studentsDo": [
+        "Descomponen una idea en pasos y trabajan con el prompt, los tokens y el contexto.",
+        "Usan Git y GitHub, la CLI y las API, y aprenden a gestionar las claves de API de forma segura.",
+        "Guardan datos en una base de datos (p. ej., Supabase) y prueban tanto modelos en la nube como modelos locales.",
+        "Despliegan la aplicación y explican qué ha creado la AI y qué han verificado y corregido ellos mismos."
+      ],
+      "output": "Una aplicación o herramienta funcional y desplegada, y una breve defensa de su propia solución.",
+      "subjects": [
+        "informática",
+        "matemáticas",
+        "lengua y literatura",
+        "emprendimiento"
+      ],
+      "tech": "Aula de informática con internet. Las cuentas y las claves de API las gestionamos juntos según las normas del centro y la edad de los estudiantes."
+    },
+    "unreal": {
+      "question": "Cuerpo, movimiento y mundos digitales",
+      "short": "Unreal Engine, Blueprints, Niagara, captura de movimiento. El cuerpo y el movimiento en un mundo digital.",
+      "lead": "Unreal Engine como espacio para las mecánicas de juego, la física, la animación, los VFX, la luz y el sonido. Y, además, una segunda capa: cuerpo → movimiento → tecnología → espacio digital. Aquí la tecnología no separa a la persona de su cuerpo: ayuda a explorar esa relación.",
+      "studentsDo": [
+        "Con ayuda de la AI construyen entornos 3D y mecánicas de juego en Blueprints, y se ocupan de la física y la cámara.",
+        "Trabajan con materiales, luz, sonido, animación y Niagara VFX.",
+        "Graban cómo se mueven mediante captura de movimiento y lo trasladan a un personaje digital.",
+        "Exploran el espacio físico, la conciencia corporal y la representación digital del ser humano."
+      ],
+      "output": "Una escena jugable o un vídeo corto de un mundo digital en el que también se ve el propio movimiento de los estudiantes.",
+      "subjects": [
+        "informática",
+        "física",
+        "educación plástica y visual",
+        "educación física"
+      ],
+      "tech": "Ordenadores con tarjeta gráfica dedicada o bien puestos compartidos por equipos. Para la captura de movimiento bastan una cámara y espacio libre."
+    },
+    "usage": {
+      "question": "¿Qué huella deja la AI?",
+      "short": "Tokens, costes, privacidad, valor digital. Ponemos a prueba, con espíritu crítico, una hipótesis abierta.",
+      "lead": "Cada uso de la AI tiene un consumo, un precio y un impacto. El lab se basa en un proyecto experimental real y en una pregunta abierta que los estudiantes investigan con espíritu crítico.",
+      "studentsDo": [
+        "Miden los tokens, el uso (usage) y los costes de sus consultas a la AI y trabajan con recibos digitales.",
+        "Investigan la privacidad, la descentralización, las criptomonedas y el valor digital.",
+        "Estiman el impacto ambiental y comparan de dónde proceden los datos.",
+        "Ponen a prueba la hipótesis de un beneficio para la sociedad o la naturaleza, o la rechazan con argumentos."
+      ],
+      "output": "Un estudio de datos o una infografía que, con argumentos, respalde, cuestione o refute la hipótesis.",
+      "subjects": [
+        "informática",
+        "matemáticas",
+        "geografía y ecología",
+        "ciencias sociales y economía"
+      ],
+      "tech": "Aula con ordenadores o portátiles y conexión a internet.",
+      "note": {
+        "title": "Hipótesis abierta",
+        "body": "¿Puede el valor que genera el uso de la tecnología crear un nuevo mecanismo de apoyo a la sociedad o a la naturaleza? No es una verdad establecida. Los estudiantes pueden rechazarla."
+      }
+    },
+    "invok": {
+      "question": "¿Cómo nace un producto educativo?",
+      "short": "Un caso de estudio vivo de un producto real: metodología, validación y también callejones sin salida.",
+      "lead": "Invok es un producto educativo real en el que estoy trabajando. Funciona como caso de estudio vivo: cómo nacen un producto y su metodología, la alfabetización en AI, la UX, la validación, el feedback, el rebranding y también los callejones sin salida.",
+      "studentsDo": [
+        "Siguen el nacimiento de un producto real, callejones sin salida y rebranding incluidos.",
+        "Diseñan y prueban actividades de alfabetización en AI y recogen feedback.",
+        "Aprenden a validar una idea y a tomar decisiones tanto de producto como pedagógicas.",
+        "Practican el emprendimiento con un caso real, no con un supuesto teórico."
+      ],
+      "output": "Una propuesta probada de actividad o funcionalidad, con argumentos sobre por qué tiene o no tiene valor educativo.",
+      "subjects": [
+        "ciencias sociales",
+        "economía y emprendimiento",
+        "informática",
+        "pedagogía y psicología"
+      ],
+      "tech": "Espacio para trabajar en equipo, rotafolios y, según el enfoque, algunos portátiles.",
+      "note": {
+        "title": "Juego limpio",
+        "body": "Los estudiantes no son mano de obra gratuita: la finalidad del lab es educativa. Si algún resultado de los estudiantes llegara a convertirse en una colaboración comercial real, se trataría por separado, de forma transparente y justa."
+      }
+    },
+    "future": {
+      "question": "¿Qué queremos que hagan las tecnologías?",
+      "short": "AI, naturaleza, privacidad, sobriedad digital. El desacuerdo es un resultado legítimo.",
+      "lead": "La pregunta clave no es de qué son capaces las tecnologías, sino qué queremos que hagan. El desacuerdo es un resultado educativo legítimo: si un estudiante llega a la conclusión de que no quiere usar la AI y sabe explicarlo con criterio, es un éxito.",
+      "studentsDo": [
+        "Exploran la relación entre la AI, el ser humano, la naturaleza, la sociedad, la creatividad y la educación.",
+        "Debaten sobre privacidad, automatización, dependencia tecnológica y sobriedad digital.",
+        "Comparan tecnologías locales y en la nube, el transhumanismo y también el transhumanismo biofílico.",
+        "Formulan y defienden su propia postura ética, incluido el desacuerdo."
+      ],
+      "output": "Un manifiesto, un pódcast, una exposición o un debate público para todo el centro.",
+      "subjects": [
+        "ciencias sociales y filosofía",
+        "ética",
+        "lengua y literatura",
+        "biología y ecología"
+      ],
+      "tech": "Una sala donde podamos sentarnos en círculo. No hace falta equipo técnico."
+    }
+  }
+}

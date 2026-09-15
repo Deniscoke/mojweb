@@ -1,7 +1,7 @@
 # Denis Mitrović — personal site / creative lab
 
 The site brand is the person: `Denis Mitrović`, with `Ideas, made real.` as a
-secondary claim. Project labs for schools (`/cs/laby/`) are one of the
+secondary claim. Project labs for schools (`/<lang>/laby/`) are one of the
 activities on the site, not a separate brand.
 
 A statically generated, six-language personal site built so that the site
@@ -80,7 +80,7 @@ for the create-a-project-in-the-admin test.
 | --- | --- |
 | Brand name, tagline, my name, role, contact, social links | `src/config/site.ts` |
 | Production domain (canonical, og:url, hreflang, sitemap) | `SITE_URL` env — see `.env.example` and `src/config/site-url.mjs` |
-| Project labs for schools (Czech) | `src/data/labs.ts` |
+| Project labs for schools | structure `src/data/labs.ts`, copy `src/i18n/labs/<locale>.json` (Czech is the source) |
 | Which languages exist, their routes and labels | `src/i18n/locales.ts` |
 | UI copy, hero, about, services, contact wording | `src/i18n/translations/<code>.ts` |
 | Projects in Selected Work | CMS admin (canonical) — `src/data/generated/` is a generated fallback |
@@ -154,8 +154,8 @@ src/
     [lang]/projects/[slug].astro   30 project pages (6 locales x 5 projects)
     [lang]/lab/index.astro         the Lab index, one per locale
     [lang]/lab/[slug].astro        66 lab notes (6 locales x 11 experiments)
-    [lang]/laby/index.astro        /cs/laby/ — project labs for schools (Czech only)
-    [lang]/laby/[slug].astro       /cs/laby/<lab>/ — five lab detail pages
+    [lang]/laby/index.astro        /<lang>/laby/ — project labs for schools (all locales)
+    [lang]/laby/[slug].astro       /<lang>/laby/<lab>/ — five lab detail pages per locale
   styles/                 tokens, reset, typography, motion, global
 public/assets/fonts/      self-hosted variable fonts
 integrations/

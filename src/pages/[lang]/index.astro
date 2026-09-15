@@ -37,8 +37,7 @@ const dict = useTranslations(code);
 
   <main id="main">
     <Hero lang={code} />
-    {/* The project labs are written in Czech only. */}
-    {code === 'cs' && <SchoolsEntry />}
+    <SchoolsEntry lang={code} />
     <Credo lang={code} />
     <SelectedWork lang={code} />
     <WhatIDo lang={code} />

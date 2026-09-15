@@ -4,21 +4,25 @@ import SiteNav from '~/components/navigation/SiteNav.astro';
 import ProjectVisual from '~/components/projects/ProjectVisual.astro';
 import TransitionCover from '~/components/ui/TransitionCover.astro';
 import { site } from '~/config/site';
-import { LAB_FORMATS, LAB_GROUP, LAB_ONLINE, LAB_PDFS, LABS, type Lab } from '~/data/labs';
-import { localePath, t } from '~/i18n';
+import { LAB_PDFS, LABS, type Lab } from '~/data/labs';
+import { LOCALES, localePath, t } from '~/i18n';
+import { getLabsCopy } from '~/i18n/labs';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import { getExperiments, getProjects, hasLabDetail } from '~/lib/cms';
 
 /**
- * LAB DETAIL — /cs/laby/[slug]/
+ * LAB DETAIL — /[lang]/laby/[slug]/
  *
- * One page per lab, in the lab's own colour world. Every page answers the
- * same questions a school asks, in the same order: what is it about, what do
- * students actually do, what comes out, which subjects it touches, which
- * formats fit, what the school needs, how big the group is, and who to call.
+ * One page per lab and language, in the lab's own colour world. Every page
+ * answers the same questions a school asks, in the same order: what is it
+ * about, what do students actually do, what comes out, which subjects it
+ * touches, which formats fit, what the school needs, how big the group is,
+ * and who to call.
  */
 export function getStaticPaths() {
-  return LABS.map((lab) => ({ params: { lang: 'cs', slug: lab.slug }, props: { code: 'cs', lab } }));
+  return LOCALES.flatMap((locale) =>
+    LABS.map((lab) => ({ params: { lang: locale.route, slug: lab.slug }, props: { code: locale.code, lab } })),
+  );
 }
 
 interface Props {
@@ -27,6 +31,8 @@ interface Props {
 }
 
 const { code, lab } = Astro.props;
+const copy = getLabsCopy(code);
+const labCopy = copy.labs[lab.slug];
 
 const index = LABS.findIndex((item) => item.slug === lab.slug);
 const prev = LABS[(index - 1 + LABS.length) % LABS.length]!;
@@ -40,12 +46,12 @@ const related = lab.related
     if (item.kind === 'project') {
       const project = projects.find((p) => p.slug === item.slug);
       return project
-        ? { href: localePath('cs', `projects/${project.slug}`), title: t(project.title, code), kind: 'Projekt' }
+        ? { href: localePath(code, `projects/${project.slug}`), title: t(project.title, code), kind: copy.detail.kindProject }
         : null;
     }
     const experiment = experiments.find((e) => (e.slug ?? e.id) === item.slug);
     return experiment && hasLabDetail(experiment)
-      ? { href: localePath('cs', `lab/${item.slug}`), title: t(experiment.title, code), kind: 'Lab poznámka' }
+      ? { href: localePath(code, `lab/${item.slug}`), title: t(experiment.title, code), kind: copy.detail.kindLab }
       : null;
   })
   .filter((item): item is { href: string; title: string; kind: string } => item !== null);
@@ -54,15 +60,21 @@ const email = site.contact.email;
 const phone = site.contact.phone;
 const tel = phone ? `tel:${phone.replace(/\s+/g, '')}` : null;
 
-const title = `${lab.name}: ${lab.question} — ${site.author.name}`;
-const description = `${lab.lead} Malá projektová skupina do 12 studentů.`;
+const title = `${lab.name}: ${labCopy.question} — ${site.author.name}`;
+const description = `${labCopy.lead} ${copy.meta.detailSuffix}`;
+
+// The labs share image carries Czech text, so only Czech and Slovak use it.
+const ogImage = code === 'cs' || code === 'sk' ? '/assets/og-laby.png' : undefined;
+const ogImageAlt = ogImage ? copy.meta.ogAlt : undefined;
 
 const navLinks = [
-  { href: localePath('cs', 'laby'), label: 'Všechny laby', accent: true },
-  { href: '#formaty', label: 'Formáty' },
-  { href: '#kontakt', label: 'Kontakt' },
-  { href: `${localePath('cs')}#about`, label: 'O mně' },
+  { href: localePath(code, 'laby'), label: copy.nav.allLabs, accent: true },
+  { href: '#formaty', label: copy.nav.formats },
+  { href: '#kontakt', label: copy.nav.contact },
+  { href: `${localePath(code)}#about`, label: copy.nav.about },
 ];
+
+const contactTitle = copy.detail.contactTitle.replace('{lab}', lab.name);
 ---
 
 <BaseLayout
@@ -70,9 +82,8 @@ const navLinks = [
   title={title}
   description={description}
   altPath={`laby/${lab.slug}`}
-  onlyLocales={['cs']}
-  ogImage="/assets/og-laby.png"
-  ogImageAlt="Nejdeme na zkoušku. Jdeme tvořit. Projektové laby pro střední školy — Denis Mitrović"
+  ogImage={ogImage}
+  ogImageAlt={ogImageAlt}
 >
   <TransitionCover />
   <SiteNav lang={code} links={navLinks} />
@@ -86,20 +97,20 @@ const navLinks = [
     <section class="lab-hero" id="hero">
       <div class="wrap lab-hero__inner grid12">
         <p class="mono lab-hero__crumbs" data-reveal>
-          <a class="link hit" href={localePath('cs', 'laby')}>Projektové laby</a>
+          <a class="link hit" href={localePath(code, 'laby')}>{copy.detail.crumbs}</a>
           <span aria-hidden="true"> / </span>
           <span class="lab-hero__glyph" aria-hidden="true">{lab.glyph}</span> {lab.name}
         </p>
 
-        <h1 class="lab-hero__title is-say" data-reveal style="--reveal-delay:60ms">{lab.question}</h1>
+        <h1 class="lab-hero__title is-say" data-reveal style="--reveal-delay:60ms">{labCopy.question}</h1>
 
-        <p class="lead lab-hero__lead" data-reveal style="--reveal-delay:160ms">{lab.lead}</p>
+        <p class="lead lab-hero__lead" data-reveal style="--reveal-delay:160ms">{labCopy.lead}</p>
 
         <div class="lab-hero__plate" data-reveal data-draw-group style="--reveal-delay:220ms">
           <ProjectVisual visual={lab.visual} hue={0} seed={`lab-${lab.slug}`} accent={lab.world.accent} />
         </div>
 
-        <p class="mono lab-hero__group" data-reveal style="--reveal-delay:260ms">{LAB_GROUP.short}</p>
+        <p class="mono lab-hero__group" data-reveal style="--reveal-delay:260ms">{copy.group.short}</p>
       </div>
     </section>
 
@@ -107,70 +118,70 @@ const navLinks = [
     <section class="section section--sm lab-detail">
       <div class="wrap lab-detail__grid">
         <div class="block block--wide" data-reveal>
-          <h2 class="mono block__label">Co studenti dělají</h2>
+          <h2 class="mono block__label">{copy.detail.doing}</h2>
           <ul class="doing" role="list">
-            {lab.studentsDo.map((item) => <li class="doing__item">{item}</li>)}
+            {labCopy.studentsDo.map((item) => <li class="doing__item">{item}</li>)}
           </ul>
         </div>
 
         <div class="block" data-reveal style="--reveal-delay:60ms">
-          <h2 class="mono block__label">Možný výstup</h2>
-          <p class="block__text">{lab.output}</p>
+          <h2 class="mono block__label">{copy.detail.output}</h2>
+          <p class="block__text">{labCopy.output}</p>
         </div>
 
         <div class="block" data-reveal style="--reveal-delay:120ms">
-          <h2 class="mono block__label">Propojení s předměty</h2>
+          <h2 class="mono block__label">{copy.detail.subjects}</h2>
           <ul class="chips" role="list">
-            {lab.subjects.map((subject) => <li class="chips__item">{subject}</li>)}
+            {labCopy.subjects.map((subject) => <li class="chips__item">{subject}</li>)}
           </ul>
         </div>
 
         {
-          lab.note && (
+          labCopy.note && (
             <div class="block block--note" data-reveal>
-              <h2 class="mono block__label">{lab.note.title}</h2>
-              <p class="block__text">{lab.note.body}</p>
+              <h2 class="mono block__label">{labCopy.note.title}</h2>
+              <p class="block__text">{labCopy.note.body}</p>
             </div>
           )
         }
 
         <div class="block block--wide" id="formaty" data-reveal>
-          <h2 class="mono block__label">Vhodné formáty</h2>
+          <h2 class="mono block__label">{copy.detail.formats}</h2>
           <ul class="fit" role="list">
             {
-              LAB_FORMATS.map((format, i) => {
+              copy.formats.items.map((format, i) => {
                 const fits = lab.formats.includes(i);
                 return (
                   <li class="fit__item" data-fit={fits ? 'yes' : 'no'}>
                     <span class="fit__name">{format.name}</span>
                     <span class="mono fit__dur">{format.duration}</span>
-                    <span class="visually-hidden">{fits ? '(vhodné)' : '(méně vhodné)'}</span>
+                    <span class="visually-hidden">{fits ? copy.detail.fitYes : copy.detail.fitNo}</span>
                   </li>
                 );
               })
             }
             <li class="fit__item" data-fit={lab.online ? 'yes' : 'no'}>
-              <span class="fit__name">{LAB_ONLINE.name}</span>
-              <span class="mono fit__dur">{lab.online ? 'lze' : 'jen osobně'}</span>
+              <span class="fit__name">{copy.formats.onlineName}</span>
+              <span class="mono fit__dur">{lab.online ? copy.detail.onlineYes : copy.detail.onlineNo}</span>
             </li>
           </ul>
         </div>
 
         <div class="block" data-reveal>
-          <h2 class="mono block__label">Technické požadavky</h2>
-          <p class="block__text">{lab.tech}</p>
+          <h2 class="mono block__label">{copy.detail.tech}</h2>
+          <p class="block__text">{labCopy.tech}</p>
         </div>
 
         <div class="block" data-reveal style="--reveal-delay:60ms">
-          <h2 class="mono block__label">Velikost skupiny</h2>
-          <p class="block__text"><strong>Malá projektová skupina:</strong> {LAB_GROUP.ideal}.</p>
-          <p class="block__text block__text--dim">{LAB_GROUP.why} {LAB_GROUP.flex}</p>
+          <h2 class="mono block__label">{copy.detail.group}</h2>
+          <p class="block__text"><strong>{copy.detail.groupStrong}</strong> {copy.group.ideal}.</p>
+          <p class="block__text block__text--dim">{copy.group.why} {copy.group.flex}</p>
         </div>
 
         {
           related.length > 0 && (
             <div class="block block--wide" data-reveal>
-              <h2 class="mono block__label">Souvisí s mou prací</h2>
+              <h2 class="mono block__label">{copy.detail.related}</h2>
               <ul class="related" role="list">
                 {related.map((item) => (
                   <li>
@@ -191,22 +202,20 @@ const navLinks = [
     <!-- ============================================================= CONTACT -->
     <section class="section section--sm lab-contact" id="kontakt" aria-labelledby="lab-contact-title">
       <div class="wrap lab-contact__inner">
-        <h2 id="lab-contact-title" class="lab-contact__title is-say" data-reveal>
-          Pojďme z {lab.name} udělat projekt pro vaši školu.
-        </h2>
+        <h2 id="lab-contact-title" class="lab-contact__title is-say" data-reveal>{contactTitle}</h2>
         <div class="lab-contact__row" data-reveal style="--reveal-delay:80ms">
           <div class="lab-contact__person">
             <p class="lab-contact__name">{site.author.name}</p>
             {email && <a class="link hit" href={`mailto:${email}?subject=${encodeURIComponent(lab.name)}`}>{email}</a>}
             {phone && tel && <a class="link hit" href={tel}>{phone}</a>}
-            <p class="lab-contact__sig">Čau lidi, jdeme na to.</p>
+            <p class="lab-contact__sig">{copy.contact.signature}</p>
           </div>
           <div class="lab-contact__actions">
-            <a class="action" href={LAB_PDFS.cards.href} download>
-              Karty labů · PDF <span class="action__arrow" aria-hidden="true">&#8595;</span>
+            <a class="action" href={LAB_PDFS.cards} download>
+              {copy.detail.pdfCards} <span class="action__arrow" aria-hidden="true">&#8595;</span>
             </a>
-            <a class="action" href={LAB_PDFS.poster.href} download>
-              Nabídka pro školy · PDF <span class="action__arrow" aria-hidden="true">&#8595;</span>
+            <a class="action" href={LAB_PDFS.poster} download>
+              {copy.detail.pdfPoster} <span class="action__arrow" aria-hidden="true">&#8595;</span>
             </a>
           </div>
         </div>
@@ -214,17 +223,17 @@ const navLinks = [
     </section>
 
     <!-- ========================================================== PREV / NEXT -->
-    <nav class="wrap lab-pager" aria-label="Další laby">
-      <a class="lab-pager__link" href={localePath('cs', `laby/${prev.slug}`)} style={`--pager-accent:${prev.world.accent}`}>
-        <span class="mono lab-pager__dir"><span aria-hidden="true">&#8592; </span>Předchozí</span>
+    <nav class="wrap lab-pager" aria-label={copy.detail.pagerLabel}>
+      <a class="lab-pager__link" href={localePath(code, `laby/${prev.slug}`)} style={`--pager-accent:${prev.world.accent}`}>
+        <span class="mono lab-pager__dir"><span aria-hidden="true">&#8592; </span>{copy.detail.prev}</span>
         <span class="lab-pager__name">{prev.name}</span>
       </a>
       <a
         class="lab-pager__link lab-pager__link--next"
-        href={localePath('cs', `laby/${next.slug}`)}
+        href={localePath(code, `laby/${next.slug}`)}
         style={`--pager-accent:${next.world.accent}`}
       >
-        <span class="mono lab-pager__dir">Další<span aria-hidden="true"> &#8594;</span></span>
+        <span class="mono lab-pager__dir">{copy.detail.next}<span aria-hidden="true"> &#8594;</span></span>
         <span class="lab-pager__name">{next.name}</span>
       </a>
     </nav>

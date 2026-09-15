@@ -1,0 +1,256 @@
+{
+  "navLabel": "Pre školy",
+  "entry": {
+    "label": "Pre školy · Projektové laby",
+    "title": "Do škôl nenosím prednášku. Nosím projekt.",
+    "lead": "Projektové vzdelávanie pre stredné školy na pomedzí AI, informatiky, tvorby, pedagogiky a sveta okolo nás. Vychádza z toho, na čom naozaj pracujem.",
+    "cta": "Preskúmať projektové laby"
+  },
+  "meta": {
+    "title": "Projektové laby pre stredné školy",
+    "description": "Nejdeme na skúšku. Ideme tvoriť. Projektové vzdelávanie pre stredné školy: AI, informatika, Unreal Engine, tvorba, pedagogika a otázky o technológiách. Malé skupiny do 12 študentov.",
+    "ogAlt": "Nejdeme na skúšku. Ideme tvoriť. Projektové laby pre stredné školy — Denis Mitrović",
+    "detailSuffix": "Malá projektová skupina do 12 študentov."
+  },
+  "nav": {
+    "labs": "Laby",
+    "formats": "Formáty",
+    "projects": "Projekty",
+    "contact": "Kontakt",
+    "about": "O mne",
+    "allLabs": "Všetky laby"
+  },
+  "hero": {
+    "label": "Pre školy · Projektové laby",
+    "line1": "Nejdeme na skúšku.",
+    "line2": "Ideme tvoriť.",
+    "lead": "Projektové vzdelávanie pre stredné školy na pomedzí AI, informatiky, tvorby, pedagogiky a sveta okolo nás.",
+    "credo": "Technológie nie sú cieľ. Sú to nástroje, s ktorými môžeme tvoriť, premýšľať, skúmať a hľadať riešenia, ktoré majú zmysel.",
+    "ctaExplore": "Preskúmať projektové laby",
+    "ctaContact": "Dohodnúť projekt"
+  },
+  "readout": {
+    "forKey": "Pre",
+    "forValue": "stredné školy",
+    "groupKey": "Skupina",
+    "groupValue": "do 12 študentov",
+    "formatsKey": "Formáty",
+    "formatsValue": "90 min – polrok",
+    "yearKey": "Školský rok"
+  },
+  "manifest": {
+    "label": "Prečo to robím",
+    "title": "Do škôl nenosím prednášku. Nosím projekt.",
+    "p1": "Čau, som Denis. Osem rokov som sa venoval vyučovaniu informatiky, telesnej výchovy a projektovému vzdelávaniu. Dnes sa intenzívne venujem AI, digitálnym produktom, Unreal Engine a experimentom na pomedzí technológií, vzdelávania a spoločnosti.",
+    "p2": "Pedagogika pre mňa nie je bývalá profesia, ale jeden z pilierov. Zaujíma ma, ako sa človek učí, čo podporuje motiváciu, ako vzniká prostredie, kde sa nebojí experimentovať, a ako prepojiť hru so skutočnou prácou. Študenti sa u mňa pýtajú, skúšajú, tvoria, overujú a odchádzajú s výstupom, ktorý má zmysel.",
+    "signature": "Čaute, ideme na to."
+  },
+  "list": {
+    "label": "Päť vstupných ciest",
+    "title": "Projektové laby",
+    "lead": "Nejde o päť kurzov. Je to jeden projektový priestor a päť rôznych ciest, ktorými doň možno vstúpiť.",
+    "more": "Detail labu"
+  },
+  "formats": {
+    "label": "Formáty spolupráce",
+    "title": "Od workshopu po ateliér",
+    "lead": "Dĺžku a hĺbku dohodneme podľa školy, študentov aj rozvrhu.",
+    "items": [
+      {
+        "duration": "90–120 min",
+        "name": "Workshop",
+        "body": "Ochutnávka jedného labu: prvý prototyp, experiment alebo otázka, ku ktorej sa dá vrátiť."
+      },
+      {
+        "duration": "1 deň",
+        "name": "Projektový deň",
+        "body": "Od zadania k malému hotovému výstupu počas jedného dňa."
+      },
+      {
+        "duration": "2–5 dní",
+        "name": "Intenzívny program",
+        "body": "Skutočný projekt s prezentáciou a reflexiou výstupu na konci."
+      },
+      {
+        "duration": "týždne",
+        "name": "Projektový blok",
+        "body": "Pravidelné stretnutia a projekt, ktorý rastie spolu s tímom."
+      },
+      {
+        "duration": "polrok +",
+        "name": "Externý ateliér",
+        "body": "Dlhodobé a pravidelné vedenie študentských projektov."
+      }
+    ],
+    "anywhere": "kdekoľvek",
+    "onlineName": "Online / hybridne",
+    "onlineBody": "Väčšinu formátov je možné viesť online alebo kombinovane. Unreal AI Lab len osobne."
+  },
+  "group": {
+    "label": "Veľkosť skupiny",
+    "max": "max. 12",
+    "title": "Malá projektová skupina",
+    "short": "Malá projektová skupina · do 12 študentov",
+    "ideal": "ideálne 6–10 študentov, maximálne 12",
+    "why": "Menšia skupina dáva priestor na individuálne vedenie, rozhovor, experiment a skutočnú tímovú prácu namiesto frontálneho workshopu.",
+    "flex": "Väčšie skupiny sa dajú riešiť po individuálnej dohode, napríklad rozdelením študentov do viacerých projektových tímov alebo blokov."
+  },
+  "principles": {
+    "label": "Ako pracujeme",
+    "items": [
+      "hra + skutočná práca",
+      "študent je autor",
+      "AI overujeme",
+      "nesúhlas je legitímny",
+      "učí sa celý človek",
+      "technológie nie sú povinnosť",
+      "vedieť technológiu vypnúť",
+      "skutočný výstup namiesto cvičenia do šuplíka"
+    ]
+  },
+  "projects": {
+    "label": "Reálne projekty",
+    "title": "Toto nie sú témy, o ktorých len prednášam",
+    "lead": "Sú to oblasti, v ktorých naozaj pracujem. Laby z nich priamo vychádzajú.",
+    "usageMeta": "Experimentálny projekt · vo vývoji · základ Usage Labu",
+    "invokMeta": "Vzdelávací produkt · vo vývoji · základ Invok Labu"
+  },
+  "contact": {
+    "label": "Kontakt",
+    "title": "Poďme spolu vymyslieť projekt pre vašu školu.",
+    "emailCta": "Napísať e-mail",
+    "mailSubject": "Projektové laby pre našu školu",
+    "pdfPoster": "Stiahnuť ponuku pre školy · PDF (v češtine)",
+    "pdfCards": "Karty piatich labov · PDF (v češtine)",
+    "heroPdf": "Ponuka pre školy · plagát A4 (PDF, v češtine)",
+    "signature": "Čaute, ideme na to."
+  },
+  "detail": {
+    "crumbs": "Projektové laby",
+    "doing": "Čo študenti robia",
+    "output": "Možný výstup",
+    "subjects": "Prepojenie s predmetmi",
+    "formats": "Vhodné formáty",
+    "fitYes": "(vhodné)",
+    "fitNo": "(menej vhodné)",
+    "onlineYes": "možné",
+    "onlineNo": "len osobne",
+    "tech": "Technické požiadavky",
+    "group": "Veľkosť skupiny",
+    "groupStrong": "Malá projektová skupina:",
+    "related": "Súvisí s mojou prácou",
+    "kindProject": "Projekt",
+    "kindLab": "Poznámka k labu",
+    "contactTitle": "Poďme z {lab} urobiť projekt pre vašu školu.",
+    "pdfCards": "Karty labov · PDF (v češtine)",
+    "pdfPoster": "Ponuka pre školy · PDF (v češtine)",
+    "pagerLabel": "Ďalšie laby",
+    "prev": "Predchádzajúci",
+    "next": "Ďalší"
+  },
+  "labs": {
+    "ai-builder": {
+      "question": "Od nápadu k funkčnému produktu",
+      "short": "Prompt, kontext, Git, API, databáza, nasadenie. Čo urobila AI, overíme a vysvetlíme.",
+      "lead": "Študent sa neučí len zadávať prompt. Pochopí cestu od nápadu k funkčnému digitálnemu produktu. AI pritom nie je autorita: niečo vytvorí, ale študent musí pochopiť, čo sa stalo, overiť to, opraviť a vysvetliť.",
+      "studentsDo": [
+        "Rozložia nápad na kroky a pracujú s promptom, tokenmi a kontextom.",
+        "Používajú Git a GitHub, CLI a API a učia sa bezpečne spravovať API kľúče.",
+        "Ukladajú dáta do databázy (napr. Supabase), skúšajú cloudové aj lokálne modely.",
+        "Aplikáciu nasadia a vysvetlia, čo v nej vytvorila AI a čo sami overili a opravili."
+      ],
+      "output": "Funkčná nasadená aplikácia alebo nástroj a krátka obhajoba vlastného riešenia.",
+      "subjects": [
+        "informatika",
+        "matematika",
+        "slovenský jazyk",
+        "podnikavosť"
+      ],
+      "tech": "Počítačová učebňa s internetom. Účty a API kľúče riešime spoločne podľa pravidiel školy a veku študentov."
+    },
+    "unreal": {
+      "question": "Telo, pohyb a digitálne svety",
+      "short": "Unreal Engine, Blueprints, Niagara, motion capture. Telo a pohyb v digitálnom svete.",
+      "lead": "Unreal Engine ako priestor na gameplay, fyziku, animáciu, VFX, svetlo a zvuk. A k tomu druhá vrstva: telo → pohyb → technológia → digitálny priestor. Technológia tu človeka od tela neodreže, pomáha tento vzťah skúmať.",
+      "studentsDo": [
+        "S pomocou AI stavajú 3D prostredie a gameplay v Blueprints, riešia fyziku a kameru.",
+        "Pracujú s materiálmi, svetlom, zvukom, animáciou a Niagara VFX.",
+        "Nahrajú vlastný pohyb cez motion capture a prenesú ho do digitálnej postavy.",
+        "Skúmajú fyzický priestor, uvedomovanie si tela a digitálnu reprezentáciu človeka."
+      ],
+      "output": "Hrateľná scéna alebo krátke video z digitálneho sveta, v ktorom vidno aj vlastný pohyb študentov.",
+      "subjects": [
+        "informatika",
+        "fyzika",
+        "výtvarná výchova",
+        "telesná výchova"
+      ],
+      "tech": "Počítače s dedikovanou grafickou kartou, prípadne zdieľané stanice pre tímy. Na motion capture stačí kamera a voľný priestor."
+    },
+    "usage": {
+      "question": "Akú stopu zanecháva AI?",
+      "short": "Tokeny, náklady, súkromie, digitálna hodnota. Otvorenú hypotézu kriticky testujeme.",
+      "lead": "Každé použitie AI má spotrebu, cenu a dopad. Lab stojí na reálnom experimentálnom projekte a otvorenej otázke, ktorú študenti kriticky skúmajú.",
+      "studentsDo": [
+        "Merajú tokeny, usage a náklady svojich AI dopytov a pracujú s digitálnymi receipts.",
+        "Skúmajú súkromie, decentralizáciu, krypto a digitálne hodnoty.",
+        "Odhadujú environmentálny dopad a porovnávajú, odkiaľ dáta pochádzajú.",
+        "Hypotézu o prínose pre spoločnosť či prírodu overujú alebo ju s odôvodnením odmietnu."
+      ],
+      "output": "Dátová štúdia alebo infografika, ktorá hypotézu s argumentmi podporí, spochybní alebo vyvráti.",
+      "subjects": [
+        "informatika",
+        "matematika",
+        "geografia a ekológia",
+        "náuka o spoločnosti a ekonómia"
+      ],
+      "tech": "Učebňa s počítačmi alebo notebookmi a pripojením na internet.",
+      "note": {
+        "title": "Otvorená hypotéza",
+        "body": "Môže hodnota vznikajúca používaním technológií vytvoriť nový mechanizmus podpory spoločnosti alebo prírody? Nie je to hotová pravda. Študenti ju môžu odmietnuť."
+      }
+    },
+    "invok": {
+      "question": "Ako vzniká vzdelávací produkt?",
+      "short": "Živá case study reálneho produktu: metodika, validácia aj slepé uličky.",
+      "lead": "Invok je reálny vzdelávací produkt, na ktorom pracujem. Slúži ako živá case study: ako vzniká produkt a jeho metodika, AI literacy, UX, validácia, spätná väzba, rebranding aj slepé uličky.",
+      "studentsDo": [
+        "Sledujú vznik skutočného produktu vrátane slepých uličiek a rebrandingu.",
+        "Navrhujú a testujú aktivity pre AI literacy a zbierajú spätnú väzbu.",
+        "Učia sa validovať nápad a rozhodovať sa produktovo aj pedagogicky.",
+        "Skúšajú si podnikavosť na reálnom prípade, nie na modelovej situácii."
+      ],
+      "output": "Otestovaný návrh aktivity alebo funkcie s argumentáciou, prečo má alebo nemá vzdelávaciu hodnotu.",
+      "subjects": [
+        "náuka o spoločnosti",
+        "ekonomika a podnikavosť",
+        "informatika",
+        "pedagogika a psychológia"
+      ],
+      "tech": "Priestor na tímovú prácu, flipcharty a podľa zamerania niekoľko notebookov.",
+      "note": {
+        "title": "Férovosť",
+        "body": "Študenti nie sú bezplatná pracovná sila, účel labu je vzdelávací. Ak by študentský výstup niekedy prerástol do reálnej komerčnej spolupráce, riešila by sa samostatne, transparentne a férovo."
+      }
+    },
+    "future": {
+      "question": "Čo chceme, aby technológie robili?",
+      "short": "AI, príroda, súkromie, digitálna striedmosť. Nesúhlas je legitímny výsledok.",
+      "lead": "Kľúčová otázka neznie, čo všetko technológie dokážu, ale čo chceme, aby robili. Nesúhlas je legitímny vzdelávací výsledok: keď študent dospeje k tomu, že AI používať nechce, a vie to rozumne vysvetliť, je to úspech.",
+      "studentsDo": [
+        "Skúmajú vzťah AI, človeka, prírody, spoločnosti, kreativity a vzdelávania.",
+        "Diskutujú o súkromí, automatizácii, technologickej závislosti a digitálnej striedmosti.",
+        "Porovnávajú lokálne a cloudové technológie, transhumanizmus aj biofilný transhumanizmus.",
+        "Sformulujú a obhájia vlastný etický postoj vrátane nesúhlasu."
+      ],
+      "output": "Manifest, podcast, výstava alebo verejná debata pre celú školu.",
+      "subjects": [
+        "náuka o spoločnosti a filozofia",
+        "etika",
+        "slovenský jazyk",
+        "biológia a ekológia"
+      ],
+      "tech": "Miestnosť, kde sa dá sedieť v kruhu. Technika nie je nutná."
+    }
+  }
+}

@@ -1,0 +1,256 @@
+{
+  "navLabel": "Za škole",
+  "entry": {
+    "label": "Za škole · Projektni labovi",
+    "title": "U škole ne donosim predavanje. Donosim projekat.",
+    "lead": "Projektno obrazovanje za srednje škole na preseku AI, informatike, stvaralaštva, pedagogije i sveta oko nas. Proizlazi iz onoga na čemu zaista radim.",
+    "cta": "Istražite projektne labove"
+  },
+  "meta": {
+    "title": "Projektni labovi za srednje škole",
+    "description": "Ne idemo na ispit. Idemo da stvaramo. Projektno obrazovanje za srednje škole: AI, informatika, Unreal Engine, stvaralaštvo, pedagogija i pitanja o tehnologijama. Male grupe do 12 učenika.",
+    "ogAlt": "Ne idemo na ispit. Idemo da stvaramo. Projektni labovi za srednje škole — Denis Mitrović",
+    "detailSuffix": "Mala projektna grupa do 12 učenika."
+  },
+  "nav": {
+    "labs": "Labovi",
+    "formats": "Formati",
+    "projects": "Projekti",
+    "contact": "Kontakt",
+    "about": "O meni",
+    "allLabs": "Svi labovi"
+  },
+  "hero": {
+    "label": "Za škole · Projektni labovi",
+    "line1": "Ne idemo na ispit.",
+    "line2": "Idemo da stvaramo.",
+    "lead": "Projektno obrazovanje za srednje škole na preseku AI, informatike, stvaralaštva, pedagogije i sveta oko nas.",
+    "credo": "Tehnologije nisu cilj. To su alati pomoću kojih možemo da stvaramo, razmišljamo, istražujemo i tražimo rešenja koja imaju smisla.",
+    "ctaExplore": "Istražite projektne labove",
+    "ctaContact": "Dogovorimo projekat"
+  },
+  "readout": {
+    "forKey": "Za",
+    "forValue": "srednje škole",
+    "groupKey": "Grupa",
+    "groupValue": "do 12 učenika",
+    "formatsKey": "Formati",
+    "formatsValue": "90 min – polugodište",
+    "yearKey": "Školska godina"
+  },
+  "manifest": {
+    "label": "Zašto ovo radim",
+    "title": "U škole ne donosim predavanje. Donosim projekat.",
+    "p1": "Ćao, ja sam Denis. Osam godina sam se bavio nastavom informatike i fizičkog vaspitanja, kao i projektnim obrazovanjem. Danas su mi u punom fokusu AI, digitalni proizvodi, Unreal Engine i eksperimenti na preseku tehnologije, obrazovanja i društva.",
+    "p2": "Pedagogija za mene nije bivša profesija, već jedan od stubova. Zanima me kako čovek uči, šta podstiče motivaciju, kako nastaje okruženje u kojem se ljudi ne plaše da eksperimentišu i kako povezati igru sa pravim radom. Učenici kod mene postavljaju pitanja, isprobavaju, stvaraju, proveravaju i odlaze sa rezultatom koji ima smisla.",
+    "signature": "Ćao ljudi, idemo!"
+  },
+  "list": {
+    "label": "Pet ulaznih puteva",
+    "title": "Projektni labovi",
+    "lead": "Nije reč o pet kurseva. To je jedan projektni prostor i pet različitih puteva kojima se u njega može ući.",
+    "more": "Detalji laba"
+  },
+  "formats": {
+    "label": "Formati saradnje",
+    "title": "Od radionice do ateljea",
+    "lead": "Trajanje i dubinu dogovaramo u zavisnosti od škole, učenika i rasporeda časova.",
+    "items": [
+      {
+        "duration": "90–120 min",
+        "name": "Radionica",
+        "body": "Degustacija jednog laba: prvi prototip, eksperiment ili pitanje kojem se može vratiti."
+      },
+      {
+        "duration": "1 dan",
+        "name": "Projektni dan",
+        "body": "Od zadatka do malog gotovog rezultata u toku jednog dana."
+      },
+      {
+        "duration": "2–5 dana",
+        "name": "Intenzivni program",
+        "body": "Pravi projekat sa prezentacijom i refleksijom rezultata na kraju."
+      },
+      {
+        "duration": "nedelje",
+        "name": "Projektni blok",
+        "body": "Redovni susreti i projekat koji raste zajedno sa timom."
+      },
+      {
+        "duration": "polugodište +",
+        "name": "Eksterni atelje",
+        "body": "Dugoročno i redovno vođenje učeničkih projekata."
+      }
+    ],
+    "anywhere": "bilo gde",
+    "onlineName": "Onlajn / hibridno",
+    "onlineBody": "Većina formata može da se vodi onlajn ili kombinovano. Unreal AI Lab samo uživo."
+  },
+  "group": {
+    "label": "Veličina grupe",
+    "max": "maks. 12",
+    "title": "Mala projektna grupa",
+    "short": "Mala projektna grupa · do 12 učenika",
+    "ideal": "idealno 6–10 učenika, najviše 12",
+    "why": "Manja grupa daje prostor za individualno vođenje, razgovor, eksperiment i pravi timski rad umesto frontalne radionice.",
+    "flex": "Za veće grupe možemo naći rešenje uz individualni dogovor, na primer podelom učenika na više projektnih timova ili blokova."
+  },
+  "principles": {
+    "label": "Kako radimo",
+    "items": [
+      "igra + pravi rad",
+      "učenik je autor",
+      "AI proveravamo",
+      "neslaganje je legitimno",
+      "uči ceo čovek",
+      "tehnologije nisu obaveza",
+      "znati isključiti tehnologiju",
+      "pravi rezultat umesto vežbe za fioku"
+    ]
+  },
+  "projects": {
+    "label": "Stvarni projekti",
+    "title": "Ovo nisu teme o kojima samo držim predavanja",
+    "lead": "To su oblasti u kojima zaista radim. Labovi direktno proizlaze iz njih.",
+    "usageMeta": "Eksperimentalni projekat · u razvoju · osnova za Usage Lab",
+    "invokMeta": "Obrazovni proizvod · u razvoju · osnova za Invok Lab"
+  },
+  "contact": {
+    "label": "Kontakt",
+    "title": "Hajde da zajedno osmislimo projekat za vašu školu.",
+    "emailCta": "Pošaljite mejl",
+    "mailSubject": "Projektni labovi za našu školu",
+    "pdfPoster": "Preuzmite ponudu za škole · PDF (na češkom)",
+    "pdfCards": "Kartice pet labova · PDF (na češkom)",
+    "heroPdf": "Ponuda za škole · plakat A4 (PDF, na češkom)",
+    "signature": "Ćao ljudi, idemo!"
+  },
+  "detail": {
+    "crumbs": "Projektni labovi",
+    "doing": "Šta učenici rade",
+    "output": "Mogući rezultat",
+    "subjects": "Veza sa predmetima",
+    "formats": "Pogodni formati",
+    "fitYes": "(pogodno)",
+    "fitNo": "(manje pogodno)",
+    "onlineYes": "može",
+    "onlineNo": "samo uživo",
+    "tech": "Tehnički zahtevi",
+    "group": "Veličina grupe",
+    "groupStrong": "Mala projektna grupa:",
+    "related": "Povezano s mojim radom",
+    "kindProject": "Projekat",
+    "kindLab": "Beleška iz laba",
+    "contactTitle": "Hajde da {lab} pretvorimo u projekat za vašu školu.",
+    "pdfCards": "Kartice labova · PDF (na češkom)",
+    "pdfPoster": "Ponuda za škole · PDF (na češkom)",
+    "pagerLabel": "Ostali labovi",
+    "prev": "Prethodni",
+    "next": "Sledeći"
+  },
+  "labs": {
+    "ai-builder": {
+      "question": "Od ideje do funkcionalnog proizvoda",
+      "short": "Prompt, kontekst, Git, API, baza podataka, puštanje u rad. Ono što je uradila AI proverićemo i objasniti.",
+      "lead": "Učenik ne uči samo da piše prompt. Shvatiće put od ideje do funkcionalnog digitalnog proizvoda. AI pritom nije autoritet: nešto napravi, ali učenik mora da razume šta se desilo, da to proveri, ispravi i objasni.",
+      "studentsDo": [
+        "Razlažu ideju na korake i rade sa promptom, tokenima i kontekstom.",
+        "Koriste Git i GitHub, CLI i API i uče da bezbedno upravljaju API ključevima.",
+        "Čuvaju podatke u bazi podataka (npr. Supabase), isprobavaju modele u oblaku i lokalne modele.",
+        "Puštaju aplikaciju u rad i objašnjavaju šta je u njoj napravila AI, a šta su sami proverili i ispravili."
+      ],
+      "output": "Funkcionalna aplikacija ili alat koji je pušten u rad i kratka odbrana sopstvenog rešenja.",
+      "subjects": [
+        "informatika",
+        "matematika",
+        "srpski jezik i književnost",
+        "preduzetništvo"
+      ],
+      "tech": "Računarska učionica sa internetom. Naloge i API ključeve rešavamo zajedno, u skladu sa pravilima škole i uzrastom učenika."
+    },
+    "unreal": {
+      "question": "Telo, pokret i digitalni svetovi",
+      "short": "Unreal Engine, Blueprints, Niagara, motion capture. Telo i pokret u digitalnom svetu.",
+      "lead": "Unreal Engine kao prostor za gameplay, fiziku, animaciju, VFX, svetlo i zvuk. A uz to i drugi sloj: telo → pokret → tehnologija → digitalni prostor. Tehnologija ovde ne odvaja čoveka od tela, već pomaže da se taj odnos istraži.",
+      "studentsDo": [
+        "Uz pomoć AI grade 3D okruženje i gameplay u Blueprints, podešavaju fiziku i kameru.",
+        "Rade sa materijalima, svetlom, zvukom, animacijom i alatom Niagara VFX.",
+        "Snimaju sopstveni pokret pomoću motion capture tehnike i prenose ga na digitalni lik.",
+        "Istražuju fizički prostor, svest o telu i digitalnu reprezentaciju čoveka."
+      ],
+      "output": "Scena koja može da se igra ili kratak video iz digitalnog sveta u kojem se vidi i sopstveni pokret učenika.",
+      "subjects": [
+        "informatika",
+        "fizika",
+        "likovna kultura",
+        "fizičko vaspitanje"
+      ],
+      "tech": "Računari sa zasebnom grafičkom karticom ili, po potrebi, zajedničke radne stanice za timove. Za motion capture dovoljni su kamera i slobodan prostor."
+    },
+    "usage": {
+      "question": "Kakav trag ostavlja AI?",
+      "short": "Tokeni, troškovi, privatnost, digitalna vrednost. Otvorenu hipotezu kritički testiramo.",
+      "lead": "Svako korišćenje AI ima svoju potrošnju, cenu i uticaj. Lab se zasniva na stvarnom eksperimentalnom projektu i otvorenom pitanju koje učenici kritički istražuju.",
+      "studentsDo": [
+        "Mere tokene, potrošnju (usage) i troškove svojih AI upita i rade sa digitalnim računima (receipts).",
+        "Istražuju privatnost, decentralizaciju, kripto i digitalne vrednosti.",
+        "Procenjuju uticaj na životnu sredinu i upoređuju odakle podaci potiču.",
+        "Hipotezu o koristi za društvo ili prirodu proveravaju ili je, uz obrazloženje, odbacuju."
+      ],
+      "output": "Istraživanje zasnovano na podacima ili infografika koja argumentima podržava, dovodi u pitanje ili opovrgava hipotezu.",
+      "subjects": [
+        "informatika",
+        "matematika",
+        "geografija i ekologija",
+        "društvene nauke i ekonomija"
+      ],
+      "tech": "Učionica sa računarima ili laptopovima i pristupom internetu.",
+      "note": {
+        "title": "Otvorena hipoteza",
+        "body": "Može li vrednost koja nastaje korišćenjem tehnologija stvoriti novi mehanizam podrške društvu ili prirodi? To nije gotova istina. Učenici tu hipotezu mogu odbaciti."
+      }
+    },
+    "invok": {
+      "question": "Kako nastaje obrazovni proizvod?",
+      "short": "Živa studija slučaja stvarnog proizvoda: metodika, validacija i ćorsokaci.",
+      "lead": "Invok je stvarni obrazovni proizvod na kojem radim. Služi kao živa studija slučaja: kako nastaju proizvod i njegova metodika, AI pismenost, UX, validacija, povratne informacije, rebrending, ali i ćorsokaci.",
+      "studentsDo": [
+        "Prate nastanak stvarnog proizvoda, uključujući ćorsokake i rebrending.",
+        "Osmišljavaju i testiraju aktivnosti za AI pismenost i prikupljaju povratne informacije.",
+        "Uče da validiraju ideju i donose odluke iz ugla proizvoda i pedagogije.",
+        "Preduzetništvo isprobavaju na stvarnom slučaju, a ne na zamišljenoj situaciji."
+      ],
+      "output": "Testiran predlog aktivnosti ili funkcije sa argumentacijom zašto ima ili nema obrazovnu vrednost.",
+      "subjects": [
+        "društvene nauke",
+        "ekonomija i preduzetništvo",
+        "informatika",
+        "pedagogija i psihologija"
+      ],
+      "tech": "Prostor za timski rad, flipčart table i, zavisno od fokusa, nekoliko laptopova.",
+      "note": {
+        "title": "Fer odnos",
+        "body": "Učenici nisu besplatna radna snaga, svrha laba je obrazovna. Ako bi učenički rezultat ikada prerastao u stvarnu komercijalnu saradnju, to bi se rešavalo zasebno, transparentno i pošteno."
+      }
+    },
+    "future": {
+      "question": "Šta želimo da tehnologije rade?",
+      "short": "AI, priroda, privatnost, digitalna umerenost. Neslaganje je legitiman ishod.",
+      "lead": "Ključno pitanje ne glasi šta sve tehnologije mogu, već šta želimo da rade. Neslaganje je legitiman obrazovni ishod: kada učenik zaključi da ne želi da koristi AI i ume to razložno da objasni, to je uspeh.",
+      "studentsDo": [
+        "Istražuju odnos između AI, čoveka, prirode, društva, kreativnosti i obrazovanja.",
+        "Razgovaraju o privatnosti, automatizaciji, tehnološkoj zavisnosti i digitalnoj umerenosti.",
+        "Upoređuju lokalne tehnologije i tehnologije u oblaku, transhumanizam i biofilni transhumanizam.",
+        "Formulišu i brane sopstveni etički stav, uključujući i neslaganje."
+      ],
+      "output": "Manifest, podkast, izložba ili javna debata za celu školu.",
+      "subjects": [
+        "društvene nauke i filozofija",
+        "etika",
+        "srpski jezik i književnost",
+        "biologija i ekologija"
+      ],
+      "tech": "Prostorija u kojoj se može sedeti u krugu. Tehnika nije neophodna."
+    }
+  }
+}

@@ -1,0 +1,256 @@
+{
+  "navLabel": "For schools",
+  "entry": {
+    "label": "For schools · Project labs",
+    "title": "I don’t bring a lecture to schools. I bring a project.",
+    "lead": "Project-based learning for secondary schools at the crossroads of AI, computer science, creative work, pedagogy and the world around us. It’s built on what I actually work on.",
+    "cta": "Explore the project labs"
+  },
+  "meta": {
+    "title": "Project labs for secondary schools",
+    "description": "We’re not here for an exam. We’re here to create. Project-based learning for secondary schools: AI, computer science, Unreal Engine, creative work, pedagogy and questions about technology. Small groups of up to 12 students.",
+    "ogAlt": "We’re not here for an exam. We’re here to create. Project labs for secondary schools — Denis Mitrović",
+    "detailSuffix": "A small project group of up to 12 students."
+  },
+  "nav": {
+    "labs": "Labs",
+    "formats": "Formats",
+    "projects": "Projects",
+    "contact": "Contact",
+    "about": "About me",
+    "allLabs": "All labs"
+  },
+  "hero": {
+    "label": "For schools · Project labs",
+    "line1": "We’re not here for an exam.",
+    "line2": "We’re here to create.",
+    "lead": "Project-based learning for secondary schools at the crossroads of AI, computer science, creative work, pedagogy and the world around us.",
+    "credo": "Technology isn’t the goal. It’s a set of tools we can use to create, think, explore and look for solutions that make sense.",
+    "ctaExplore": "Explore the project labs",
+    "ctaContact": "Plan a project"
+  },
+  "readout": {
+    "forKey": "For",
+    "forValue": "secondary schools",
+    "groupKey": "Group",
+    "groupValue": "up to 12 students",
+    "formatsKey": "Formats",
+    "formatsValue": "90 min – semester",
+    "yearKey": "School year"
+  },
+  "manifest": {
+    "label": "Why I do this",
+    "title": "I don’t bring a lecture to schools. I bring a project.",
+    "p1": "Hi, I’m Denis. For eight years I taught computer science and physical education and worked in project-based learning. Today I’m deeply involved in AI, digital products, Unreal Engine and experiments where technology, education and society meet.",
+    "p2": "For me, pedagogy isn’t a past profession but one of the pillars of my work. I’m interested in how people learn, what supports motivation, how to build an environment where people aren’t afraid to experiment, and how to connect play with real work. In my labs, students ask questions, try things out, create, verify and leave with an outcome that matters.",
+    "signature": "Hey folks, let’s do this."
+  },
+  "list": {
+    "label": "Five ways in",
+    "title": "Project labs",
+    "lead": "It’s not five courses. It’s one project space and five different ways into it.",
+    "more": "Lab details"
+  },
+  "formats": {
+    "label": "Formats for working together",
+    "title": "From workshop to studio",
+    "lead": "We’ll agree on length and depth to suit the school, the students and the timetable.",
+    "items": [
+      {
+        "duration": "90–120 min",
+        "name": "Workshop",
+        "body": "A taste of one lab: a first prototype, an experiment or a question you can come back to."
+      },
+      {
+        "duration": "1 day",
+        "name": "Project day",
+        "body": "From brief to a small finished outcome in a single day."
+      },
+      {
+        "duration": "2–5 days",
+        "name": "Intensive programme",
+        "body": "A real project, with a presentation and reflection on the outcome at the end."
+      },
+      {
+        "duration": "weeks",
+        "name": "Project block",
+        "body": "Regular sessions and a project that grows along with the team."
+      },
+      {
+        "duration": "semester +",
+        "name": "External studio",
+        "body": "Long-term, regular guidance for student projects."
+      }
+    ],
+    "anywhere": "anywhere",
+    "onlineName": "Online / hybrid",
+    "onlineBody": "Most formats can run online or as a hybrid. Unreal AI Lab is in person only."
+  },
+  "group": {
+    "label": "Group size",
+    "max": "max. 12",
+    "title": "Small project group",
+    "short": "Small project group · up to 12 students",
+    "ideal": "ideally 6–10 students, 12 at most",
+    "why": "A smaller group leaves room for individual guidance, conversation, experimentation and genuine teamwork instead of a lecture-style workshop.",
+    "flex": "Larger groups can be worked out case by case, for example by splitting students into several project teams or blocks."
+  },
+  "principles": {
+    "label": "How we work",
+    "items": [
+      "play + real work",
+      "the student is the author",
+      "we verify AI",
+      "disagreement is legitimate",
+      "the whole person learns",
+      "technology isn’t compulsory",
+      "being able to switch technology off",
+      "real outcomes, not exercises that gather dust"
+    ]
+  },
+  "projects": {
+    "label": "Real projects",
+    "title": "These aren’t topics I only lecture about",
+    "lead": "They’re areas I actually work in. The labs grow directly out of them.",
+    "usageMeta": "Experimental project · in development · the basis for Usage Lab",
+    "invokMeta": "Educational product · in development · the basis for Invok Lab"
+  },
+  "contact": {
+    "label": "Contact",
+    "title": "Let’s come up with a project for your school together.",
+    "emailCta": "Send an email",
+    "mailSubject": "Project labs for our school",
+    "pdfPoster": "Download the offer for schools · PDF (in Czech)",
+    "pdfCards": "Cards for the five labs · PDF (in Czech)",
+    "heroPdf": "Offer for schools · A4 poster (PDF, in Czech)",
+    "signature": "Hey folks, let’s do this."
+  },
+  "detail": {
+    "crumbs": "Project labs",
+    "doing": "What students do",
+    "output": "Possible outcome",
+    "subjects": "Subject links",
+    "formats": "Suitable formats",
+    "fitYes": "(suitable)",
+    "fitNo": "(less suitable)",
+    "onlineYes": "possible",
+    "onlineNo": "in person only",
+    "tech": "Technical requirements",
+    "group": "Group size",
+    "groupStrong": "Small project group:",
+    "related": "Related to my work",
+    "kindProject": "Project",
+    "kindLab": "Lab note",
+    "contactTitle": "Let’s turn {lab} into a project for your school.",
+    "pdfCards": "Lab cards · PDF (in Czech)",
+    "pdfPoster": "Offer for schools · PDF (in Czech)",
+    "pagerLabel": "More labs",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "labs": {
+    "ai-builder": {
+      "question": "From an idea to a working product",
+      "short": "Prompts, context, Git, API, databases, deployment. We verify and explain what AI did.",
+      "lead": "Students don’t just learn to write prompts. They come to understand the path from an idea to a working digital product. AI is not an authority here: it builds something, but students have to understand what happened, verify it, fix it and explain it.",
+      "studentsDo": [
+        "They break an idea down into steps and work with prompts, tokens and context.",
+        "They use Git and GitHub, the CLI and APIs, and learn to manage API keys securely.",
+        "They store data in a database (e.g. Supabase) and try out both cloud and local models.",
+        "They deploy the app and explain what AI built in it and what they verified and fixed themselves."
+      ],
+      "output": "A working, deployed app or tool, plus a short defence of their own solution.",
+      "subjects": [
+        "computer science",
+        "mathematics",
+        "language and literature",
+        "entrepreneurship"
+      ],
+      "tech": "A computer classroom with internet access. We sort out accounts and API keys together, in line with the school’s rules and the students’ age."
+    },
+    "unreal": {
+      "question": "The body, movement and digital worlds",
+      "short": "Unreal Engine, Blueprints, Niagara, motion capture. The body and movement in a digital world.",
+      "lead": "Unreal Engine as a space for gameplay, physics, animation, VFX, light and sound. Plus a second layer: body → movement → technology → digital space. Here technology doesn’t cut people off from their bodies; it helps them explore that relationship.",
+      "studentsDo": [
+        "With help from AI, they build 3D environments and gameplay in Blueprints, tackling physics and camera work.",
+        "They work with materials, light, sound, animation and Niagara VFX.",
+        "They record their own movement with motion capture and transfer it onto a digital character.",
+        "They explore physical space, body awareness and the digital representation of people."
+      ],
+      "output": "A playable scene or a short video from a digital world that also shows the students’ own movement.",
+      "subjects": [
+        "computer science",
+        "physics",
+        "art",
+        "physical education"
+      ],
+      "tech": "Computers with a dedicated graphics card, or shared workstations for teams. For motion capture, a camera and some open space are enough."
+    },
+    "usage": {
+      "question": "What footprint does AI leave?",
+      "short": "Tokens, costs, privacy, digital value. We critically test an open hypothesis.",
+      "lead": "Every use of AI consumes resources, has a cost and has an impact. The lab is built on a real experimental project and an open question that students examine critically.",
+      "studentsDo": [
+        "They measure the tokens, usage and costs of their AI queries and work with digital receipts.",
+        "They explore privacy, decentralisation, crypto and digital value.",
+        "They estimate environmental impact and compare where data comes from.",
+        "They test the hypothesis about benefits to society or nature, or reject it with reasoned arguments."
+      ],
+      "output": "A data study or infographic that uses arguments to support, question or refute the hypothesis.",
+      "subjects": [
+        "computer science",
+        "mathematics",
+        "geography and ecology",
+        "social studies and economics"
+      ],
+      "tech": "A classroom with computers or laptops and an internet connection.",
+      "note": {
+        "title": "Open hypothesis",
+        "body": "Could the value created by using technology form a new mechanism for supporting society or nature? It isn’t a settled truth. Students are free to reject it."
+      }
+    },
+    "invok": {
+      "question": "How is an educational product made?",
+      "short": "A living case study of a real product: methodology, validation and dead ends.",
+      "lead": "Invok is a real educational product I’m working on. It serves as a living case study: how a product and its methodology take shape, AI literacy, UX, validation, feedback, rebranding and the dead ends too.",
+      "studentsDo": [
+        "They follow how a real product takes shape, dead ends and rebranding included.",
+        "They design and test AI literacy activities and gather feedback.",
+        "They learn to validate an idea and make both product and pedagogical decisions.",
+        "They try out entrepreneurship on a real case, not a hypothetical scenario."
+      ],
+      "output": "A tested design for an activity or feature, with an argument for why it does or doesn’t have educational value.",
+      "subjects": [
+        "social studies",
+        "economics and entrepreneurship",
+        "computer science",
+        "pedagogy and psychology"
+      ],
+      "tech": "Space for teamwork, flipcharts and, depending on the focus, a few laptops.",
+      "note": {
+        "title": "Fairness",
+        "body": "Students are not free labour; the purpose of the lab is educational. If a student outcome ever grew into a real commercial collaboration, it would be handled separately, transparently and fairly."
+      }
+    },
+    "future": {
+      "question": "What do we want technology to do?",
+      "short": "AI, nature, privacy, digital minimalism. Disagreement is a legitimate outcome.",
+      "lead": "The key question isn’t what technology can do, but what we want it to do. Disagreement is a legitimate educational outcome: if a student concludes they don’t want to use AI and can give sound reasons for it, that’s a success.",
+      "studentsDo": [
+        "They explore the relationship between AI, people, nature, society, creativity and education.",
+        "They discuss privacy, automation, dependence on technology and digital minimalism.",
+        "They compare local and cloud technologies, as well as transhumanism and biophilic transhumanism.",
+        "They formulate and defend their own ethical stance, including disagreement."
+      ],
+      "output": "A manifesto, podcast, exhibition or public debate for the whole school.",
+      "subjects": [
+        "social studies and philosophy",
+        "ethics",
+        "language and literature",
+        "biology and ecology"
+      ],
+      "tech": "A room where people can sit in a circle. No tech required."
+    }
+  }
+}

@@ -1,16 +1,22 @@
 ---
-import { LAB_GROUP, LABS } from '~/data/labs';
+import { LABS } from '~/data/labs';
 import { localePath } from '~/i18n';
+import { getLabsCopy } from '~/i18n/labs';
+
+interface Props {
+  lang: string;
+}
 
 /**
- * PRO ŠKOLY — the schools entry on the Czech homepage.
+ * FOR SCHOOLS — the schools entry on every homepage.
  *
  * Sits directly under the hero. The hero stays about the person; this band is
  * where the project labs branch off, as the natural consequence of the work
  * listed further down the page rather than a separate business stuck on top.
- * Czech only: the labs exist in Czech only.
  */
-const labsHref = localePath('cs', 'laby');
+const { lang } = Astro.props;
+const copy = getLabsCopy(lang);
+const labsHref = localePath(lang, 'laby');
 ---
 
 <section class="section section--sm schools" id="pro-skoly" aria-labelledby="schools-title">
@@ -18,25 +24,22 @@ const labsHref = localePath('cs', 'laby');
     <div class="schools__frame grid12">
       <p class="mono section__label schools__label" data-reveal>
         <span class="section__index" aria-hidden="true">→</span>
-        Pro školy · Projektové laby
+        {copy.entry.label}
       </p>
 
       <div class="schools__intro" data-reveal style="--reveal-delay:80ms">
-        <h2 id="schools-title" class="schools__title is-say">Do škol nenosím přednášku. Nosím&nbsp;projekt.</h2>
-        <p class="lead schools__lead">
-          Projektové vzdělávání pro střední školy na pomezí AI, informatiky, tvorby, pedagogiky a světa kolem nás.
-          Vychází z toho, na čem opravdu pracuji.
-        </p>
+        <h2 id="schools-title" class="schools__title is-say">{copy.entry.title}</h2>
+        <p class="lead schools__lead">{copy.entry.lead}</p>
       </div>
 
       <ul class="schools__labs" role="list" data-reveal style="--reveal-delay:160ms">
         {
           LABS.map((lab) => (
             <li style={`--lab-accent:${lab.world.accent}`}>
-              <a class="schools__lab" href={localePath('cs', `laby/${lab.slug}`)}>
+              <a class="schools__lab" href={localePath(lang, `laby/${lab.slug}`)}>
                 <span class="mono schools__glyph" aria-hidden="true">{lab.glyph}</span>
                 <span class="schools__lab-name">{lab.name}</span>
-                <span class="schools__lab-q">{lab.question}</span>
+                <span class="schools__lab-q">{copy.labs[lab.slug].question}</span>
               </a>
             </li>
           ))
@@ -45,10 +48,10 @@ const labsHref = localePath('cs', 'laby');
 
       <div class="schools__foot" data-reveal style="--reveal-delay:220ms">
         <a class="action schools__cta" href={labsHref}>
-          Prozkoumat projektové laby
+          {copy.entry.cta}
           <span class="action__arrow" aria-hidden="true">&#8594;</span>
         </a>
-        <p class="mono schools__group">{LAB_GROUP.short}</p>
+        <p class="mono schools__group">{copy.group.short}</p>
       </div>
     </div>
   </div>

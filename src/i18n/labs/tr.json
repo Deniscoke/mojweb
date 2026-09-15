@@ -1,0 +1,256 @@
+{
+  "navLabel": "Okullar için",
+  "entry": {
+    "label": "Okullar için · Proje labları",
+    "title": "Okullara ders anlatmaya gitmiyorum. Proje götürüyorum.",
+    "lead": "AI, bilişim, yaratıcı üretim, pedagoji ve etrafımızdaki dünyanın kesişiminde liseler için proje tabanlı eğitim. Gerçekten üzerinde çalıştığım işlerden besleniyor.",
+    "cta": "Proje lablarını keşfedin"
+  },
+  "meta": {
+    "title": "Liseler için proje labları",
+    "description": "Sınava girmiyoruz. Üretmeye başlıyoruz. Liseler için proje tabanlı eğitim: AI, bilişim, Unreal Engine, yaratıcı üretim, pedagoji ve teknoloji üzerine sorular. En fazla 12 öğrenciden oluşan küçük gruplar.",
+    "ogAlt": "Sınava girmiyoruz. Üretmeye başlıyoruz. Liseler için proje labları — Denis Mitrović",
+    "detailSuffix": "En fazla 12 öğrenciden oluşan küçük proje grubu."
+  },
+  "nav": {
+    "labs": "Lablar",
+    "formats": "Formatlar",
+    "projects": "Projeler",
+    "contact": "İletişim",
+    "about": "Hakkımda",
+    "allLabs": "Tüm lablar"
+  },
+  "hero": {
+    "label": "Okullar için · Proje labları",
+    "line1": "Sınava girmiyoruz.",
+    "line2": "Üretmeye başlıyoruz.",
+    "lead": "AI, bilişim, yaratıcı üretim, pedagoji ve etrafımızdaki dünyanın kesişiminde liseler için proje tabanlı eğitim.",
+    "credo": "Teknolojiler amaç değil. Üretmek, düşünmek, keşfetmek ve anlamlı çözümler aramak için kullanabileceğimiz araçlar.",
+    "ctaExplore": "Proje lablarını keşfedin",
+    "ctaContact": "Proje için görüşelim"
+  },
+  "readout": {
+    "forKey": "Kimler için",
+    "forValue": "liseler",
+    "groupKey": "Grup",
+    "groupValue": "en fazla 12 öğrenci",
+    "formatsKey": "Formatlar",
+    "formatsValue": "90 dk – dönem",
+    "yearKey": "Eğitim yılı"
+  },
+  "manifest": {
+    "label": "Bunu neden yapıyorum",
+    "title": "Okullara ders anlatmaya gitmiyorum. Proje götürüyorum.",
+    "p1": "Selam, ben Denis. Sekiz yıl boyunca bilişim ve beden eğitimi öğretmenliği yaptım, proje tabanlı eğitim alanında çalıştım. Bugün ise yoğun olarak AI, dijital ürünler, Unreal Engine ve teknolojinin, eğitimin ve toplumun kesişimindeki deneyler üzerine çalışıyorum.",
+    "p2": "Pedagoji benim için geride kalmış bir meslek değil, temel dayanaklarımdan biri. İnsanın nasıl öğrendiği, motivasyonu neyin desteklediği, insanların denemekten çekinmediği bir ortamın nasıl oluştuğu ve oyunun gerçek işle nasıl birleştirilebileceği ilgimi çekiyor. Benimle çalışan öğrenciler soru soruyor, deniyor, üretiyor, doğruluyor ve anlamlı bir çıktıyla ayrılıyor.",
+    "signature": "Selam millet, hadi başlayalım!"
+  },
+  "list": {
+    "label": "Beş giriş yolu",
+    "title": "Proje labları",
+    "lead": "Bu beş ayrı kurs değil. Tek bir proje alanı ve ona girmenin beş farklı yolu.",
+    "more": "Lab detayları"
+  },
+  "formats": {
+    "label": "İş birliği formatları",
+    "title": "Workshop'tan atölyeye",
+    "lead": "Süreyi ve derinliği okula, öğrencilere ve ders programına göre birlikte belirleriz.",
+    "items": [
+      {
+        "duration": "90–120 dk",
+        "name": "Workshop",
+        "body": "Bir labın tadımlığı: ilk prototip, bir deney ya da daha sonra dönülebilecek bir soru."
+      },
+      {
+        "duration": "1 gün",
+        "name": "Proje günü",
+        "body": "Bir gün içinde görev tanımından küçük ama tamamlanmış bir çıktıya."
+      },
+      {
+        "duration": "2–5 gün",
+        "name": "Yoğun program",
+        "body": "Sonunda çıktının sunulduğu ve üzerine yansıtma yapıldığı gerçek bir proje."
+      },
+      {
+        "duration": "haftalar",
+        "name": "Proje bloğu",
+        "body": "Düzenli buluşmalar ve ekiple birlikte büyüyen bir proje."
+      },
+      {
+        "duration": "dönem +",
+        "name": "Harici atölye",
+        "body": "Öğrenci projelerinin uzun soluklu ve düzenli rehberliği."
+      }
+    ],
+    "anywhere": "her yerde",
+    "onlineName": "Çevrim içi / hibrit",
+    "onlineBody": "Formatların çoğu çevrim içi ya da karma olarak yürütülebilir. Unreal AI Lab yalnızca yüz yüze."
+  },
+  "group": {
+    "label": "Grup büyüklüğü",
+    "max": "maks. 12",
+    "title": "Küçük proje grubu",
+    "short": "Küçük proje grubu · en fazla 12 öğrenci",
+    "ideal": "ideal olarak 6–10 öğrenci, en fazla 12",
+    "why": "Daha küçük bir grup, düz anlatıma dayalı bir workshop yerine bireysel rehberliğe, sohbete, deneye ve gerçek ekip çalışmasına alan tanır.",
+    "flex": "Daha büyük gruplar ayrıca görüşülerek planlanabilir; örneğin öğrencileri birden fazla proje ekibine ya da bloğa ayırarak."
+  },
+  "principles": {
+    "label": "Nasıl çalışıyoruz",
+    "items": [
+      "oyun + gerçek iş",
+      "öğrenci eserin sahibi",
+      "AI'ı doğruluyoruz",
+      "aynı fikirde olmamak meşrudur",
+      "insan bir bütün olarak öğrenir",
+      "teknoloji bir zorunluluk değil",
+      "teknolojiyi kapatabilmek",
+      "çekmecede kalacak alıştırma yerine gerçek çıktı"
+    ]
+  },
+  "projects": {
+    "label": "Gerçek projeler",
+    "title": "Bunlar yalnızca anlattığım konular değil",
+    "lead": "Bunlar gerçekten çalıştığım alanlar. Lablar doğrudan bunlardan doğuyor.",
+    "usageMeta": "Deneysel proje · geliştirme aşamasında · Usage Lab'ın temeli",
+    "invokMeta": "Eğitim ürünü · geliştirme aşamasında · Invok Lab'ın temeli"
+  },
+  "contact": {
+    "label": "İletişim",
+    "title": "Okulunuz için birlikte bir proje tasarlayalım.",
+    "emailCta": "E-posta yazın",
+    "mailSubject": "Okulumuz için proje labları",
+    "pdfPoster": "Okullara yönelik teklifi indirin · PDF (Çekçe)",
+    "pdfCards": "Beş labın kartları · PDF (Çekçe)",
+    "heroPdf": "Okullara yönelik teklif · A4 afiş (PDF, Çekçe)",
+    "signature": "Selam millet, hadi başlayalım!"
+  },
+  "detail": {
+    "crumbs": "Proje labları",
+    "doing": "Öğrenciler ne yapıyor",
+    "output": "Olası çıktı",
+    "subjects": "Derslerle bağlantı",
+    "formats": "Uygun formatlar",
+    "fitYes": "(uygun)",
+    "fitNo": "(daha az uygun)",
+    "onlineYes": "mümkün",
+    "onlineNo": "yalnızca yüz yüze",
+    "tech": "Teknik gereksinimler",
+    "group": "Grup büyüklüğü",
+    "groupStrong": "Küçük proje grubu:",
+    "related": "İşimle bağlantılı",
+    "kindProject": "Proje",
+    "kindLab": "Lab notu",
+    "contactTitle": "{lab} ile okulunuz için bir proje hazırlayalım.",
+    "pdfCards": "Lab kartları · PDF (Çekçe)",
+    "pdfPoster": "Okullara yönelik teklif · PDF (Çekçe)",
+    "pagerLabel": "Diğer lablar",
+    "prev": "Önceki",
+    "next": "Sonraki"
+  },
+  "labs": {
+    "ai-builder": {
+      "question": "Fikirden çalışan bir ürüne",
+      "short": "Prompt, bağlam, Git, API, veritabanı, yayına alma. AI'ın yaptığını doğrular ve açıklarız.",
+      "lead": "Öğrenci yalnızca prompt yazmayı öğrenmez. Bir fikirden çalışan bir dijital ürüne giden yolu kavrar. Bu süreçte AI bir otorite değildir: Bir şey üretir ama öğrencinin ne olup bittiğini anlaması, bunu doğrulaması, düzeltmesi ve açıklaması gerekir.",
+      "studentsDo": [
+        "Bir fikri adımlara ayırıyor; prompt, token ve bağlamla çalışıyorlar.",
+        "Git ve GitHub, CLI ve API kullanıyor, API anahtarlarını güvenli şekilde yönetmeyi öğreniyorlar.",
+        "Verileri bir veritabanına (ör. Supabase) kaydediyor, hem bulut hem de yerel modelleri deniyorlar.",
+        "Uygulamayı yayına alıyor ve içinde AI'ın neyi ürettiğini, kendilerinin neyi doğrulayıp düzelttiğini açıklıyorlar."
+      ],
+      "output": "Çalışan, yayına alınmış bir uygulama ya da araç ve kendi çözümlerinin kısa bir savunması.",
+      "subjects": [
+        "bilişim",
+        "matematik",
+        "Türk dili ve edebiyatı",
+        "girişimcilik"
+      ],
+      "tech": "İnternet bağlantılı bilgisayar sınıfı. Hesapları ve API anahtarlarını okulun kurallarına ve öğrencilerin yaşına göre birlikte ayarlıyoruz."
+    },
+    "unreal": {
+      "question": "Beden, hareket ve dijital dünyalar",
+      "short": "Unreal Engine, Blueprints, Niagara, motion capture. Dijital dünyada beden ve hareket.",
+      "lead": "Oynanış, fizik, animasyon, VFX, ışık ve ses için bir alan olarak Unreal Engine. Buna eklenen ikinci bir katman: beden → hareket → teknoloji → dijital alan. Teknoloji burada insanı bedeninden koparmaz, bu ilişkiyi keşfetmeye yardım eder.",
+      "studentsDo": [
+        "AI'ın yardımıyla 3D ortamlar kuruyor, Blueprints ile oynanış oluşturuyor, fizik ve kamera üzerinde çalışıyorlar.",
+        "Materyaller, ışık, ses, animasyon ve Niagara VFX ile çalışıyorlar.",
+        "Kendi hareketlerini motion capture ile kaydedip dijital bir karaktere aktarıyorlar.",
+        "Fiziksel alanı, beden farkındalığını ve insanın dijital temsilini araştırıyorlar."
+      ],
+      "output": "Oynanabilir bir sahne ya da öğrencilerin kendi hareketlerinin de görüldüğü dijital bir dünyadan kısa bir video.",
+      "subjects": [
+        "bilişim",
+        "fizik",
+        "görsel sanatlar",
+        "beden eğitimi"
+      ],
+      "tech": "Harici ekran kartlı bilgisayarlar ya da ekipler için ortak iş istasyonları. Motion capture için bir kamera ve boş bir alan yeterli."
+    },
+    "usage": {
+      "question": "AI nasıl bir iz bırakıyor?",
+      "short": "Token, maliyet, gizlilik, dijital değer. Açık bir hipotezi eleştirel gözle test ediyoruz.",
+      "lead": "Her AI kullanımının bir tüketimi, bir maliyeti ve bir etkisi vardır. Bu lab, gerçek bir deneysel projeye ve öğrencilerin eleştirel gözle incelediği açık bir soruya dayanıyor.",
+      "studentsDo": [
+        "Kendi AI sorgularının token sayısını, kullanımını (usage) ve maliyetini ölçüyor, dijital makbuzlarla (receipts) çalışıyorlar.",
+        "Gizliliği, merkeziyetsizliği, kriptoyu ve dijital değerleri inceliyorlar.",
+        "Çevresel etkiyi tahmin ediyor ve verilerin nereden geldiğini karşılaştırıyorlar.",
+        "Topluma ya da doğaya fayda sağlanabileceği hipotezini sınıyor ya da gerekçelendirerek reddediyorlar."
+      ],
+      "output": "Hipotezi argümanlarla destekleyen, sorgulayan ya da çürüten bir veri çalışması veya infografik.",
+      "subjects": [
+        "bilişim",
+        "matematik",
+        "coğrafya ve ekoloji",
+        "sosyal bilimler ve ekonomi"
+      ],
+      "tech": "Bilgisayar ya da dizüstü bilgisayarlarla donatılmış, internet bağlantısı olan bir sınıf.",
+      "note": {
+        "title": "Açık hipotez",
+        "body": "Teknoloji kullanımından doğan değer, topluma ya da doğaya destek olacak yeni bir mekanizma yaratabilir mi? Bu kesinleşmiş bir gerçek değil. Öğrenciler bu hipotezi reddedebilir."
+      }
+    },
+    "invok": {
+      "question": "Bir eğitim ürünü nasıl ortaya çıkar?",
+      "short": "Gerçek bir ürünün canlı vaka çalışması: metodoloji, doğrulama ve çıkmaz sokaklar.",
+      "lead": "Invok, üzerinde çalıştığım gerçek bir eğitim ürünü. Canlı bir vaka çalışması işlevi görüyor: bir ürünün ve metodolojisinin nasıl ortaya çıktığı, AI okuryazarlığı, UX, doğrulama, geri bildirim, yeniden markalaşma ve çıkmaz sokaklar.",
+      "studentsDo": [
+        "Çıkmaz sokaklar ve yeniden markalaşma dâhil, gerçek bir ürünün doğuşunu izliyorlar.",
+        "AI okuryazarlığı için etkinlikler tasarlıyor, test ediyor ve geri bildirim topluyorlar.",
+        "Bir fikri doğrulamayı, hem ürün hem de pedagoji açısından karar vermeyi öğreniyorlar.",
+        "Girişimciliği kurgusal bir senaryo üzerinde değil, gerçek bir vaka üzerinde deneyimliyorlar."
+      ],
+      "output": "Neden eğitsel bir değeri olduğunu ya da olmadığını gerekçelendiren, test edilmiş bir etkinlik veya özellik önerisi.",
+      "subjects": [
+        "sosyal bilimler",
+        "ekonomi ve girişimcilik",
+        "bilişim",
+        "pedagoji ve psikoloji"
+      ],
+      "tech": "Ekip çalışması için alan, flipchart'lar ve çalışmanın odağına göre birkaç dizüstü bilgisayar.",
+      "note": {
+        "title": "Adillik",
+        "body": "Öğrenciler ücretsiz iş gücü değildir; labın amacı eğitseldir. Bir öğrenci çıktısı günün birinde gerçek bir ticari iş birliğine dönüşürse, bu ayrı bir süreç olarak, şeffaf ve adil biçimde ele alınır."
+      }
+    },
+    "future": {
+      "question": "Teknolojinin ne yapmasını istiyoruz?",
+      "short": "AI, doğa, gizlilik, dijital ölçülülük. Aynı fikirde olmamak meşru bir sonuç.",
+      "lead": "Asıl soru teknolojinin neler yapabileceği değil, ne yapmasını istediğimiz. Aynı fikirde olmamak meşru bir eğitim sonucudur: Bir öğrenci AI kullanmak istemediği kararına varır ve bunu makul biçimde açıklayabilirse, bu bir başarıdır.",
+      "studentsDo": [
+        "AI, insan, doğa, toplum, yaratıcılık ve eğitim arasındaki ilişkiyi araştırıyorlar.",
+        "Gizlilik, otomasyon, teknoloji bağımlılığı ve dijital ölçülülük üzerine tartışıyorlar.",
+        "Yerel ve bulut teknolojilerini, transhümanizmi ve biyofilik transhümanizmi karşılaştırıyorlar.",
+        "Aynı fikirde olmamak da dâhil olmak üzere kendi etik duruşlarını ortaya koyup savunuyorlar."
+      ],
+      "output": "Tüm okul için bir manifesto, podcast, sergi ya da herkese açık bir tartışma.",
+      "subjects": [
+        "sosyal bilimler ve felsefe",
+        "etik",
+        "Türk dili ve edebiyatı",
+        "biyoloji ve ekoloji"
+      ],
+      "tech": "Daire şeklinde oturulabilecek bir oda. Teknik ekipman gerekmez."
+    }
+  }
+}

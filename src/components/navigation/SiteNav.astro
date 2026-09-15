@@ -1,6 +1,7 @@
 ---
 import { site } from '~/config/site';
 import { LOCALES, getLocale, localePath, useTranslations } from '~/i18n';
+import { getLabsCopy } from '~/i18n/labs';
 
 interface NavLink {
   href: string;
@@ -20,12 +21,10 @@ const dict = useTranslations(lang);
 const current = getLocale(lang);
 
 /**
- * The project labs exist in Czech only, so only the Czech navigation gets the
- * schools entry. It is listed first: it is the one link a visitor coming for
- * schools is looking for.
+ * The schools entry is listed first in every language: it is the one link a
+ * visitor coming for the project labs is looking for.
  */
-const schoolsLink: NavLink[] =
-  lang === 'cs' ? [{ href: localePath('cs', 'laby'), label: 'Pro školy', accent: true }] : [];
+const schoolsLink: NavLink[] = [{ href: localePath(lang, 'laby'), label: getLabsCopy(lang).navLabel, accent: true }];
 
 const links: NavLink[] = customLinks ?? [
   ...schoolsLink,
@@ -167,14 +166,28 @@ const links: NavLink[] = customLinks ?? [
     justify-content: center;
   }
 
-  /* Five links on a 360px phone: tighten spacing so the row does not wrap. */
-  @media (max-width: 24rem) {
+  /*
+   * Five links on a phone, in six languages (Spanish and Turkish labels are the
+   * longest). Tighter tracking fits them on one row; if a language still needs
+   * more room, the row scrolls sideways instead of growing the sticky header.
+   */
+  @media (max-width: 30rem) {
     .nav__links {
-      column-gap: 0.55rem;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      column-gap: 0.6rem;
+    }
+
+    .nav__links::-webkit-scrollbar {
+      display: none;
     }
 
     .nav__link {
-      letter-spacing: 0.08em;
+      flex: none;
+      white-space: nowrap;
+      letter-spacing: 0.06em;
     }
   }
 
