@@ -20,3 +20,8 @@ cms/src/payload-types.ts
 # runtime (only cms/src/content/media.ts reads artifacts/evidence-ready when
 # importing media into Payload locally). Kept on disk, out of the repository.
 artifacts/
+
+# Internal review notes that name real businesses and people awaiting approval.
+# Kept on disk, never published.
+docs/web-projects-review.md
+docs/web-portfolio-selection.md
