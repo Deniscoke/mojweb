@@ -42,7 +42,9 @@ export function initEnterTransition({ root, cover }: Options): () => void {
     const label = anchor.dataset.langLabel ?? anchor.textContent?.trim() ?? '';
 
     rememberLocale(code);
-    setEnterIntent({ code, label });
+    // Scoped to the page it is for: if this navigation never happens, no
+    // other page can pick the intent up and paint itself as that language.
+    setEnterIntent({ code, label, path: new URL(anchor.href).pathname });
     if (coverLabel) coverLabel.textContent = label;
 
     const go = () => window.location.assign(anchor.href);

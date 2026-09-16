@@ -119,14 +119,26 @@
   box-shadow: 1px 0 0 rgb(255 255 255 / 0.04);
 }
 
-.transition-cover__label {
+/*
+ * The label is a language name on the gate ("Čeština") but a project title on
+ * the plate transition ("Web a digitální práce"). `--label-len` (set from JS
+ * with the text) shrinks long titles to fit the width; short labels still
+ * resolve to --t-gate, so the gate is unchanged. Both halves of the project
+ * transition share this rule, so the hand-over stays the same size.
+ */
+.transition-cover__label,
+.pt__label {
   position: relative;
   font-family: var(--f-display), 'Inter Tight Fallback';
-  font-size: var(--t-gate);
+  font-size: max(2rem, min(var(--t-gate), calc(90vw / (max(var(--label-len, 1), 4) * 0.56))));
   font-weight: var(--fw-heavy);
   letter-spacing: var(--tr-mega);
   line-height: 1;
   color: var(--c-bone);
+  text-align: center;
+  text-wrap: balance;
+  max-inline-size: calc(100vw - 2 * var(--gutter, 1.25rem));
+  margin: 0;
   opacity: 0;
 }
 
@@ -140,12 +152,172 @@
   transform-origin: left center;
 }
 
+/* In project mode the rule sits under a title whose size is only known once
+   the label has its text (see --label-len), so it waits one step rather than
+   being painted centred and then jumping. */
+html[data-enter-kind='project'] .transition-cover__rule {
+  visibility: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* The signature moment collapses to a plain crossfade. The route still
      changes and the content still arrives — it stops being a performance. */
   .transition-cover__label {
     display: none;
   }
+}
+
+/* --------------------------------- LEVEL 1: the project plate transition ----
+ *
+ * See src/motion/projects/plateTransition.ts. The overlay is built on click
+ * and only ever exists for the ~1.4s before navigation, so none of this costs
+ * anything at rest. It ends in the exact state the destination's transition
+ * cover paints before first frame: void, accent rule, centred title.
+ */
+.pt {
+  position: fixed;
+  inset: 0;
+  /* Includes the scrollbar the homepage still has, so this box matches the
+     destination cover, whose page hides its scrollbar while covered. Without
+     it the title shifts sideways at the hand-over. */
+  inline-size: 100vw;
+  z-index: var(--z-transition);
+  cursor: progress;
+  touch-action: none;
+}
+
+/*
+ * PROJECT MODE — both halves of the transition.
+ *
+ * The cover was built for the language gate, where the label is one short
+ * word and the accent rule can run across the screen behind it. A project
+ * title is a whole phrase, and the rule struck straight through the words.
+ * So in project mode the cover stacks: the title, then the rule under it as
+ * a short mark. The overlay and the destination cover share this rule, which
+ * is what keeps the hand-over invisible.
+ */
+html[data-enter-kind='project'] .transition-cover,
+.pt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-4);
+}
+
+html[data-enter-kind='project'] .transition-cover__rule,
+.pt__rule {
+  position: static;
+  /* After the label, whatever the source order says. */
+  order: 2;
+  inline-size: 5rem;
+  transform-origin: center;
+}
+
+.pt__clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  will-change: clip-path;
+}
+
+.pt__stage {
+  position: absolute;
+  transform-origin: 0 0;
+  background-color: var(--c-ink);
+  will-change: transform;
+}
+
+.pt__svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+
+.pt__veil {
+  position: absolute;
+  inset: 0;
+  background-color: var(--c-void);
+  opacity: 0;
+}
+
+.pt__rule {
+  block-size: 1px;
+  background-color: var(--c-signal);
+  transform: scaleX(0);
+}
+
+/* Cubes for the `grid` plate. Faces extrude backwards so the front face sits
+   exactly where the flat cell was: the plate turns 3D without a jump. */
+.pt__cubes {
+  position: absolute;
+  inset: 0;
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+}
+
+.pt__cube {
+  position: absolute;
+  background-color: var(--cube);
+  will-change: transform, opacity;
+}
+
+/*
+ * Only the lit cells are built as boxes, and only they keep a 3D context.
+ * `will-change: opacity` (like an animated opacity) makes the element group
+ * its own rendering, which grounds `transform-style: preserve-3d` back to
+ * flat and flattens the faces away — so this element animates transform only,
+ * and leaves the screen by flying off rather than by fading.
+ */
+.pt__cube[data-lit] {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.pt__cube[data-lit]::before,
+.pt__cube[data-lit]::after {
+  content: '';
+  position: absolute;
+}
+
+/* Top face. */
+.pt__cube[data-lit]::before {
+  inset-inline: 0;
+  inset-block-start: 0;
+  block-size: var(--depth);
+  transform-origin: top center;
+  transform: rotateX(-90deg);
+  background-color: color-mix(in oklab, var(--cube) 72%, white);
+}
+
+/* Side face, on the side that turns towards the viewer. */
+.pt__cube[data-lit]::after {
+  inset-block: 0;
+  inline-size: var(--depth);
+  background-color: color-mix(in oklab, var(--cube) 55%, black);
+}
+
+.pt__cube[data-lit][data-side='left']::after {
+  inset-inline-start: 0;
+  transform-origin: left center;
+  transform: rotateY(90deg);
+}
+
+.pt__cube[data-lit][data-side='right']::after {
+  inset-inline-end: 0;
+  transform-origin: right center;
+  transform: rotateY(-90deg);
+}
+
+.pt__cube[data-accent] {
+  box-shadow: 0 0 1.5rem color-mix(in oklab, var(--cube) 60%, transparent);
+}
+
+/* The source plate stays put under the overlay; hide it so a moving cursor
+   cannot drag a second copy out from under the growing clip. */
+html[data-plate-transition] .project__plate {
+  visibility: hidden;
 }
 
 /* ------------------------------------ LEVEL 1: the gate greeting morph ----

@@ -44,13 +44,43 @@ export function recallLocale(): string | null {
 export interface EnterIntent {
   code: string;
   label: string;
+  /**
+   * What is being entered. The cover is laid out differently for each: a
+   * language name is one short word, so the accent rule runs across the
+   * screen behind it; a project title is a whole phrase, so the rule sits
+   * under it as a short mark instead of striking through the words.
+   */
+  kind?: 'language' | 'project';
+  /**
+   * The path the intent was written for. An intent is a promise about one
+   * specific page: "the page at this path is about to open, and it already
+   * knows what it will say". Any other page that happens to load inside the
+   * TTL — a reload, the back button, an abandoned transition — must ignore
+   * it rather than paint itself as somewhere it is not.
+   */
+  path?: string;
+}
+
+/** Trailing slashes are a server's business, not the intent's. */
+function samePath(a: string | undefined, b: string): boolean {
+  if (!a) return true; // Written before paths were recorded: trust the TTL.
+  return a.replace(/\/+$/, '') === b.replace(/\/+$/, '');
 }
 
 export function setEnterIntent(intent: EnterIntent): void {
   safeSet(window.sessionStorage, ENTER_KEY, JSON.stringify({ ...intent, at: Date.now() }));
 }
 
-/** Reads and clears the intent. Returns null if absent or stale. */
+/** Drops an intent that is not going to be used after all. */
+export function clearEnterIntent(): void {
+  try {
+    window.sessionStorage?.removeItem(ENTER_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Reads and clears the intent. Returns null if absent, stale or elsewhere. */
 export function takeEnterIntent(): EnterIntent | null {
   const raw = safeGet(window.sessionStorage, ENTER_KEY);
   try {
@@ -62,7 +92,8 @@ export function takeEnterIntent(): EnterIntent | null {
   try {
     const parsed = JSON.parse(raw) as EnterIntent & { at: number };
     if (Date.now() - parsed.at > ENTER_TTL_MS) return null;
-    return { code: parsed.code, label: parsed.label };
+    if (!samePath(parsed.path, window.location.pathname)) return null;
+    return { code: parsed.code, label: parsed.label, kind: parsed.kind ?? 'language' };
   } catch {
     return null;
   }
@@ -75,7 +106,15 @@ export function takeEnterIntent(): EnterIntent | null {
  */
 export const ENTER_FLAG_SNIPPET =
   `try{var r=sessionStorage.getItem('${ENTER_KEY}');if(r){var d=JSON.parse(r);` +
-  `if(Date.now()-d.at<${ENTER_TTL_MS}){var e=document.documentElement;e.setAttribute('data-entering','');` +
+  // Mirrors samePath(): only the page the intent was written for may paint
+  // the cover. Without this, a reload or a back button inside the TTL opens
+  // covered, under a title belonging to a page it never went to.
+  `var t=function(s){return String(s).replace(/\\/+$/,'')};` +
+  `if(Date.now()-d.at<${ENTER_TTL_MS}&&(!d.path||t(d.path)===t(location.pathname))){` +
+  `var e=document.documentElement;e.setAttribute('data-entering','');` +
+  // The cover's layout depends on what is being entered, and it is painted
+  // before this module's logic runs, so the kind has to be on the root too.
+  `if(d.kind)e.setAttribute('data-enter-kind',d.kind);` +
   // Dead man's switch: if the reveal module fails to load or throws, the
   // cover must not be allowed to trap the visitor on a blank screen.
   `setTimeout(function(){e.removeAttribute('data-entering')},2600)}}}catch(e){}`;

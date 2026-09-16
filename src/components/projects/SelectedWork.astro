@@ -54,6 +54,7 @@ const featuredProjects = await getFeaturedProjects(lang);
               data-reveal
               data-draw-group
               data-live={isLive ? '' : undefined}
+              data-title={t(project.title, lang)}
               style={`--reveal-delay:${index * 70}ms; --project-hue:${project.hue}`}
             >
               <a class="project__link" href={localePath(lang, `projects/${project.slug}`)}>
@@ -298,8 +299,13 @@ const featuredProjects = await getFeaturedProjects(lang);
 </style>
 
 <script>
+  import { initPlateTransition } from '~/motion/projects/plateTransition';
   import { initProjectPointerPreview } from '~/motion/projects/pointerPreview';
 
   const section = document.querySelector<HTMLElement>('[data-work]');
-  if (section) initProjectPointerPreview(section);
+  if (section) {
+    initProjectPointerPreview(section);
+    // Clicking a project grows its plate into the loading screen for the page.
+    initPlateTransition(section);
+  }
 </script>

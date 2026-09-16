@@ -30,6 +30,7 @@ export function playEnterReveal(cover: HTMLElement | null): void {
   };
 
   const settle = () => {
+    root.removeAttribute('data-enter-kind');
     if (cover) {
       cover.dataset.state = '';
       panelsOf(cover).forEach((p) => (p.style.transform = ''));
@@ -50,7 +51,15 @@ export function playEnterReveal(cover: HTMLElement | null): void {
   const intent = takeEnterIntent();
   const label = cover.querySelector<HTMLElement>('.transition-cover__label');
   const rule = cover.querySelector<HTMLElement>('.transition-cover__rule');
-  if (label && intent) label.textContent = intent.label;
+  const isProject = intent?.kind === 'project';
+  if (label && intent) {
+    label.textContent = intent.label;
+    // Long project titles scale down to fit (see .transition-cover__label).
+    label.style.setProperty('--label-len', String(intent.label.length));
+  }
+  // The project-mode rule sits under the title, so it is held back until the
+  // title is in place rather than painted centred and then moved.
+  if (rule && isProject) rule.style.visibility = 'visible';
 
   cover.dataset.state = 'out';
 
@@ -73,10 +82,13 @@ export function playEnterReveal(cover: HTMLElement | null): void {
     { duration: 320, easing: 'ease-in', fill: 'forwards' },
   );
 
+  // The full-width gate rule retracts to the right, the short project mark
+  // closes on its own centre — each undoing the way it was drawn.
+  const origin = isProject ? 'center' : 'right center';
   rule?.animate(
     [
-      { transform: 'scaleX(1)', transformOrigin: 'right center' },
-      { transform: 'scaleX(0)', transformOrigin: 'right center' },
+      { transform: 'scaleX(1)', transformOrigin: origin },
+      { transform: 'scaleX(0)', transformOrigin: origin },
     ],
     { duration: 420, easing: EASE_OUT, fill: 'forwards' },
   );
