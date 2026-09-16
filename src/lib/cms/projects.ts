@@ -8,6 +8,7 @@
  */
 
 import { cmsGet } from './client';
+import { withLocalEvidence } from './evidence';
 import { normalizeProject } from './normalize';
 import { usingPayload } from './source';
 import type { PayloadProject, PayloadListResponse } from './types';
@@ -27,7 +28,7 @@ export async function getProjects(locale: string): Promise<Project[]> {
     return (res?.docs ?? []).map(normalizeProject);
   }
 
-  return localProjects;
+  return localProjects.map((project) => withLocalEvidence(project, locale));
 }
 
 export async function getFeaturedProjects(locale: string): Promise<Project[]> {
@@ -47,7 +48,8 @@ export async function getProjectBySlug(slug: string, locale: string): Promise<Pr
     return doc ? normalizeProject(doc) : undefined;
   }
 
-  return localProjects.find((p) => p.slug === slug);
+  const local = localProjects.find((p) => p.slug === slug);
+  return local ? withLocalEvidence(local, locale) : undefined;
 }
 
 /** The next project in display order, wrapping at the end of the list. */

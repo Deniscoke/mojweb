@@ -3,6 +3,7 @@
  */
 
 import { cmsGet } from './client';
+import { withLocalEvidence } from './evidence';
 import { normalizeExperiment } from './normalize';
 import { usingPayload } from './source';
 import type { PayloadExperiment, PayloadListResponse } from './types';
@@ -23,7 +24,7 @@ export async function getExperiments(locale: string): Promise<Experiment[]> {
     return (res?.docs ?? []).map(normalizeExperiment);
   }
 
-  return localExperiments;
+  return localExperiments.map((experiment) => withLocalEvidence(experiment, locale));
 }
 
 export async function getExperimentBySlug(
@@ -45,5 +46,6 @@ export async function getExperimentBySlug(
   // Slugs and identifiers diverged once the snapshot started carrying real
   // URL slugs (`ai-unreal` vs `ai-controlling-unreal`), so match the slug
   // first and fall back to the id for older entries that have none.
-  return localExperiments.find((e) => (e.slug ?? e.id) === slug);
+  const local = localExperiments.find((e) => (e.slug ?? e.id) === slug);
+  return local ? withLocalEvidence(local, locale) : undefined;
 }

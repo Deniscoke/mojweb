@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" width="1200" height="660" role="img"
+     aria-label="AI Commerce Engine pipeline: a product brief and its sources produce a master, which is rendered into per-profile exports. Quality gates covering evidence, learner fit, learning value, agency, accessibility, culture and ethics, media and commercial checks are verified against SHA-256 hashes at product, profile or release scope. A product manifest records content-addressed exports, and a marketplace package is only released after an explicit human publish approval. Dry-run is the default, so no paid or network operation happens without that approval.">
+  <title>AI Commerce Engine — pipeline</title>
+
+  <defs>
+    <style>
+      .bg    { fill: #08080a; }
+      .panel { fill: #101014; stroke: #23232b; stroke-width: 1; }
+      .gate  { fill: #101014; stroke: #34343e; stroke-width: 1; }
+      .mono  { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+               font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; fill: #6b6862; }
+      .tiny  { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+               font-size: 10px; letter-spacing: 0.08em; fill: #6b6862; }
+      .h     { font-family: 'Inter Tight', Inter, system-ui, sans-serif; font-size: 17px; font-weight: 600;
+               letter-spacing: -0.01em; fill: #ebe7de; }
+      .b     { font-family: 'Inter Tight', Inter, system-ui, sans-serif; font-size: 13px; font-weight: 300;
+               fill: #a7a29a; }
+      .sig   { fill: #ff4a1c; }
+      .flow  { stroke: #34343e; stroke-width: 1.5; fill: none; }
+      .rule  { stroke: #23232b; stroke-width: 1; }
+    </style>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#34343e"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="660"/>
+
+  <text class="mono" x="56" y="52">AI Commerce Engine · product pipeline</text>
+  <line class="rule" x1="56" y1="70" x2="1144" y2="70"/>
+
+  <!-- ── STAGE ROW ─────────────────────────────────────────── -->
+  <g>
+    <rect class="panel" x="56" y="108" width="196" height="104" rx="2"/>
+    <text class="tiny" x="76" y="136">01</text>
+    <text class="h" x="76" y="162">Brief</text>
+    <text class="b" x="76" y="186">Audience, objectives,</text>
+    <text class="b" x="76" y="204">evidence claims</text>
+
+    <rect class="panel" x="284" y="108" width="196" height="104" rx="2"/>
+    <text class="tiny" x="304" y="136">02</text>
+    <text class="h" x="304" y="162">Sources</text>
+    <text class="b" x="304" y="186">Every claim traceable</text>
+    <text class="b" x="304" y="204">to where it came from</text>
+
+    <rect class="panel" x="512" y="108" width="196" height="104" rx="2"/>
+    <text class="tiny" x="532" y="136">03</text>
+    <text class="h" x="532" y="162">Master</text>
+    <text class="b" x="532" y="186">One source document,</text>
+    <text class="b" x="532" y="204">not one per format</text>
+
+    <rect class="panel" x="740" y="108" width="196" height="104" rx="2"/>
+    <text class="tiny" x="760" y="136">04</text>
+    <text class="h" x="760" y="162">Exports</text>
+    <text class="b" x="760" y="186">Per-profile render:</text>
+    <text class="b" x="760" y="204">A4, US Letter…</text>
+
+    <rect class="panel" x="968" y="108" width="176" height="104" rx="2"/>
+    <text class="tiny" x="988" y="136">05</text>
+    <text class="h" x="988" y="162">Previews</text>
+    <text class="b" x="988" y="186">Read-only catalog</text>
+    <text class="b" x="988" y="204">with fingerprints</text>
+
+    <path class="flow" d="M252 160 L284 160" marker-end="url(#b)"/>
+    <path class="flow" d="M480 160 L512 160" marker-end="url(#b)"/>
+    <path class="flow" d="M708 160 L740 160" marker-end="url(#b)"/>
+    <path class="flow" d="M936 160 L968 160" marker-end="url(#b)"/>
+  </g>
+
+  <!-- ── GATES ─────────────────────────────────────────────── -->
+  <path class="flow" d="M600 212 L600 258" marker-end="url(#b)"/>
+
+  <text class="mono sig" x="56" y="292">06 · Quality gates — a verdict only enters through a human review bound to subject hashes</text>
+
+  <rect class="gate" x="56" y="308" width="1088" height="104" rx="2"/>
+  <g class="mono" font-size="11">
+    <text x="82"  y="346">evidence</text>
+    <text x="216" y="346">learner_fit</text>
+    <text x="368" y="346">learning_value</text>
+    <text x="552" y="346">agency</text>
+    <text x="676" y="346">accessibility</text>
+    <text x="838" y="346">culture &amp; ethics</text>
+    <text x="1012" y="346">media</text>
+    <text x="82"  y="384">commercial</text>
+  </g>
+  <text class="b" x="216" y="385">Scope per check: product · profile · release — each verified against a SHA-256 of that subject.</text>
+
+  <!-- ── MANIFEST + APPROVAL ───────────────────────────────── -->
+  <path class="flow" d="M600 412 L600 452" marker-end="url(#b)"/>
+
+  <rect class="panel" x="56" y="452" width="530" height="118" rx="2"/>
+  <text class="tiny" x="78" y="480">07</text>
+  <text class="h" x="78" y="506">Product manifest</text>
+  <text class="b" x="78" y="530">Content-addressed exports behind a registrar lock:</text>
+  <text class="b" x="78" y="550">which inputs, which version, which outputs.</text>
+
+  <rect class="panel" x="614" y="452" width="530" height="118" rx="2"/>
+  <text class="tiny" x="636" y="480">08</text>
+  <text class="h" x="636" y="506">Publish approval &#8594; marketplace package</text>
+  <text class="b" x="636" y="530">Dry-run is the default. No network or paid operation</text>
+  <text class="b" x="636" y="550">runs without an explicit human approval.</text>
+
+  <path class="flow" d="M586 511 L614 511" marker-end="url(#b)"/>
+
+  <!-- ── FOOTER ────────────────────────────────────────────── -->
+  <line class="rule" x1="56" y1="602" x2="1144" y2="602"/>
+  <text class="mono" x="56" y="630">Marketplace-neutral core</text>
+  <text class="b" x="288" y="631">Channel limits live only in the channel&#8217;s own capability file and adapter, never in the pipeline.</text>
+</svg>

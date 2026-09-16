@@ -42,7 +42,8 @@ export default function mediaSnapshot() {
           docs = (await res.json()).docs ?? [];
         } catch (err) {
           // No CMS means the build ran on fallback data, which references no
-          // uploads at all — so there is nothing to snapshot and nothing broken.
+          // uploads — only the committed evidence in public/media/evidence/
+          // (see src/lib/cms/evidence.ts). Nothing to snapshot, nothing broken.
           logger.info(`no media to snapshot (${err.message})`);
           return;
         }
