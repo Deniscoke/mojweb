@@ -71,6 +71,13 @@ const readoutRows = [
 ];
 
 const title = `${t(project.title, code)} — ${site.author.name}`;
+
+/**
+ * The display title is set huge, and translated titles can hold one long word
+ * ("Výuka snowboardingu"). The longest word caps the size so it always fits on
+ * one line of a phone; short titles like "Pravo365" keep the full size.
+ */
+const titleChars = Math.max(...t(project.title, code).split(/\s+/).map((w) => w.length));
 const description = t(project.description, code);
 
 /**
@@ -109,7 +116,7 @@ const restMedia = media.slice(1);
         </p>
 
         <div class="project-page__title-block">
-          <h1 class="project-page__title is-name">{t(project.title, code)}</h1>
+          <h1 class="project-page__title is-name" style={`--title-chars:${titleChars}`}>{t(project.title, code)}</h1>
           {
             detail && (
               <p class="project-page__subtitle is-say">{t(detail.subtitle, code)}</p>
@@ -287,7 +294,10 @@ const restMedia = media.slice(1);
   }
 
   .project-page__title {
-    font-size: var(--t-mega);
+    /* 0.64em is the measured average glyph advance of the heavy uppercase
+       face; 3.5rem is the page gutter on a phone. */
+    font-size: min(var(--t-mega), calc((100vw - 3.5rem) / (var(--title-chars, 8) * 0.64)));
+    overflow-wrap: anywhere; /* last resort only — the size above should prevent it */
   }
 
   .project-page__subtitle {

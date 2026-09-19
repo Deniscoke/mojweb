@@ -23,7 +23,7 @@
 
   --c-bone: #ebe7de; /* primary text — warm, not pure white */
   --c-bone-dim: #a7a29a;
-  --c-bone-faint: #6b6862;
+  --c-bone-faint: #85817a; /* 4.6:1 on every surface — WCAG AA for small mono labels */
 
   --c-signal: #ff4a1c; /* the accent. Live status, links, focus. */
   --c-signal-ink: #1a0703; /* text on signal */
@@ -55,7 +55,7 @@
 
   /* ----------------------------------------------------- type scale by role */
   --t-micro: clamp(0.625rem, 0.6rem + 0.12vw, 0.6875rem);
-  --t-mono: clamp(0.6875rem, 0.66rem + 0.14vw, 0.75rem);
+  --t-mono: clamp(0.75rem, 0.72rem + 0.1vw, 0.8125rem); /* 12px floor: readable on a phone */
   --t-body: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
   --t-lead: clamp(1.125rem, 1rem + 0.7vw, 1.5rem);
   --t-h3: clamp(1.25rem, 1.05rem + 1vw, 1.75rem);

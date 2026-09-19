@@ -48,7 +48,7 @@ const links: NavLink[] = customLinks ?? [
 <header class="nav" data-nav>
   <div class="nav__inner">
     <!-- The accessible name contains the visible name (WCAG 2.5.3). -->
-    <a class="nav__brand" href={localePath(current.route)} aria-label={`${site.brandMark} — ${dict.nav.home}`}>
+    <a class="nav__brand hit" href={localePath(current.route)} aria-label={`${site.brandMark} — ${dict.nav.home}`}>
       <span class="nav__mark">{site.brandMark}</span>
     </a>
 
@@ -63,7 +63,10 @@ const links: NavLink[] = customLinks ?? [
     </nav>
 
     <details class="lang" data-lang-menu>
-      <summary class="mono lang__toggle touch-target" aria-label={dict.footer.languageLabel}>
+      <summary
+        class="mono lang__toggle touch-target"
+        aria-label={`${current.label} — ${dict.footer.languageLabel}`}
+      >
         <span aria-hidden="true">{current.label}</span>
         <span class="lang__caret" aria-hidden="true"></span>
       </summary>

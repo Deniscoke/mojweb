@@ -23,7 +23,11 @@ export default defineConfig({
     defaultStrategy: 'hover',
   },
   build: {
-    inlineStylesheets: 'auto',
+    // Every page's CSS is small (a few KB gzipped), and most visitors arrive
+    // once from an e-mail link with a cold cache. Inlining removes the
+    // render-blocking stylesheet round trip, which on a mobile connection is
+    // the single biggest delay before first paint.
+    inlineStylesheets: 'always',
   },
   // media-snapshot copies published Payload uploads into dist/media/ so the
   // built site carries its own images and needs nothing from the CMS at

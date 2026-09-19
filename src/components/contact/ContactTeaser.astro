@@ -69,11 +69,11 @@ const links = site.contact.links.filter((link) => Boolean(link.href));
               </span>
             </a>
             <p class="mono contact__direct">
-              <a class="link" href={`mailto:${email}`}>{email}</a>
+              <a class="link hit" href={`mailto:${email}`}>{email}</a>
               {phone && (
                 <span class="contact__phone">
                   <span aria-hidden="true"> · </span>
-                  <a class="link" href={`tel:${phone.replace(/\s+/g, '')}`}>{phone}</a>
+                  <a class="link hit" href={`tel:${phone.replace(/\s+/g, '')}`}>{phone}</a>
                 </span>
               )}
             </p>

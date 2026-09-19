@@ -118,6 +118,13 @@ body::after {
 }
 
 @media (pointer: coarse) {
+  /* Small inline links (e-mail, phone, brand) get a finger-sized hit area
+     without moving anything: padding grows, the negative margin cancels it. */
+  .hit {
+    padding-block: 0.75em;
+    margin-block: -0.75em;
+  }
+
   .touch-target {
     min-block-size: 44px;
     min-inline-size: 44px;
