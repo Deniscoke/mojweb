@@ -149,10 +149,26 @@ const bootScript = `document.documentElement.classList.add('js');${
 
   <body class={bodyClass} data-lang={lang}>
     <slot />
+
+    <script>
+      import { initCursorField } from '~/motion/pointer/cursorField';
+
+      initCursorField();
+    </script>
   </body>
 </html>
 
 <style is:global>
+  /* The cursor field paints above the page and below the language transition,
+     and never intercepts a click. It is created by the module only on a real
+     mouse, so there is nothing here for touch or reduced motion to pay for. */
+  .cursor-field {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-gate);
+    pointer-events: none;
+  }
+
   /* Painted before the reveal module loads, so the cover is opaque on the
      very first frame of the destination page. */
   html[data-entering] .transition-cover {
