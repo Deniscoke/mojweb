@@ -151,4 +151,47 @@ export const EVIDENCE: EvidenceSpec[] = [
       sk: 'Predvolený je dry-run: nič platené ani sieťové neprebehne bez výslovného schválenia a verdikt sa do záznamu dostane len naviazaný na hash.',
     },
   },
+  // ───────────────────────────────────────────── WEB & DIGITAL WORK
+  /**
+   * Live client sites, captured from the public web at 1440x900 and cropped to
+   * remove the browser scrollbar. Both are shipped, running on their own
+   * domain, and named here with Denis's approval — unlike the unsold proposals
+   * in docs/web-portfolio-selection.md, which stay out.
+   */
+  {
+    file: 'web-esenciaviva.webp',
+    width: 1424,
+    height: 900,
+    kind: 'screenshot',
+    project: 'web-digital-work',
+    order: 1,
+    alt: {
+      en: 'The Esencia Viva homepage: a pale, washed-out photograph of a woman standing by water fills the screen behind large serif type reading "Tělo nemusíte opravovat. Potřebuje být slyšeno." — the body does not need fixing, it needs to be heard. Below it a line about massage, aromatherapy, herbs and conscious body work, and two buttons — arrange a first session, and how it works.',
+      cs: 'Úvodní stránka Esencia Viva: bledá, prosvětlená fotografie ženy u vody vyplňuje celou plochu za velkým patkovým písmem „Tělo nemusíte opravovat. Potřebuje být slyšeno." Pod ním řádek o masážích, aromaterapii, bylinkách a vědomé práci s tělem a dvě tlačítka — domluvit první sezení a jak to probíhá.',
+      sk: 'Úvodná stránka Esencia Viva: bledá, presvetlená fotografia ženy pri vode vypĺňa celú plochu za veľkým pätkovým písmom „Tělo nemusíte opravovat. Potřebuje být slyšeno." Pod ním riadok o masážach, aromaterapii, bylinkách a vedomej práci s telom a dve tlačidlá — dohodnúť prvé sedenie a ako to prebieha.',
+    },
+    caption: {
+      en: 'Live at esenciaviva.cz. A one-person practice, in Czech: every route through the site ends at the same thing — booking a first session.',
+      cs: 'Živě na esenciaviva.cz. Praxe jednoho člověka, v češtině: každá cesta webem končí u téhož — domluvit první sezení.',
+      sk: 'Naživo na esenciaviva.cz. Prax jedného človeka, v češtine: každá cesta webom končí pri tom istom — dohodnúť prvé sedenie.',
+    },
+  },
+  {
+    file: 'web-elevatorservis.webp',
+    width: 1424,
+    height: 900,
+    kind: 'screenshot',
+    project: 'web-digital-work',
+    order: 2,
+    alt: {
+      en: 'The Elevator Servis homepage: a dark photograph of a lift machine room — steel cable drums and a technician in work trousers — behind white headline type reading "Servis výťahov v Banskej Bystrici a okolí" — lift servicing in and around Banská Bystrica — with the city underlined in yellow. A badge states the service radius is 80 km, a paragraph lists servicing, repairs, inspections and modernisation, and two buttons offer a non-binding enquiry or the emergency line.',
+      cs: 'Úvodní stránka Elevátor Servis: tmavá fotografie strojovny výtahu — ocelové lanové bubny a technik v pracovních kalhotách — za bílým nadpisem „Servis výťahov v Banskej Bystrici a okolí", s městem podtrženým žlutě. Odznak uvádí dojezd 80 km, odstavec vyjmenovává servis, opravy, odborné prohlídky a modernizaci a dvě tlačítka nabízejí nezávaznou poptávku nebo havarijní linku.',
+      sk: 'Úvodná stránka Elevátor Servis: tmavá fotografia strojovne výťahu — oceľové lanové bubny a technik v pracovných nohaviciach — za bielym nadpisom „Servis výťahov v Banskej Bystrici a okolí", s mestom podčiarknutým žlto. Odznak uvádza dojazd 80 km, odsek vymenúva servis, opravy, odborné prehliadky a modernizáciu a dve tlačidlá ponúkajú nezáväzný dopyt alebo havarijnú linku.',
+    },
+    caption: {
+      en: 'Live at elevatorservis.sk. A lift service company, in Slovak. The emergency call-out gets its own route in the header, separate from the ordinary enquiry — a broken lift is not a sales conversation.',
+      cs: 'Živě na elevatorservis.sk. Servisní firma na výtahy, ve slovenštině. Havarijní služba má v hlavičce vlastní cestu, oddělenou od běžné poptávky — porouchaný výtah není obchodní hovor.',
+      sk: 'Naživo na elevatorservis.sk. Servisná firma na výťahy, po slovensky. Havarijná služba má v hlavičke vlastnú cestu, oddelenú od bežného dopytu — pokazený výťah nie je obchodný hovor.',
+    },
+  },
 ];
