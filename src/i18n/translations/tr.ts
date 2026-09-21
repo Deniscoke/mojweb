@@ -5,7 +5,7 @@ export const tr: Dictionary = {
   meta: {
     title: 'Denis Mitrović — Fikirleri gerçeğe dönüştürüyorum',
     description:
-      'Teknoloji, eğitim, yapay zekâ ve yaratıcı işin kesişiminde çalışan bir creative technologist ve product builder. Projeler, prototipler ve denemeler.',
+      'Creative technologist, eğitmen ve hareket koçu: web siteleri ve yapay zekâ ürünleri, 3D ve Unreal Engine, okullar için proje labları, sirk ve snowboard.',
   },
   nav: {
     work: 'İşler',
@@ -155,6 +155,12 @@ export const tr: Dictionary = {
       note: 'Siz istemeden hiçbir şey yüklenmez: sahne {host} adresinden gelir ve tarayıcınızda çalışır.',
       open: 'Yeni pencerede aç',
     },
+  },
+  notFound: {
+    title: 'Bu sayfa burada değil.',
+    lead: 'Adres yanlış yazılmış olabilir ya da sayfa, bağlantı oluşturulduktan sonra taşınmış olabilir.',
+    home: 'Ana sayfaya dön',
+    languages: 'Ya da bir dil seçin',
   },
   footer: {
     colophon: 'Bu site de projeler gibi yapılıyor: elle, açıkta ve hâlâ değişerek.',

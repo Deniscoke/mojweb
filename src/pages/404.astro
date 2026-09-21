@@ -1,0 +1,127 @@
+---
+import { site } from '~/config/site';
+import { LOCALES } from '~/i18n/locales';
+import { useTranslations } from '~/i18n';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+
+/**
+ * 404 — one page for every address that does not exist.
+ *
+ * The host serves this same file for a missing /sk/… and a missing /tr/…, so
+ * the language cannot be known when it is built. It renders in English, and a
+ * few lines of script read the first path segment and switch the text and the
+ * "home" link to that locale. The six language links underneath work without
+ * any script at all, so nobody is ever stranded here.
+ *
+ * `noindex`, and no canonical or hreflang: a page served at every missing URL
+ * must not claim to be the canonical version of any of them.
+ */
+const strings = Object.fromEntries(
+  LOCALES.map((locale) => [locale.route, { lang: locale.htmlLang, ...useTranslations(locale.code).notFound }]),
+);
+const en = strings.en!;
+---
+
+<BaseLayout
+  lang="gate"
+  variant="gate"
+  title={`404 — ${site.author.name}`}
+  description={en.lead}
+  noindex
+>
+  <main id="main" class="not-found wrap">
+    <p class="mono not-found__code" aria-hidden="true">404</p>
+    <h1 class="not-found__title" data-nf="title">{en.title}</h1>
+    <p class="not-found__lead" data-nf="lead">{en.lead}</p>
+
+    <a class="action not-found__home" href="/" data-nf-home>
+      <span data-nf="home">{en.home}</span>
+      <span class="action__arrow" aria-hidden="true">&rarr;</span>
+    </a>
+
+    <nav class="not-found__langs" aria-labelledby="nf-langs">
+      <p id="nf-langs" class="mono not-found__langs-label" data-nf="languages">{en.languages}</p>
+      <ul role="list">
+        {
+          LOCALES.map((locale) => (
+            <li>
+              <a class="link hit" href={`/${locale.route}/`} hreflang={locale.htmlLang} lang={locale.htmlLang}>
+                {locale.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </main>
+
+  <script is:inline type="application/json" id="nf-strings" set:html={JSON.stringify(strings).replace(/</g, '\\u003c')} />
+</BaseLayout>
+
+<script>
+  type Strings = Record<string, { lang: string; title: string; lead: string; home: string; languages: string }>;
+
+  const route = location.pathname.split('/')[1] ?? '';
+  const source = document.getElementById('nf-strings')?.textContent;
+  const all: Strings = source ? JSON.parse(source) : {};
+  // Own keys only: `/constructor/` must not match an inherited member.
+  const locale = Object.hasOwn(all, route) ? all[route] : undefined;
+
+  if (locale) {
+    document.documentElement.lang = locale.lang;
+    for (const el of document.querySelectorAll<HTMLElement>('[data-nf]')) {
+      const key = el.dataset.nf as keyof typeof locale;
+      if (locale[key]) el.textContent = locale[key];
+    }
+    document.querySelector<HTMLAnchorElement>('[data-nf-home]')?.setAttribute('href', `/${route}/`);
+  }
+</script>
+
+<style>
+  .not-found {
+    min-block-size: 100svh;
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: var(--s-5);
+    padding-block: var(--s-8);
+  }
+
+  .not-found__code {
+    color: var(--c-signal);
+  }
+
+  .not-found__title {
+    font-size: var(--t-display);
+    font-weight: var(--fw-semi);
+    letter-spacing: var(--tr-tight);
+    line-height: 1;
+    max-inline-size: 16ch;
+    text-wrap: balance;
+  }
+
+  .not-found__lead {
+    color: var(--c-bone-dim);
+    font-size: var(--t-lead);
+    max-inline-size: 40ch;
+    text-wrap: pretty;
+  }
+
+  .not-found__langs {
+    margin-block-start: var(--s-6);
+    display: grid;
+    gap: var(--s-3);
+  }
+
+  .not-found__langs-label {
+    color: var(--c-bone-faint);
+  }
+
+  .not-found__langs ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3) var(--s-5);
+    margin: 0;
+    padding: 0;
+  }
+</style>

@@ -4,7 +4,7 @@ export const en: Dictionary = {
   meta: {
     title: 'Denis Mitrović — I make ideas real',
     description:
-      'Creative technologist and product builder working across technology, education, AI and creative work. Projects, prototypes and experiments.',
+      'Creative technologist, educator and movement coach: websites and AI products, 3D and Unreal Engine, project labs for schools, circus and snowboard coaching.',
   },
   nav: {
     work: 'Work',
@@ -154,6 +154,12 @@ export const en: Dictionary = {
       note: 'Nothing loads until you ask: the scene comes from {host} and runs in your browser.',
       open: 'Open in a new window',
     },
+  },
+  notFound: {
+    title: 'This page isn’t here.',
+    lead: 'The address may be mistyped, or the page has moved since the link was made.',
+    home: 'Back to the homepage',
+    languages: 'Or pick a language',
   },
   footer: {
     colophon: 'This site is built the way the projects are: by hand, in the open, still changing.',

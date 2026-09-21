@@ -22,6 +22,11 @@ interface Props {
   /** Open Graph image path relative to /public. Defaults to the site image. */
   ogImage?: string;
   ogImageAlt?: string;
+  /**
+   * For pages that must never be indexed or declared canonical — the 404,
+   * which is served at every address that does not exist.
+   */
+  noindex?: boolean;
 }
 
 const {
@@ -34,6 +39,7 @@ const {
   altPath = '',
   ogImage: ogImagePath = site.ogImage,
   ogImageAlt = `${site.author.name} — ${site.tagline}`,
+  noindex = false,
 } = Astro.props;
 
 const htmlLangAttr = htmlLang ?? (variant === 'gate' ? 'en' : getLocale(lang).htmlLang);
@@ -44,7 +50,7 @@ const htmlLangAttr = htmlLang ?? (variant === 'gate' ? 'en' : getLocale(lang).ht
  * Without it, canonical, og:url and hreflang are left out rather than pointed
  * at a guessed domain. The OG image then falls back to a root-relative path.
  */
-const origin = Astro.site;
+const origin = noindex ? undefined : Astro.site;
 const absolute = (path: string) => (origin ? new URL(path, origin).href : null);
 
 const canonical = absolute(Astro.url.pathname);
@@ -91,6 +97,7 @@ const bootScript = `document.documentElement.classList.add('js');${
 
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     {canonical && <link rel="canonical" href={canonical} />}
 
     {alternates.map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
@@ -111,7 +118,12 @@ const bootScript = `document.documentElement.classList.add('js');${
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
+    <!-- SVG for browsers that read it; the .ico, touch icon and manifest are
+         for everything that does not (npm run icons). -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#08080a" />
     <meta name="color-scheme" content="dark" />
 

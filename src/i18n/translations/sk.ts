@@ -4,7 +4,7 @@ export const sk: Dictionary = {
   meta: {
     title: 'Denis Mitrović — Robím z nápadov skutočnosť',
     description:
-      'Creative technologist a product builder na pomedzí technológií, vzdelávania, AI a kreatívnej tvorby. Projekty, prototypy a experimenty.',
+      'Creative technologist, pedagóg a tréner pohybu: weby a AI produkty, 3D a Unreal Engine, projektové laby pre školy, nový cirkus a výučba snowboardingu.',
   },
   nav: {
     work: 'Práca',
@@ -154,6 +154,12 @@ export const sk: Dictionary = {
       note: 'Kým nekliknete, nič sa nenačíta: scéna prichádza z {host} a beží vo vašom prehliadači.',
       open: 'Otvoriť v novom okne',
     },
+  },
+  notFound: {
+    title: 'Táto stránka tu nie je.',
+    lead: 'Adresa je možno preklepnutá, alebo sa stránka od vytvorenia odkazu presunula.',
+    home: 'Späť na úvod',
+    languages: 'Alebo si vyberte jazyk',
   },
   footer: {
     colophon: 'Tento web vzniká rovnako ako projekty: ručne, na svetle a stále sa mení.',

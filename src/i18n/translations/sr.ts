@@ -8,7 +8,7 @@ export const sr: Dictionary = {
   meta: {
     title: 'Denis Mitrović — Pretvaram ideje u stvarnost',
     description:
-      'Creative technologist i product builder na preseku tehnologije, obrazovanja, AI i kreativnog rada. Projekti, prototipovi i eksperimenti.',
+      'Creative technologist, edukator i trener pokreta: sajtovi i AI proizvodi, 3D i Unreal Engine, projektni labovi za škole, cirkus i snoubording.',
   },
   nav: {
     work: 'Radovi',
@@ -158,6 +158,12 @@ export const sr: Dictionary = {
       note: 'Ništa se ne učitava dok ne kliknete: scena dolazi sa {host} i radi u vašem pregledaču.',
       open: 'Otvori u novom prozoru',
     },
+  },
+  notFound: {
+    title: 'Ove stranice nema.',
+    lead: 'Adresa je možda pogrešno ukucana ili je stranica premeštena otkad je link napravljen.',
+    home: 'Nazad na početnu',
+    languages: 'Ili izaberite jezik',
   },
   footer: {
     colophon: 'Ovaj sajt nastaje isto kao i projekti: ručno, na otvorenom i još uvek se menja.',

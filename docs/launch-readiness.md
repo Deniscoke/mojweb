@@ -37,17 +37,15 @@ tam. **Ty:** kúpiť doménu (odporúčanie z predošla: `denismitrovic.cz`).
 canonical/sitemap/OG sa prepli. Kód netreba meniť — produkčnú URL si build berie
 z Vercelu sám.
 
-### A2. Vlastná 404 stránka · Ja
-Neexistujúca adresa dnes ukáže generickú Vercel stránku „404: NOT_FOUND" v
-angličtine, mimo dizajnu webu. Treba `404.astro` v štýle webu s odkazom späť.
-~30 min.
+### A2. Vlastná 404 stránka · ✅ hotové (21. 9.)
+Jedna stránka pre všetky jazyky, jazyk podľa adresy (`/sk/…` → slovensky), bez
+JavaScriptu angličtina a odkazy na všetkých 6 jazykov. Status 404, `noindex`,
+bez canonical a hreflang.
 
-### A3. Popis pre Google je zastaraný · Ja
-Meta description (text pod názvom vo výsledkoch Google) vo všetkých 6 jazykoch
-stále hovorí „Creative technologist and **product builder**… technology,
-education, AI and creative work". Hero od iterácie 5.1 hovorí „Creative
-Technologist · Educator · Movement Coach" a pohyb/učenie v popise úplne chýba.
-Prvý dojem z Google by protirečil webu. ~15 min.
+### A3. Popis pre Google · ✅ hotové (21. 9.)
+Nový meta description v 6 jazykoch (142–156 znakov) podľa toho, čo web
+naozaj ukazuje, a s tým istým názvom projektových labov, aký používa zvyšok
+každého jazyka.
 
 ### A4. Právne náležitosti · Spolu
 Web ponúka platené služby (sekcia „S čím môžem pomôcť", Web a digitálna práca).
@@ -86,13 +84,16 @@ dôveryhodnejšie je:
 
 | # | Čo | Prečo | Kto | Čas |
 |---|---|---|---|---|
-| B1 | **Bezpečnostné hlavičky** (`vercel.json`): CSP s povolením iba `app.splatoo.com` v iframe, `frame-ancestors 'self'`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` | Dnes je nastavené len HSTS. Bez `frame-ancestors` môže ktokoľvek vložiť tvoj web do iframe (clickjacking). CSP treba otestovať na všetkých 151 stránkach, lebo Astro vkladá štýly inline. | Ja | ~1 h |
-| B2 | **`Sitemap:` riadok v robots.txt** | Dnes tam je len `Allow: /` — vyhľadávače musia sitemap hľadať samy. | Ja | 5 min |
-| B3 | **Ikony**: `apple-touch-icon.png`, `favicon.ico`, web manifest | Existuje len `favicon.svg`. iOS pri „Pridať na plochu" a niektoré prehliadače/aplikácie SVG nepoužijú a ukážu prázdnu ikonu. | Ja | ~30 min |
+| B1 | ✅ **Bezpečnostné hlavičky a CSP** | Hotové 21. 9.: CSP s hashmi pre každý inline skript na každej stránke (bez `unsafe-inline` pre skripty), `frame-ancestors`, `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`. Overené: 151 stránok bez porušenia, vložený skript sa zablokuje, Splatoo funguje. | Ja | — |
+| B3 | ✅ **Ikony a web manifest** | Hotové 21. 9.: `favicon.ico`, `apple-touch-icon.png`, ikony 192/512 a maskable pre Android, `manifest.webmanifest` (`npm run icons`). | Ja | — |
 | B4 | **Štruktúrované dáta** (JSON-LD `Person` + `WebSite`) | Dnes 0 stránok. Pomáha Google spojiť meno „Denis Mitrović" s webom a profilmi. **Ty:** ktoré profily prepojiť (LinkedIn, GitHub, Instagram…)? | Spolu | ~20 min |
 | B5 | **Záloha CMS databázy** | `cms/data/payload.db` je len na tvojom notebooku (v `.gitignore`). Publikovaný text je v gite cez snapshot, ale koncepty a samotné CMS nie. Stačí automatická kópia do cloudu (OneDrive/Google Drive). | Spolu | ~15 min |
 | B6 | **E-mail na vlastnej doméne** | Kontakt je dnes `@gmail.com`. Po kúpe domény pôsobí `denis@…` profesionálnejšie; môže len presmerovať do Gmailu. | Ty (+ ja zmením adresu) | ~20 min |
 | B7 | **Preklikateľné doklady** (`sourceUrl`) | Screenshoty esenciaviva.cz a elevatorservis.sk sa nedajú prekliknúť. | Ja (tvoje rozhodnutie) | ~20 min |
+
+> **Oprava auditu:** pôvodná položka B2 („chýba `Sitemap:` v robots.txt") bola
+> chybná — pri audite som čítal lokálny build bez produkčnej URL. Produkcia
+> riadok `Sitemap:` má.
 
 ---
 
@@ -112,6 +113,6 @@ dôveryhodnejšie je:
 ## Odporúčané poradie
 
 1. **Ty:** doména + rozhodnutia A4 (podnikanie), A5 (jazyky), A6 (Splatoo), B4 (profily).
-2. **Ja, hneď a bez čakania na teba:** A2, A3, B1, B2, B3.
+2. ~~**Ja, hneď a bez čakania na teba:** A2, A3, B1, B3.~~ ✅ hotové 21. 9.
 3. **Ja, keď dodáš údaje:** A1, A4, A5, A6, B4, B6.
 4. **Spustenie** → potom sekcia C.

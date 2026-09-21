@@ -109,6 +109,14 @@ export interface Dictionary {
       open: string;
     };
   };
+  /** The 404 page. One page serves every locale; see src/pages/404.astro. */
+  notFound: {
+    title: string;
+    lead: string;
+    home: string;
+    /** Label above the six language links. */
+    languages: string;
+  };
   footer: {
     colophon: string;
     backToTop: string;

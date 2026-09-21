@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import { loadEnv } from 'vite';
+import csp from './integrations/csp.mjs';
 import mediaSnapshot from './integrations/media-snapshot.mjs';
 import sitemap from './integrations/sitemap.mjs';
 import { resolveSiteUrl } from './src/config/site-url.mjs';
@@ -32,9 +33,11 @@ export default defineConfig({
   // media-snapshot copies published Payload uploads into dist/media/ so the
   // built site carries its own images and needs nothing from the CMS at
   // runtime. sitemap writes sitemap.xml + robots.txt from the built pages.
+  // csp runs last: it hashes the final HTML, so nothing may change it after.
   integrations: [
     mediaSnapshot(),
     sitemap({ source: siteUrlSource, vercelEnv: env.VERCEL_ENV }),
+    csp({ vercelEnv: env.VERCEL_ENV }),
   ],
   devToolbar: { enabled: false },
 });

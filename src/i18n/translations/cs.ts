@@ -4,7 +4,7 @@ export const cs: Dictionary = {
   meta: {
     title: 'Denis Mitrović — Dělám z nápadů skutečnost',
     description:
-      'Zkoumám, jak se člověk učí, tvoří a žije s technologiemi, a stavím z toho reálné projekty. AI, Unreal Engine, pedagogika, pohyb a projektové laby pro střední školy.',
+      'Creative technologist, pedagog a trenér pohybu: weby a AI produkty, 3D a Unreal Engine, projektové laby pro školy, nový cirkus a výuka snowboardingu.',
   },
   nav: {
     work: 'Práce',
@@ -154,6 +154,12 @@ export const cs: Dictionary = {
       note: 'Dokud nekliknete, nic se nenačte: scéna přichází z {host} a běží ve vašem prohlížeči.',
       open: 'Otevřít v novém okně',
     },
+  },
+  notFound: {
+    title: 'Tahle stránka tu není.',
+    lead: 'Adresa je možná překlepnutá, nebo se stránka od vytvoření odkazu přesunula.',
+    home: 'Zpět na úvod',
+    languages: 'Nebo si vyberte jazyk',
   },
   footer: {
     colophon: 'Tenhle web vzniká stejně jako projekty: ručně, na světle a pořád se mění.',
