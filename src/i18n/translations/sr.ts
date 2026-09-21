@@ -153,6 +153,11 @@ export const sr: Dictionary = {
     relatedExperiments: 'Povezani eksperimenti',
     evidence: 'Dokazi',
     mediaPending: 'Još nije zabeleženo',
+    embed: {
+      load: 'Učitaj 3D scenu',
+      note: 'Ništa se ne učitava dok ne kliknete: scena dolazi sa {host} i radi u vašem pregledaču.',
+      open: 'Otvori u novom prozoru',
+    },
   },
   footer: {
     colophon: 'Ovaj sajt nastaje isto kao i projekti: ručno, na otvorenom i još uvek se menja.',

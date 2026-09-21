@@ -579,6 +579,105 @@ export const projectsData: Project[] = [
     }
   },
   {
+    slug: "splatoo",
+    title: "Splatoo",
+    category: {
+      en: "3D / Gaussian Splatting / Web",
+      sr: "3D / Gaussian Splatting / Veb"
+    },
+    description: {
+      en: "Real places captured in 3D and made explorable in any browser, with nothing to install. A collaboration on Splatoo.",
+      cs: "Skutečná místa zachycená ve 3D, prozkoumatelná v každém prohlížeči a bez instalace. Spolupráce na Splatoo.",
+      sk: "Skutočné miesta zachytené v 3D, preskúmateľné v každom prehliadači a bez inštalácie. Spolupráca na Splatoo.",
+      es: "Lugares reales capturados en 3D y explorables en cualquier navegador, sin instalar nada. Una colaboración en Splatoo.",
+      sr: "Stvarna mesta snimljena u 3D, koja se mogu istraživati u svakom pregledaču, bez instalacije. Saradnja na Splatoo.",
+      tr: "Gerçek mekânlar 3D olarak yakalanıyor ve hiçbir şey kurmadan her tarayıcıda keşfedilebiliyor. Splatoo üzerinde bir iş birliği."
+    },
+    status: [
+      "live"
+    ],
+    href: "https://splatoo.com/",
+    visual: "scan",
+    hue: 125,
+    featured: true,
+    detail: {
+      subtitle: {
+        en: "A real place, explorable from a link.",
+        cs: "Skutečné místo, prozkoumatelné z odkazu.",
+        sk: "Skutočné miesto, preskúmateľné z odkazu.",
+        es: "Un lugar real, explorable desde un enlace.",
+        sr: "Stvarno mesto, dostupno preko linka.",
+        tr: "Gerçek bir mekân, bir bağlantıdan keşfedilebilir."
+      },
+      question: {
+        en: "Can someone walk through a real place from a browser, with nothing to install?",
+        cs: "Dá se projít skutečným místem z prohlížeče, bez čehokoli k instalaci?",
+        sk: "Dá sa prejsť skutočným miestom z prehliadača, bez čohokoľvek na inštaláciu?",
+        es: "¿Se puede recorrer un lugar real desde el navegador, sin instalar nada?",
+        sr: "Može li se proći kroz stvarno mesto iz pregledača, bez ičega za instaliranje?",
+        tr: "Gerçek bir mekânda, hiçbir şey kurmadan tarayıcıdan dolaşılabilir mi?"
+      },
+      disciplines: [
+        "Gaussian splatting",
+        "Unreal Engine",
+        "Wayfinding",
+        "Web"
+      ],
+      sections: [
+        {
+          id: "overview",
+          body: [
+            {
+              en: "Splatoo turns real places into interactive 3D spaces that open in an ordinary browser — no app to install. I collaborate on it.",
+              cs: "Splatoo mění skutečná místa v interaktivní 3D prostory, které se otevřou v obyčejném prohlížeči — bez instalace aplikace. Spolupracuju na něm.",
+              sk: "Splatoo mení skutočné miesta na interaktívne 3D priestory, ktoré sa otvoria v obyčajnom prehliadači — bez inštalácie aplikácie. Spolupracujem na ňom."
+            },
+            {
+              en: "The scene on this page is Žďár nad Sázavou, presented the way Splatoo presents any space: a captured place you can move through yourself, rather than a video of someone else moving through it.",
+              cs: "Scéna na téhle stránce je Žďár nad Sázavou, představený tak, jak Splatoo představuje jakýkoli prostor: zachycené místo, kterým se pohybuješ sám, ne video, jak se jím pohybuje někdo jiný.",
+              sk: "Scéna na tejto stránke je Žďár nad Sázavou, predstavený tak, ako Splatoo predstavuje akýkoľvek priestor: zachytené miesto, ktorým sa pohybuješ sám, nie video, ako sa ním pohybuje niekto iný."
+            }
+          ]
+        },
+        {
+          id: "technology",
+          body: [
+            {
+              en: "A location is captured with Gaussian splatting, which keeps both the geometry and the atmosphere of a place instead of reducing it to a simplified model.",
+              cs: "Místo se zachytí metodou Gaussian splatting, která zachová geometrii i atmosféru místa, místo aby ho zjednodušila na model.",
+              sk: "Miesto sa zachytí metódou Gaussian splatting, ktorá zachová geometriu aj atmosféru miesta, namiesto toho, aby ho zjednodušila na model."
+            },
+            {
+              en: "On top of the capture goes a layer of points of interest, routes and content, so a scene works as wayfinding and not only as something to look at. The same scene runs on the web and on on-site kiosks.",
+              cs: "Na záznam se přidá vrstva bodů zájmu, tras a obsahu, takže scéna slouží k orientaci, ne jen k dívání. Stejná scéna běží na webu i na kioscích přímo na místě.",
+              sk: "Na záznam sa pridá vrstva bodov záujmu, trás a obsahu, takže scéna slúži na orientáciu, nie len na pozeranie. Tá istá scéna beží na webe aj na kioskoch priamo na mieste."
+            },
+            {
+              en: "Scenes can also be brought over from Unreal Engine and converted into splats, so a space does not have to exist physically to be presented this way.",
+              cs: "Scény se dají převést i z Unreal Engine do splatů, takže prostor nemusí fyzicky existovat, aby se dal takhle ukázat.",
+              sk: "Scény sa dajú previesť aj z Unreal Engine do splatov, takže priestor nemusí fyzicky existovať, aby sa dal takto ukázať."
+            }
+          ]
+        },
+        {
+          id: "state",
+          body: [
+            {
+              en: "Live at splatoo.com. Splatoo’s own site sets out where it is aimed: real estate, events, retail, tourism, golf, zoos and veterinary practices.",
+              cs: "Živě na splatoo.com. Web Splatoo sám uvádí, pro koho je určený: reality, akce, retail, cestovní ruch, golf, zoo a veterinární praxe.",
+              sk: "Naživo na splatoo.com. Web Splatoo sám uvádza, pre koho je určený: reality, podujatia, retail, cestovný ruch, golf, zoo a veterinárne ambulancie."
+            }
+          ]
+        }
+      ],
+      written: [
+        "en",
+        "cs",
+        "sk"
+      ]
+    }
+  },
+  {
     slug: "snowboard-coaching",
     title: {
       en: "Snowboard Coaching",

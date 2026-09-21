@@ -149,6 +149,11 @@ export const en: Dictionary = {
     relatedExperiments: 'Related experiments',
     evidence: 'Evidence',
     mediaPending: 'Not captured yet',
+    embed: {
+      load: 'Load the 3D scene',
+      note: 'Nothing loads until you ask: the scene comes from {host} and runs in your browser.',
+      open: 'Open in a new window',
+    },
   },
   footer: {
     colophon: 'This site is built the way the projects are: by hand, in the open, still changing.',

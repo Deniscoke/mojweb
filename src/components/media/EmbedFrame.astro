@@ -1,0 +1,181 @@
+---
+import ProjectVisual from '~/components/projects/ProjectVisual.astro';
+import type { EmbedSpec } from '~/data/embeds';
+import type { ProjectVisual as Visual } from '~/data/projects';
+import { useTranslations } from '~/i18n';
+
+interface Props {
+  embed: EmbedSpec;
+  lang: string;
+  /** The project's own plate stands in for the scene until it is asked for. */
+  visual: Visual;
+  hue: number;
+  seed: string;
+}
+
+const { embed, lang, visual, hue, seed } = Astro.props;
+const dict = useTranslations(lang);
+
+/**
+ * CLICK TO LOAD
+ * =============
+ * The scene is someone else's application: about a megabyte of script before
+ * it draws anything, plus that site's own analytics and error reporting. None
+ * of it is requested until the visitor presses the button. Until then this is
+ * the project's own generated plate and a plain button, so the page costs
+ * exactly what it did before the embed existed, and nobody's browser talks to
+ * a third party they did not choose.
+ *
+ * The link underneath always works, including with JavaScript off.
+ */
+const pick = (text: Record<'en' | 'cs' | 'sk', string> | undefined) =>
+  text ? ((text as Record<string, string>)[lang] ?? text.en) : undefined;
+
+const title = pick(embed.title)!;
+const caption = pick(embed.caption);
+const host = new URL(embed.src).host;
+---
+
+<figure class="embed" data-embed>
+  <div class="embed__frame" style={`--embed-ratio:${embed.ratio}`}>
+    <div class="embed__poster" data-embed-poster>
+      <ProjectVisual visual={visual} hue={hue} seed={seed} class="embed__plate" />
+      <div class="embed__cta">
+        <button
+          type="button"
+          class="action embed__load"
+          data-embed-load
+          data-src={embed.src}
+          data-title={title}
+        >
+          <span class="embed__play" aria-hidden="true">&#9654;</span>
+          {dict.project.embed.load}
+        </button>
+        <p class="embed__note">{dict.project.embed.note.replace('{host}', host)}</p>
+      </div>
+    </div>
+  </div>
+
+  <figcaption class="embed__caption">
+    {caption && <span>{caption}</span>}
+    <a class="link hit embed__open" href={embed.src} target="_blank" rel="noopener">
+      {dict.project.embed.open}
+      <span aria-hidden="true"> &#8599;</span>
+    </a>
+  </figcaption>
+</figure>
+
+<style>
+  .embed {
+    margin: 0;
+    display: grid;
+    gap: var(--s-3);
+  }
+
+  .embed__frame {
+    position: relative;
+    aspect-ratio: var(--embed-ratio, 16 / 9);
+    overflow: hidden;
+    background-color: var(--c-ink);
+    border: 1px solid var(--c-line);
+  }
+
+  .embed__poster,
+  .embed__frame :global(iframe) {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    border: 0;
+  }
+
+  .embed__poster :global(.embed__plate) {
+    position: absolute;
+    inset: 0;
+    opacity: 0.55;
+  }
+
+  .embed__cta {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--s-3);
+    padding: var(--s-5);
+    text-align: center;
+    background: radial-gradient(closest-side, rgb(8 8 10 / 0.82), rgb(8 8 10 / 0.35));
+  }
+
+  .embed__load {
+    font-size: var(--t-small, 0.875rem);
+    cursor: pointer;
+  }
+
+  .embed__play {
+    color: var(--c-signal);
+  }
+
+  .embed__note {
+    max-inline-size: 42ch;
+    margin: 0;
+    color: var(--c-bone-dim);
+    font-size: var(--t-mono);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  /* Too cramped for a sentence under the button on a phone; the button and
+     the caption link below still say everything that matters. */
+  @media (max-width: 29.99rem) {
+    .embed__note {
+      display: none;
+    }
+  }
+
+  .embed__caption {
+    color: var(--c-bone-faint);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-3) var(--s-5);
+    font-size: var(--t-small, 0.875rem);
+    line-height: 1.45;
+  }
+
+  .embed__open {
+    color: var(--c-bone-dim);
+    white-space: nowrap;
+  }
+</style>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-embed-load]')) {
+    button.addEventListener(
+      'click',
+      () => {
+        const figure = button.closest<HTMLElement>('[data-embed]');
+        const poster = figure?.querySelector<HTMLElement>('[data-embed-poster]');
+        if (!figure || !poster) return;
+
+        const frame = document.createElement('iframe');
+        frame.src = button.dataset.src ?? '';
+        frame.title = button.dataset.title ?? '';
+        frame.allow = 'fullscreen; xr-spatial-tracking; gyroscope; accelerometer';
+        frame.allowFullscreen = true;
+        frame.referrerPolicy = 'strict-origin-when-cross-origin';
+        // Scripts and its own origin (storage, workers, WebAssembly) are what
+        // the scene needs; navigating this page away is not.
+        frame.setAttribute(
+          'sandbox',
+          'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-pointer-lock',
+        );
+
+        poster.replaceWith(frame);
+        frame.focus();
+      },
+      { once: true },
+    );
+  }
+</script>

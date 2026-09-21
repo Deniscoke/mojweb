@@ -149,6 +149,11 @@ export const sk: Dictionary = {
     relatedExperiments: 'Súvisiace experimenty',
     evidence: 'Doklady',
     mediaPending: 'Zatiaľ nezachytené',
+    embed: {
+      load: 'Načítať 3D scénu',
+      note: 'Kým nekliknete, nič sa nenačíta: scéna prichádza z {host} a beží vo vašom prehliadači.',
+      open: 'Otvoriť v novom okne',
+    },
   },
   footer: {
     colophon: 'Tento web vzniká rovnako ako projekty: ručne, na svetle a stále sa mení.',

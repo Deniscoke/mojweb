@@ -150,6 +150,11 @@ export const es: Dictionary = {
     relatedExperiments: 'Experimentos relacionados',
     evidence: 'Evidencia',
     mediaPending: 'Aún sin capturar',
+    embed: {
+      load: 'Cargar la escena 3D',
+      note: 'No se carga nada hasta que lo pidas: la escena viene de {host} y se ejecuta en tu navegador.',
+      open: 'Abrir en una ventana nueva',
+    },
   },
   footer: {
     colophon: 'Esta web se construye igual que los proyectos: a mano, a la vista y todavía cambiando.',

@@ -150,6 +150,11 @@ export const tr: Dictionary = {
     relatedExperiments: 'İlgili deneyler',
     evidence: 'Kanıt',
     mediaPending: 'Henüz kaydedilmedi',
+    embed: {
+      load: '3D sahneyi yükle',
+      note: 'Siz istemeden hiçbir şey yüklenmez: sahne {host} adresinden gelir ve tarayıcınızda çalışır.',
+      open: 'Yeni pencerede aç',
+    },
   },
   footer: {
     colophon: 'Bu site de projeler gibi yapılıyor: elle, açıkta ve hâlâ değişerek.',

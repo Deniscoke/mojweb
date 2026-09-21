@@ -99,6 +99,15 @@ export interface Dictionary {
     evidence: string;
     /** Shown in place of media that has not been captured yet. */
     mediaPending: string;
+    /** Click-to-load facade for an interactive scene from another site. */
+    embed: {
+      /** Button that loads the scene. */
+      load: string;
+      /** Says what loading costs and where it comes from. `{host}` is replaced. */
+      note: string;
+      /** Always-available link that opens the scene on its own site. */
+      open: string;
+    };
   };
   footer: {
     colophon: string;

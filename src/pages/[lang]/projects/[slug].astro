@@ -1,6 +1,7 @@
 ---
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import EmbedFrame from '~/components/media/EmbedFrame.astro';
 import MediaFigure from '~/components/media/MediaFigure.astro';
 import SiteFooter from '~/components/contact/SiteFooter.astro';
 import SiteNav from '~/components/navigation/SiteNav.astro';
@@ -8,6 +9,7 @@ import ProjectVisual from '~/components/projects/ProjectVisual.astro';
 import Readout from '~/components/ui/Readout.astro';
 import TransitionCover from '~/components/ui/TransitionCover.astro';
 import { site } from '~/config/site';
+import { embedFor } from '~/data/embeds';
 import { LOCALES, localePath, t, useTranslations } from '~/i18n';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import {
@@ -91,8 +93,15 @@ const description = t(project.description, code);
  * have nothing to show yet.
  */
 const media = project.media ?? [];
-const heroMedia = media[0];
-const restMedia = media.slice(1);
+
+/**
+ * A live embed outranks a still: when the project is something you can use in
+ * the browser, the thing itself goes at the top, and any screenshots move down
+ * into the evidence block.
+ */
+const embed = embedFor(project.slug);
+const heroMedia = embed ? undefined : media[0];
+const restMedia = embed ? media : media.slice(1);
 
 /**
  * Every project page used to share og-default.png, so sending someone a link
@@ -166,9 +175,11 @@ const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
         </div>
       </header>
 
-      <div class="project-page__plate" data-reveal data-draw-group data-has-evidence={heroMedia ? '' : undefined}>
+      <div class="project-page__plate" data-reveal data-draw-group data-has-evidence={heroMedia || embed ? '' : undefined}>
         {
-          heroMedia ? (
+          embed ? (
+            <EmbedFrame embed={embed} lang={code} visual={project.visual} hue={project.hue} seed={project.slug} />
+          ) : heroMedia ? (
             <MediaFigure item={heroMedia} priority />
           ) : (
             <ProjectVisual visual={project.visual} hue={project.hue} seed={project.slug} />

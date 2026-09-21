@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "content:titles": "cross-env NODE_OPTIONS=--no-deprecation tsx src/content/titles.ts",
     "content:movement": "cross-env NODE_OPTIONS=--no-deprecation tsx src/content/movement.ts",
+    "content:splatoo": "cross-env NODE_OPTIONS=--no-deprecation tsx src/content/splatoo.ts",
     "restructure": "cross-env NODE_OPTIONS=--no-deprecation tsx src/content/restructure.ts",
     "media:import": "cross-env NODE_OPTIONS=--no-deprecation tsx src/content/media.ts",
     "content:import": "cross-env NODE_OPTIONS=--no-deprecation tsx src/content/import.ts",
