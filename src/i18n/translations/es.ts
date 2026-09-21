@@ -102,13 +102,14 @@ export const es: Dictionary = {
   },
   about: {
     label: 'Sobre mí',
-    title: 'Cómo surgió esto',
+    title: 'Hola, soy Denis',
+    arc: ['Tecnología', 'Aprendizaje', 'Movimiento', 'Creación'],
     paragraphs: [
-      'Varios años de enseñanza intensiva resultaron ser un laboratorio inusualmente práctico: un sitio donde se ve cómo aprende la gente de verdad, qué la mantiene y cómo recurre a la tecnología cuando nadie la califica por ello.',
-      'El movimiento enseña lo mismo desde el otro lado. En el circo y sobre una tabla el progreso es físico, repetitivo y bastante poco sentimental: lo intentas, no sale, cambias una cosa, vuelves a empezar.',
-      'En la tecnología ese bucle corre más rápido: una idea se convierte en un sistema o un producto y la respuesta llega en horas, no en temporadas. Están en la misma web porque son el mismo hábito aplicado a materiales distintos.',
+      'Construyo webs, productos digitales y cosas con IA: desde la web de un pequeño negocio, pasando por Pravo365, hasta un plugin para Unreal Engine y una colaboración en Splatoo. Y después de años enseñando, lo que más me sigue interesando es cómo aprende de verdad la gente y qué hace que siga adelante.',
+      'La otra mitad es el movimiento. Hago circo contemporáneo con niños y jóvenes —malabares, equilibrio, acrobacias— y en la pista enseño a la gente sus primeros giros en snowboard. Lo que más me gusta es el momento en que algo que llevaba tiempo sin salir de pronto sale. Lo intentas, no sale, cambias una cosa, vuelves a empezar.',
+      'Con la tecnología pasa exactamente lo mismo, solo que más rápido: en unas horas, una idea difusa se convierte en algo en lo que se puede hacer clic. Por eso está todo en la misma web. Echa un vistazo, juega un rato en el Lab y, si tienes una idea que todavía no tiene forma, escríbeme. Esas son mis favoritas.',
     ],
-    pull: 'No es un profesor que se pasó a la tecnología: es alguien que conecta disciplinas y convierte ideas vagas en algo que se puede probar.',
+    pull: 'Hago cosas con tecnología, enseño y me muevo mucho. Y no me apetece elegir solo una.',
   },
   currently: {
     label: 'Ahora mismo',

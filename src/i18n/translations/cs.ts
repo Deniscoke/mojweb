@@ -101,13 +101,14 @@ export const cs: Dictionary = {
   },
   about: {
     label: 'O mně',
-    title: 'Jak to vzniklo',
+    title: 'Ahoj, jsem Denis',
+    arc: ['Technologie', 'Učení', 'Pohyb', 'Tvorba'],
     paragraphs: [
-      'Několik let intenzivního učení se ukázalo jako nezvykle praktická laboratoř: místo, kde je vidět, jak se lidé doopravdy učí, co je u toho udrží a jak sahají po technologiích, když jim za ně nikdo nedává známku.',
-      'Pohyb učí to samé z druhé strany. V cirkuse a na snowboardu je pokrok fyzický, opakovaný a dost nesentimentální — zkusíš to, nejde to, změníš jednu věc, jdeš znovu.',
-      'V technologiích běží ta smyčka nejrychleji: z nápadu se stane systém nebo produkt a zpětná vazba přijde v hodinách, ne za sezónu. Jsou na jednom webu proto, že je to stejný návyk aplikovaný na jiný materiál.',
+      'Stavím weby, digitální produkty a věci s AI — od webu pro malou firmu přes Pravo365 až po plugin do Unreal Engine a spolupráci na Splatoo. A za ty roky učení mě pořád nejvíc zajímá, jak se lidi doopravdy učí a co je u toho udrží.',
+      'Druhá polovina je pohyb. S dětmi a mladými dělám nový cirkus — žonglování, rovnováhu, akrobacii — a na svahu učím lidi první oblouky na snowboardu. Nejvíc mě baví moment, kdy něco, co dlouho nešlo, najednou jde. Zkusíš, nejde to, změníš jednu věc, jdeš znovu.',
+      'S technologiemi je to úplně stejné, jen rychlejší: z mlhavého nápadu je za pár hodin něco, na co se dá kliknout. Proto je to všechno na jednom webu. Klidně se porozhlédni, pohraj si v Labu — a jestli máš nápad, který ještě nemá tvar, napiš mi. Takové mám nejradši.',
     ],
-    pull: 'Není to učitel, který přešel do IT — je to člověk, který propojuje obory a mění neurčité nápady v něco, co jde otestovat.',
+    pull: 'Dělám věci s technologiemi, učím lidi a hodně se hýbu. A nechce se mi vybírat jen jedno.',
   },
   currently: {
     label: 'Právě teď',
@@ -120,9 +121,9 @@ export const cs: Dictionary = {
   },
   contact: {
     label: 'Spolupráce',
-    title: 'Máte něco v hlavě?',
+    title: 'Máš něco v hlavě?',
     lead: 'Pojďme si o tom promluvit. Nedodělané myšlenky vítány — obvykle právě tam začíná to zajímavé.',
-    emailCta: 'Napište mi',
+    emailCta: 'Napiš mi',
     pending: 'Kontaktní údaje se doplňují.',
     elsewhere: 'Jinde',
   },

@@ -70,6 +70,8 @@ export interface Dictionary {
   about: {
     label: string;
     title: string;
+    /** The four areas, shown as a numbered strip above the prose. */
+    arc: string[];
     paragraphs: string[];
     pull: string;
   };

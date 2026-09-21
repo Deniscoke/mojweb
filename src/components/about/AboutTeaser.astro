@@ -9,15 +9,15 @@ const { lang } = Astro.props;
 const dict = useTranslations(lang);
 
 /**
- * ABOUT — a story, not a bio block.
+ * ABOUT — first person, in Denis's own register.
  *
- * The arc the brief describes (education → experimentation → technology →
- * products) is rendered as an actual visible progression rather than being
- * left implicit in the prose. These four words are labels for the narrative,
- * not claims about roles or dates — deliberately, since no dates, titles or
- * employers have been provided.
+ * The numbered strip names the four areas the prose walks through, in the
+ * same order. It used to be a hard-coded English list from the original brief
+ * (education → experimentation → technology → products), shown untranslated
+ * on every locale and describing a story the text no longer tells; it now
+ * comes from the dictionary like every other visible word.
  */
-const arc = ['Education', 'Experimentation', 'Technology', 'Products'];
+const arc = dict.about.arc;
 ---
 
 <section class="section section--lg about" id="about" aria-labelledby="about-title">

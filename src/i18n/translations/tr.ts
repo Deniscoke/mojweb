@@ -102,13 +102,14 @@ export const tr: Dictionary = {
   },
   about: {
     label: 'Hakkımda',
-    title: 'Bu nasıl bir araya geldi',
+    title: 'Merhaba, ben Denis',
+    arc: ['Teknoloji', 'Öğrenme', 'Hareket', 'Yaratıcılık'],
     paragraphs: [
-      'Birkaç yıl süren yoğun öğretmenlik, alışılmadık ölçüde pratik bir laboratuvara dönüştü: insanların gerçekte nasıl öğrendiğini, onları neyin sürdürdüğünü ve kimse not vermezken teknolojiye nasıl uzandıklarını görebildiğim bir yer.',
-      'Hareket aynı şeyi öbür taraftan öğretiyor. Sirkte ve tahtanın üstünde ilerleme bedensel, tekrarlı ve oldukça duygusuzdur — denersin, olmaz, bir şeyi değiştirirsin, yeniden başlarsın.',
-      'Bu döngü en hızlı teknolojide işliyor: bir fikir sisteme ya da ürüne dönüşüyor ve geri bildirim mevsimlerle değil saatlerle geliyor. Aynı sitede olmalarının nedeni, farklı malzemeye uygulanan aynı alışkanlık olmaları.',
+      'Web siteleri, dijital ürünler ve yapay zekâ ile işler geliştiriyorum — küçük bir işletmenin sitesinden Pravo365’e, Unreal Engine için bir eklentiden Splatoo üzerindeki iş birliğine kadar. Yıllarca öğretmenlik yaptıktan sonra beni hâlâ en çok ilgilendiren şey, insanların gerçekte nasıl öğrendiği ve onları neyin devam ettirdiği.',
+      'Diğer yarısı hareket. Çocuklar ve gençlerle çağdaş sirk yapıyorum — jonglörlük, denge, akrobasi — ve pistte insanlara snowboardda ilk dönüşlerini öğretiyorum. En sevdiğim an, uzun süre bir türlü olmayan bir şeyin birden olduğu an. Denersin, olmaz, bir şeyi değiştirirsin, yeniden başlarsın.',
+      'Teknolojide de tamamen aynısı, sadece daha hızlı: bulanık bir fikir birkaç saat içinde tıklanabilir bir şeye dönüşüyor. Bu yüzden hepsi aynı sitede. Rahatça etrafa bir göz at, Lab’da biraz oyna — ve henüz şekli olmayan bir fikrin varsa bana yaz. En sevdiklerim onlar.',
     ],
-    pull: 'Teknolojiye geçmiş bir öğretmen değil — disiplinleri birbirine bağlayan ve belirsiz fikirleri test edilebilir şeylere dönüştüren biri.',
+    pull: 'Teknolojiyle bir şeyler yapıyorum, insanlara öğretiyorum ve bolca hareket ediyorum. Ve sadece birini seçmek istemiyorum.',
   },
   currently: {
     label: 'Şu anda',
@@ -121,9 +122,9 @@ export const tr: Dictionary = {
   },
   contact: {
     label: 'İş birliği',
-    title: 'Aklınızda bir şey mi var?',
+    title: 'Aklında bir şey mi var?',
     lead: 'Konuşalım. Yarım kalmış düşünceler memnuniyetle karşılanır — ilginç iş genelde orada başlar.',
-    emailCta: 'Bana yazın',
+    emailCta: 'Bana yaz',
     pending: 'İletişim bilgileri ekleniyor.',
     elsewhere: 'Diğer yerler',
   },

@@ -105,13 +105,14 @@ export const sr: Dictionary = {
   },
   about: {
     label: 'O meni',
-    title: 'Kako je ovo nastalo',
+    title: 'Zdravo, ja sam Denis',
+    arc: ['Tehnologija', 'Učenje', 'Pokret', 'Stvaranje'],
     paragraphs: [
-      'Nekoliko godina intenzivnog rada u nastavi ispostavilo se kao neobično praktična laboratorija: mesto na kom se vidi kako ljudi zaista uče, šta ih drži i kako posežu za tehnologijom kada im niko za to ne daje ocenu.',
-      'Pokret uči isto to sa druge strane. U cirkusu i na dasci napredak je fizički, ponavljajući i prilično nesentimentalan — probaš, ne ide, promeniš jednu stvar, kreneš ponovo.',
-      'U tehnologiji ta petlja teče najbrže: ideja postaje sistem ili proizvod, a povratna informacija stiže za sate, a ne za sezonu. Na istom su sajtu jer su ista navika primenjena na različit materijal.',
+      'Gradim sajtove, digitalne proizvode i stvari sa AI — od sajta za malu firmu, preko Pravo365, do plugina za Unreal Engine i saradnje na projektu Splatoo. A posle godina podučavanja, i dalje me najviše zanima kako ljudi zaista uče i šta ih pri tome drži.',
+      'Druga polovina je pokret. Sa decom i mladima radim savremeni cirkus — žongliranje, ravnotežu, akrobatiku — a na stazi učim ljude prve zavoje na snoubordu. Najviše volim trenutak kada nešto što dugo nije išlo odjednom krene. Probaš, ne ide, promeniš jednu stvar, kreneš ponovo.',
+      'Sa tehnologijom je potpuno isto, samo brže: od maglovite ideje za nekoliko sati nastane nešto na šta može da se klikne. Zato je sve na jednom sajtu. Slobodno razgledaj, poigraj se u Labu — a ako imaš ideju koja još nema oblik, piši mi. Takve najviše volim.',
     ],
-    pull: 'Nije nastavnik koji je prešao u IT — to je neko ko povezuje discipline i pretvara nejasne ideje u nešto što može da se testira.',
+    pull: 'Pravim stvari sa tehnologijom, učim ljude i mnogo se krećem. I ne želim da biram samo jedno.',
   },
   currently: {
     label: 'Trenutno',
@@ -124,9 +125,9 @@ export const sr: Dictionary = {
   },
   contact: {
     label: 'Saradnja',
-    title: 'Imate nešto na umu?',
+    title: 'Imaš nešto na umu?',
     lead: 'Hajde da popričamo. Nedovršene misli su dobrodošle — tu obično počinje ono zanimljivo.',
-    emailCta: 'Pišite mi',
+    emailCta: 'Piši mi',
     pending: 'Kontakt podaci se dodaju.',
     elsewhere: 'Drugde',
   },

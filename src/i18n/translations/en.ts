@@ -101,13 +101,14 @@ export const en: Dictionary = {
   },
   about: {
     label: 'About',
-    title: 'How this came together',
+    title: 'Hi, I’m Denis',
+    arc: ['Technology', 'Learning', 'Movement', 'Creative work'],
     paragraphs: [
-      'Several years of intensive teaching turned out to be an unusually practical laboratory: a place to watch how people actually learn, what keeps them going, and how they reach for technology when nobody is grading them on it.',
-      'Movement taught the same thing from the other side. In circus and on a snowboard the progress is physical, repetitive and fairly unsentimental — you try, it does not work, you change one thing, you go again.',
-      'Technology is where that loop runs fastest: an idea becomes a system or a product, and the feedback arrives in hours rather than seasons. The three are on one site because they are the same habit applied to different material.',
+      'I build websites, digital products and things with AI — from a site for a small business, through Pravo365, to a plugin for Unreal Engine and a collaboration on Splatoo. And after years of teaching, what still interests me most is how people actually learn, and what keeps them going.',
+      'The other half is movement. I do contemporary circus with kids and young people — juggling, balance, acrobatics — and on the slopes I teach people their first turns on a snowboard. My favourite moment is when something that wouldn’t work for ages suddenly does. You try, it doesn’t work, you change one thing, you go again.',
+      'With technology it’s exactly the same, just faster: in a few hours a foggy idea turns into something you can click on. That’s why it’s all on one site. Have a look around, play in the Lab — and if you’ve got an idea that hasn’t found its shape yet, write to me. Those are my favourite.',
     ],
-    pull: 'Not a teacher who moved into tech — someone who connects disciplines and turns vague ideas into things you can actually test.',
+    pull: 'I make things with technology, I teach, and I’m always in motion. And I’d rather not pick just one.',
   },
   currently: {
     label: 'Currently',
