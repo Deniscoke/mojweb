@@ -43,20 +43,82 @@ const scan =
 ---
 
 <section class="hero" id="hero" data-hero>
-  <!-- Column rules. The editorial grid, made faintly visible. As the hero
-       scrolls out they lie down into a floor (see "The floor" below). -->
+  <!-- Column rules. The editorial grid, made faintly visible. On a desk, as
+       the hero scrolls out they lie down into a floor (see "The floor"
+       below). -->
   <div class="hero__rules grid12" aria-hidden="true">
     {Array.from({ length: 12 }, () => <span />)}
+  </div>
+
+  <!-- Desktop: the same twelve rules as they are once lying down — lit, solid
+       at the hinge, fading only at the far edge, closed by a ground rule.
+       Nothing is painted until the page moves (opacity 0 at rest). -->
+  <div class="hero__floor grid12" aria-hidden="true">
+    {Array.from({ length: 12 }, () => <span />)}
+  </div>
+
+  <!-- Below 62rem: the stage's ground, drawn once in perspective, static. Its
+       lines run up from the front of the stage and stop at an oval clearing
+       where the object stands, so no line ever crosses the scan. In the SVG
+       one unit is one CSS pixel (the band is 11rem = 176 units tall); x is
+       measured from the centre, where the anchor below puts the object. -->
+  <div class="hero__ground" aria-hidden="true">
+    <svg viewBox="-500 0 1000 176" preserveAspectRatio="xMidYMid slice" focusable="false">
+      <defs>
+        <radialGradient id="hero-ground-hole">
+          <stop offset="0.8" stop-color="#000" />
+          <stop offset="1" stop-color="#fff" />
+        </radialGradient>
+        <linearGradient id="hero-ground-depth" x1="0" y1="64" x2="0" y2="176" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#555" />
+          <stop offset="0.3" stop-color="#fff" />
+          <stop offset="0.82" stop-color="#fff" />
+          <stop offset="1" stop-color="#000" />
+        </linearGradient>
+        <linearGradient id="hero-ground-sides" x1="-200" y1="0" x2="200" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#000" />
+          <stop offset="0.24" stop-color="#fff" />
+          <stop offset="0.76" stop-color="#fff" />
+          <stop offset="1" stop-color="#000" />
+        </linearGradient>
+        <mask id="hero-ground-clear" maskUnits="userSpaceOnUse" x="-500" y="0" width="1000" height="176">
+          <rect x="-500" y="0" width="1000" height="176" fill="#fff" />
+          <ellipse cx="0" cy="102" rx="144" ry="56" fill="url(#hero-ground-hole)" />
+        </mask>
+        <mask id="hero-ground-fade" maskUnits="userSpaceOnUse" x="-500" y="0" width="1000" height="176">
+          <rect x="-500" y="0" width="1000" height="176" fill="url(#hero-ground-depth)" />
+        </mask>
+        <mask id="hero-ground-edge" maskUnits="userSpaceOnUse" x="-500" y="0" width="1000" height="176">
+          <rect x="-500" y="0" width="1000" height="176" fill="url(#hero-ground-sides)" />
+        </mask>
+      </defs>
+      <g mask="url(#hero-ground-edge)">
+        <g mask="url(#hero-ground-fade)">
+          <g mask="url(#hero-ground-clear)">
+            {
+              /* Receding lines: one every 88 px along the front edge (the
+                 phone's column rhythm), all converging on a point 60 px
+                 above the band. The pair either side of the centre is left
+                 out: under the object they would read as its legs. */
+              [132, 220, 308, 396].flatMap((x) => [x, -x]).map((x) => (
+                <line x1={x} y1="176" x2={(x * 124) / 236} y2="64" />
+              ))
+            }
+            {
+              /* Cross lines at equal steps of depth (1 / distance), from the
+                 far edge forward. */
+              [64.5, 81.5, 103.5, 133.5].map((y) => <line class="is-cross" x1="-500" y1={y} x2="500" y2={y} />)
+            }
+          </g>
+        </g>
+      </g>
+    </svg>
   </div>
 
   {
     /* The scan host. The engine appends its own canvas here once the page has
        revealed, loaded and gone idle, and only on a GPU that can afford it. */
-    scan && (
-      <div class="hero__scan" aria-hidden="true" data-desktop={scan.files.desktop} data-mobile={scan.files.mobile}>
-        <span class="hero__scan-anchor" />
-      </div>
-    )
+    scan && <div class="hero__scan" aria-hidden="true" data-desktop={scan.files.desktop} data-mobile={scan.files.mobile} />
   }
 
   <div class="wrap hero__inner grid12">
@@ -90,9 +152,18 @@ const scan =
     </a>
 
     <!-- The stage (below 62rem): a fixed band under the readout, part of the
-         layout from first paint, where the rules come to rest and the scan
-         stands. Empty, it is still framed by the rules running through it. -->
+         layout from first paint, where the scan stands. Empty, it is still a
+         floor: the ground (.hero__ground) is drawn in it whether or not a
+         scan ever arrives. -->
     <div class="hero__stage" aria-hidden="true"></div>
+
+    {
+      /* The box the scan stands in: its centre, its width, and its bottom
+         edge as the ground. It lives in this grid, not over it, so it is
+         placed by the same rows as the readout and can never sink into it.
+         Absolutely placed: it takes no part in the grid's flow. */
+      scan && <span class="hero__scan-anchor" aria-hidden="true" />
+    }
 
     {
       /* What the scan is, and where it comes from. It captions a JS-only
@@ -145,50 +216,139 @@ const scan =
     border-inline-start: 0;
   }
 
-  /* A phone's grid has four columns, so it gets four rules, not twelve. They
-     run on down through the stage, so the band is framed even when empty,
-     and fade out only over the hero's bottom padding. */
-  @media (max-width: 47.99rem) {
+  /* Below 62rem the rules stop above the scroll cue: the stage under it has
+     a ground of its own (below), and a rule running on through the band
+     would cut through the object standing there. A phone's grid has four
+     columns, so it gets four rules, not twelve. */
+  @media (max-width: 61.99rem) {
     .hero__rules {
-      mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 calc(100% - var(--s-7)), transparent);
+      --stage-reach: calc(var(--s-7) + 11rem + var(--s-5) + 44px);
+      mask-image: linear-gradient(
+        to bottom,
+        transparent,
+        #000 20%,
+        #000 calc(100% - var(--stage-reach) - 6rem),
+        transparent calc(100% - var(--stage-reach))
+      );
     }
+  }
 
+  @media (max-width: 47.99rem) {
     .hero__rules > span:nth-child(n + 5) {
       display: none;
+    }
+  }
+
+  /* ------------------------------------------------------------- the floor */
+
+  /**
+   * Desktop. The same twelve rules, drawn as they are once they lie down:
+   * lit (bone, not the faint line colour of the standing grid), solid at the
+   * hinge where the floor meets the reader, fading only towards the far
+   * edge, and closed by a ground rule along the hinge. At rest it paints
+   * nothing; as the page moves it turns with the standing rules and takes
+   * over from them (see "The floor" below).
+   */
+  .hero__floor {
+    --floor-line: color-mix(in srgb, var(--c-bone) 16%, transparent);
+    position: absolute;
+    inset: 0;
+    inline-size: min(100% - var(--gutter) * 2, var(--w-max));
+    margin-inline: auto;
+    pointer-events: none;
+    overflow-anchor: none;
+    opacity: 0;
+    border-block-end: 1px solid color-mix(in srgb, var(--c-bone) 26%, transparent);
+    /* Two cross rules, one column pitch apart, so the first cells off the
+       hinge are square: foreshortened, they are what makes it a floor. Only
+       two, and only near the hinge, so they stay below the readout. */
+    --floor-pitch: calc((min(100vw - var(--gutter) * 2, var(--w-max)) + var(--col-gap)) / 12);
+    --floor-cross: linear-gradient(var(--floor-line), var(--floor-line));
+    background:
+      var(--floor-cross) 0 calc(100% - var(--floor-pitch)) / 100% 1px no-repeat,
+      var(--floor-cross) 0 calc(100% - var(--floor-pitch) * 2) / 100% 1px no-repeat;
+    /* Solid for the near three quarters, so as it lies down its far edge
+       comes back to meet the object's base, then passes under it. */
+    mask-image: linear-gradient(to bottom, transparent 2%, #000 30%);
+  }
+
+  .hero__floor > span {
+    border-inline-start: 1px solid var(--floor-line);
+  }
+
+  .hero__floor > span:first-child {
+    border-inline-start: 0;
+  }
+
+  /**
+   * Below 62rem: the stage's ground. Drawn in perspective once, in the band
+   * the scan stands in (the host lies exactly over it), under the canvas.
+   * Static on purpose: a phone does not rotate anything (§1 rule 8), so the
+   * floor is drawn already lying down rather than squashed into place.
+   */
+  .hero__ground {
+    display: none;
+    position: absolute;
+    inset: auto 0 var(--s-7);
+    inline-size: min(100% - var(--gutter) * 2, var(--w-max));
+    block-size: 11rem;
+    margin-inline: auto;
+    pointer-events: none;
+    overflow-anchor: none;
+  }
+
+  .hero__ground svg {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: visible;
+  }
+
+  .hero__ground line {
+    stroke: var(--c-bone);
+    stroke-opacity: 0.2;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .hero__ground line.is-cross {
+    shape-rendering: crispEdges;
+  }
+
+  @media (max-width: 61.99rem) {
+    .hero__floor {
+      display: none;
+    }
+
+    .hero__ground {
+      display: block;
     }
   }
 
   /* -------------------------------------------------------------- the scan */
 
   /**
-   * Over the whole hero, under the text, laid out on the same twelve columns
-   * as the page so the object is placed by the grid, not by the window: the
-   * anchor is the box it stands in (its centre, its width, and its bottom
-   * edge as the ground). The engine draws its canvas over the whole host.
+   * Over the whole hero, under the text. The engine draws its canvas over
+   * the whole host and stands the object in `.hero__scan-anchor`, a box in
+   * the hero's own grid (below), so the grid places it, not the window.
    *
-   * Desktop: columns 7–11, the empty field right of the statement, standing
-   * at 62% of the hero's height — above the readout, which starts lower, so
-   * the object rises into the empty upper right of the grid. The mask only
-   * keeps it off the statement (which ends near half the width); it used to
-   * start inside the object and fade its whole left half out.
+   * Desktop: the mask only keeps it off the statement (which ends near half
+   * the width); it used to start inside the object and fade its whole left
+   * half out.
    */
   .hero__scan {
     position: absolute;
     inset: 0;
     z-index: var(--z-ambient);
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    grid-template-rows: 62%;
-    column-gap: var(--col-gap);
-    padding-inline: calc((100% - min(100% - var(--gutter) * 2, var(--w-max))) / 2);
     pointer-events: none;
     overflow-anchor: none;
     mask-image: linear-gradient(to right, transparent 44%, #000 54%);
   }
 
   .hero__scan-anchor {
-    grid-column: 7 / span 5;
-    grid-row: 1;
+    position: absolute;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .hero__scan-cap {
@@ -339,6 +499,20 @@ const scan =
       display: none;
     }
 
+    /* Columns 7–11, the empty field right of the name, standing a quarter of
+       its own width above the end of the name block. The readout begins one
+       row gap below that line, and the object's ground disc reaches about
+       0.23 of its width in front of where it stands, so the whole footprint
+       stays clear of the table at any window height. (A percentage margin
+       of a grid item is a share of its grid area's width.) */
+    .hero__scan-anchor {
+      grid-column: 7 / span 5;
+      grid-row: 1 / span 2;
+      inset-inline: 0;
+      inset-block-end: 0;
+      margin-block-end: 25%;
+    }
+
     /* Under the object, on the cue's line: columns 7–9 of the row that holds
        SCROLL, right-aligned so a longer locale grows into the empty column 6,
        never into the readout. */
@@ -385,19 +559,23 @@ const scan =
     }
 
     /* The host lies exactly over the stage, which ends where the hero's
-       bottom padding begins. The object stands centred in it, at 62% of the
-       band, as wide as the band allows without crowding its edges. */
+       bottom padding begins. The object stands centred in it, 13rem wide,
+       its ground 5rem above the band's foot: roof to ground disc, it then
+       fills the band without touching its edges, and stands in the oval
+       clearing the ground (.hero__ground) leaves for it. */
     .hero__scan {
       inset: auto 0 var(--s-7);
       block-size: 11rem;
-      grid-template-columns: minmax(0, 1fr);
       mask-image: none;
     }
 
     .hero__scan-anchor {
-      grid-column: 1;
-      justify-self: center;
-      inline-size: min(100%, 18rem);
+      grid-column: 1 / -1;
+      grid-row: 6;
+      inset-inline: 0;
+      inset-block-end: 5rem;
+      inline-size: 13rem;
+      margin-inline: auto;
     }
 
     /* Under the stage, right-aligned, like the caption of a figure. The stage
@@ -412,31 +590,44 @@ const scan =
 
   /**
    * THE FLOOR — the grid lies down, and the scan stands on it.
-   * As the hero scrolls out, the column rules rotate back about their bottom
-   * edge into a perspective floor (at most --floor-max-rot, 50°) and dim from
-   * 0.55 to 0.3; the first name drifts onto a farther plane, higher and a
-   * little smaller, the way things recede along a floor; the last name
-   * follows at a third of the distance. The statement holds its plane, and
-   * the aside and disciplines belong to the pointer, never to scroll.
+   * Desktop. As the hero scrolls out, the column rules rotate back about
+   * their bottom edge into a perspective floor (at most --floor-max-rot,
+   * 50°), and the lit floor turns with them, taking over by a third of the
+   * way: the standing grid is a watermark, the floor is a surface you can
+   * see. It never dims while it lies down. The first name drifts onto a
+   * farther plane, higher and a little smaller, the way things recede along
+   * a floor; the last name follows at a third of the distance. The statement
+   * holds its plane, and the aside and disciplines belong to the pointer,
+   * never to scroll.
    *
    * Everything is on the root scroll timeline, so it runs on the compositor
-   * and is exactly in step with the page. It starts at 8vh, so at scroll 0
-   * nothing has a transform. `forwards` holds the floor down for as long as
-   * the hero is still leaving. The names move on `.line`, never on
-   * `.line__inner`, which owns the reveal.
+   * (transform and opacity only) and is exactly in step with the page. It
+   * starts at 8vh, so at scroll 0 nothing has a transform. `forwards` holds
+   * the floor down for as long as the hero is still leaving. The names move
+   * on `.line`, never on `.line__inner`, which owns the reveal.
    *
    * The floor is attached on the first scroll (`data-floor`, set by the
    * script below), not at load: a 3D animation gets a compositor layer even
    * before its range starts, and a layer under the hero's text re-rasterises
    * the text over it. Until the page moves, the hero is today's to the pixel.
+   *
+   * Below 62rem nothing here rotates: the stage has its own ground, drawn
+   * lying down, and only the name planes move.
    */
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
-      :global(:root:not([data-calm])) .hero[data-floor] .hero__rules {
-        transform-origin: 50% 100%;
-        animation: hero-floor linear forwards;
-        animation-timeline: scroll(root);
-        animation-range: 8vh 70vh;
+      @media (min-width: 62rem) {
+        :global(:root:not([data-calm])) .hero[data-floor] .hero__rules,
+        :global(:root:not([data-calm])) .hero[data-floor] .hero__floor {
+          transform-origin: 50% 100%;
+          animation: hero-floor linear forwards;
+          animation-timeline: scroll(root);
+          animation-range: 8vh 70vh;
+        }
+
+        :global(:root:not([data-calm])) .hero[data-floor] .hero__floor {
+          animation-name: hero-floor-lit;
+        }
       }
 
       :global(:root:not([data-calm])) .hero__name .line {
@@ -452,39 +643,42 @@ const scan =
 
       /* Below 62rem the hero is shorter than the viewport: it is gone sooner. */
       @media (max-width: 61.99rem) {
-        :global(:root:not([data-calm])) .hero[data-floor] .hero__rules,
         :global(:root:not([data-calm])) .hero__name .line {
           animation-range: 4vh 50vh;
-        }
-      }
-
-      /* Phones never rotate (§1 rule 8): the four rules settle down into the
-         stage instead, scaling about its floor line. */
-      @media (max-width: 47.99rem) {
-        :global(:root:not([data-calm])) .hero[data-floor] .hero__rules {
-          transform-origin: 50% calc(100% - var(--s-7));
-          animation-name: hero-floor-settle;
         }
       }
     }
   }
 
+  /* The standing rules hand over to the lit floor in the first third. */
   @keyframes hero-floor {
     from {
       transform: perspective(var(--persp)) rotateX(0deg);
     }
 
+    35% {
+      opacity: 0;
+    }
+
     to {
       transform: perspective(var(--persp)) rotateX(var(--floor-max-rot));
-      /* × the rules' own 0.55 = 0.3 */
-      opacity: 0.55;
+      opacity: 0;
     }
   }
 
-  /* 0.24: about the stage's share of a phone hero, measured from its floor. */
-  @keyframes hero-floor-settle {
+  @keyframes hero-floor-lit {
+    from {
+      transform: perspective(var(--persp)) rotateX(0deg);
+      opacity: 0;
+    }
+
+    35% {
+      opacity: 1;
+    }
+
     to {
-      scale: 1 0.24;
+      transform: perspective(var(--persp)) rotateX(var(--floor-max-rot));
+      opacity: 1;
     }
   }
 

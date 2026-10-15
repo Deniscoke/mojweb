@@ -23,7 +23,7 @@ export interface ScanInputs {
   pointer?: boolean;
   /**
    * Scroll turns the turntable as an element leaves the viewport (`true` =
-   * the host): 0 → 24° with a fine pointer, 0 → 30° on touch, plus up to 8%
+   * the host): 0 → 120° with a fine pointer, 0 → 90° on touch, plus up to 8%
    * dolly with a fine pointer only.
    */
   scroll?: boolean | Element;
@@ -83,22 +83,32 @@ interface ModeSpec {
 }
 
 const MODES: Record<ScanMode, ModeSpec> = {
-  // Columns 7–11 of the 12-column hero, standing at 62% of its height.
-  hero: { place: [0.71, 0.4, 0.62], pitch: 21, look: [6, 3] },
+  // Without an anchor: about columns 7–11 of the 12-column hero, standing at
+  // half its height (the site passes an anchor; this is for the harness).
+  hero: { place: [0.71, 0.37, 0.5], pitch: 21, look: [6, 3] },
   poster: { place: [0.5, 0.7, 0.66], pitch: 24, look: [15, 6] },
 };
 
 /**
  * A host shorter than this is the mobile hero's stage band (11rem): the
- * object stands centred in it, as wide as the band's height allows.
+ * object stands centred in it, as wide as the band's height allows. Ground
+ * disc to roof, the scan is about half as tall as it is wide.
  */
 const BAND_MAX_PX = 260;
-const BAND: ModeSpec['place'] = [0.5, 0.72, 0.62];
+const BAND: ModeSpec['place'] = [0.5, 0.72, 0.55];
 
-// Per-point alpha cap [touch, fine]. Text the object may pass behind is
-// protected by the mask rects (20% of this inside them), so the cap only has
-// to keep the object itself quiet; at 0.2/0.22 it read as a grey smudge.
-const ALPHA = [0.28, 0.32];
+// Per-point alpha cap [touch, fine]. The object now stands clear of every
+// line of text (and the mask rects keep 20% of this behind any it nears), so
+// the cap is set for the object to read as a lit thing, not as a smudge.
+const ALPHA = [0.4, 0.44];
+/**
+ * Scroll turntable, degrees over the hero's whole exit [touch, fine]. On a
+ * desk the object is gone a little past half the exit, so a third of a turn
+ * shows about 65° of it; on a phone the stage crosses the whole screen, so a
+ * quarter turn shows almost all of itself. Either way a full face of the
+ * building comes round under the thumb.
+ */
+const TURN = [90, 120];
 const SWEEP_MS = 1800;
 const FADE_MS = 900;
 const DISTANCE = 4.5; // camera distance in object radii: gentle perspective
@@ -368,7 +378,7 @@ export function mount(host: HTMLElement, opts: ScanOptions): ScanEngine {
     const band = box.height < BAND_MAX_PX;
     const place = band ? BAND : mode.place;
     const cx = a ? a.left + a.width / 2 - box.left : place[0] * box.width;
-    const w = a ? a.width : Math.min(place[1] * box.width, band ? box.height * 1.6 : Infinity);
+    const w = a ? a.width : Math.min(place[1] * box.width, band ? box.height * 1.2 : Infinity);
     const base = a ? a.bottom - box.top : place[2] * box.height;
     U.set([(cx / box.width) * 2 - 1, 1 - (base / box.height) * 2, w / box.width, w / box.height], 12);
     // About the spacing between neighbouring points on screen, so density
@@ -378,7 +388,12 @@ export function mount(host: HTMLElement, opts: ScanOptions): ScanEngine {
     U[19] = ALPHA[+fine];
     U.fill(0, 20, 32);
     (opts.masks ?? []).slice(0, 3).forEach((el, i) => {
-      const r = el.getBoundingClientRect();
+      // The text, not the box: a paragraph's box runs to its max width, far
+      // past its last word, and would cut a dark slab out of the object.
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const t = range.getBoundingClientRect();
+      const r = t.width && t.height ? t : el.getBoundingClientRect();
       const x = (v: number) => (v - box.left) * scale;
       const y = (v: number) => (box.bottom - v) * scale;
       U.set([x(r.left - 10), y(r.bottom + 10), x(r.right + 10), y(r.top - 10)], 20 + i * 4);
@@ -463,7 +478,7 @@ export function mount(host: HTMLElement, opts: ScanOptions): ScanEngine {
     let height = 1;
     const onScroll = () => {
       const progress = clamp((scrollY - top) / height, 0, 1);
-      parts.scrollYaw = progress * (fine ? 24 : 30);
+      parts.scrollYaw = progress * TURN[+fine];
       parts.scrollDolly = fine ? progress * 0.08 : 0;
       kick();
     };

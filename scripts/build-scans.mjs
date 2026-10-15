@@ -75,13 +75,18 @@ const ID = args.id ?? basename(SRC).replace(/\.ply$/i, '').toLowerCase().replace
  *   focus      metres from the centre where sampling is densest (0 = even)
  *   focusGain  how much coarser the voxels are outside `focus`
  *
- * kasna: the fountain house is about 5.5 m in radius on a lawn of about
- * 12 m; at even density the lawn takes two thirds of the points and the
- * building reads as a bump. Focus spends the budget on the building while
- * the lawn and path stay, thinner, as the honest edge of the capture.
+ * kasna: the fountain house is a hexagon about 5.2 m to its corners, on a
+ * lawn that runs out to 14 m. Kept whole, the lawn set the object's size
+ * (the engine scales the widest horizontal extent to the box it stands in),
+ * so the building was drawn at a third of the width, inside a disc of
+ * sparse ground points that spilled onto the readout under it. Cropped at
+ * 5.9 m, the scan is the building on its own plinth of ground, drawn twice
+ * the size from the same 10k points, and the site's floor is the ground
+ * around it. The thin ring past 5.2 m is sampled coarser, so the plinth
+ * stays the honest edge of the capture without becoming a disc of noise.
  */
 const PRESETS = {
-  kasna: { up: 'z', yaw: 35, trim: 0.5, radius: 0, focus: 6.5, focusGain: 2.6 },
+  kasna: { up: 'z', yaw: 35, trim: 0.5, radius: 5.9, focus: 5.2, focusGain: 1.5 },
 };
 const preset = { up: 'z', yaw: 0, trim: 0.5, radius: 0, focus: 0, focusGain: 1, ...PRESETS[ID] };
 const UP = args.up ?? preset.up;
