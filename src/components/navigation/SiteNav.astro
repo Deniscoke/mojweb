@@ -38,6 +38,14 @@ const links: NavLink[] = customLinks ?? [
  * No hamburger. Four short words in a monospaced row fit on a 320px screen,
  * so the mobile navigation is the same navigation — one row lower — instead
  * of a menu button hiding four links behind an extra tap and a focus trap.
+ *
+ * CALM MOTION. The first of the two Calm toggles (the other closes the
+ * footer), here so it can be reached before any motion is met. On a desktop
+ * it is a mono text button beside the language toggle; on a phone, where the
+ * top row has no room for it, it is the last row of the language panel. It
+ * is one button either way: it lives in the panel, and on a desktop the
+ * panel's box steps aside (see "calm toggle" below). The markup is the
+ * contract in src/motion/depth/README.md; DepthRuntime wires it.
  */
 ---
 
@@ -71,26 +79,48 @@ const links: NavLink[] = customLinks ?? [
         <span class="lang__caret" aria-hidden="true"></span>
       </summary>
       <div class="lang__panel">
-        <p class="mono lang__title">{dict.nav.language}</p>
-        <ul class="lang__list" role="list">
-          {
-            LOCALES.map((locale) => (
-              <li>
-                <a
-                  class="lang__item touch-target"
-                  href={localePath(locale.route)}
-                  hreflang={locale.htmlLang}
-                  lang={locale.htmlLang}
-                  aria-current={locale.code === lang ? 'true' : undefined}
-                  data-lang-pick={locale.code}
-                >
-                  <span class="mono lang__code">{locale.label}</span>
-                  <span class="lang__name">{locale.name}</span>
-                </a>
-              </li>
-            ))
-          }
-        </ul>
+        <div class="lang__menu">
+          <p class="mono lang__title">{dict.nav.language}</p>
+          <ul class="lang__list" role="list">
+            {
+              LOCALES.map((locale) => (
+                <li>
+                  <a
+                    class="lang__item touch-target"
+                    href={localePath(locale.route)}
+                    hreflang={locale.htmlLang}
+                    lang={locale.htmlLang}
+                    aria-current={locale.code === lang ? 'true' : undefined}
+                    data-lang-pick={locale.code}
+                  >
+                    <span class="mono lang__code">{locale.label}</span>
+                    <span class="lang__name">{locale.name}</span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        <div class="lang__motion">
+          <button
+            type="button"
+            class="mono lang__calm"
+            data-motion-toggle
+            aria-pressed="false"
+            data-label-system={dict.motion.calmSystem}
+          >
+            <span class="lang__calm-box" aria-hidden="true"></span>
+            <span class="lang__calm-label" data-motion-label>{dict.motion.calm}</span>
+            <!-- The desktop bar's one word. The label above stays the name. -->
+            <span class="lang__calm-short" aria-hidden="true">{dict.motion.calmShort}</span>
+          </button>
+          <!-- The page's one live region for the hint: a press on either
+               toggle un-hides it, and it is announced once. -->
+          <p class="lang__hint" role="status">
+            <span data-motion-hint hidden>{dict.motion.nextPage}</span>
+          </p>
+        </div>
       </div>
     </details>
   </div>
@@ -257,6 +287,11 @@ const links: NavLink[] = customLinks ?? [
     gap: var(--s-3);
   }
 
+  .lang__menu {
+    display: grid;
+    gap: var(--s-3);
+  }
+
   .lang__title {
     color: var(--c-bone-faint);
   }
@@ -293,6 +328,147 @@ const links: NavLink[] = customLinks ?? [
 
   .lang__name {
     font-size: var(--t-mono);
+  }
+
+  /* --------------------------------------------------------- calm toggle */
+
+  /*
+   * On a phone (and up to 62rem) the toggle is the panel's last row, under a
+   * hairline. In a long language the label wraps beside its square.
+   */
+  .lang__motion {
+    display: grid;
+    gap: var(--s-1);
+    padding-block-start: var(--s-2);
+    border-block-start: 1px solid var(--c-line);
+  }
+
+  /*
+   * A mono label behind a small square, the notebook's checkbox: open while
+   * the page moves, filled when it is calm. The state itself is aria-pressed,
+   * so the square only ever shows what assistive technology already reads.
+   */
+  .lang__calm {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-3);
+    min-block-size: 44px;
+    min-inline-size: 44px;
+    justify-self: start;
+    text-align: start;
+    color: var(--c-bone-dim);
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .lang__calm:hover,
+  .lang__calm:focus-visible {
+    color: var(--c-bone);
+  }
+
+  .lang__calm-box {
+    flex: none;
+    inline-size: 0.75em;
+    block-size: 0.75em;
+    padding: 2px;
+    border: 1px solid currentColor;
+    background-clip: content-box;
+    transition: background-color var(--d-fast) var(--e-out);
+  }
+
+  .lang__calm[aria-pressed='true'] .lang__calm-box {
+    background-color: currentColor;
+  }
+
+  /* The system setting decides: still focusable and read out, but inert. */
+  .lang__calm[aria-disabled='true'] {
+    cursor: default;
+    color: var(--c-bone-faint);
+  }
+
+  .lang__calm-short {
+    display: none;
+  }
+
+  .lang__hint {
+    font-family: var(--f-mono);
+    font-size: var(--t-mono);
+    letter-spacing: 0.04em;
+    color: var(--c-bone-faint);
+    max-inline-size: 13rem;
+    text-wrap: pretty;
+  }
+
+  /* Without JavaScript nothing could answer the button, so there is none. */
+  :global(html:not(.js)) .lang__motion {
+    display: none;
+  }
+
+  /*
+   * A desktop: the toggle stands in the bar, beside the language toggle.
+   * The panel stops being a box (display: contents) so the toggle can sit
+   * outside it, and the menu inside it becomes the dropdown. The details'
+   * content is kept rendered while closed, so the toggle stays in view and
+   * in the tab order, and only the menu waits for the details to open. (A
+   * browser without ::details-content shows the toggle when the menu opens,
+   * still beside the language toggle: reachable, one click later.)
+   */
+  @media (min-width: 62rem) {
+    .lang::details-content {
+      content-visibility: visible;
+    }
+
+    .lang__panel {
+      display: contents;
+    }
+
+    .lang__menu {
+      position: absolute;
+      inset-block-start: calc(100% + var(--s-3));
+      inset-inline-end: 0;
+      min-inline-size: 13rem;
+      padding: var(--s-4);
+      background-color: var(--c-ink);
+      border: 1px solid var(--c-line-strong);
+    }
+
+    .lang:not([open]) .lang__menu {
+      display: none;
+    }
+
+    .lang__motion {
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-end: calc(100% + var(--s-4));
+      translate: 0 -50%;
+      /* Its own width, not what is left of the 50px language toggle. */
+      inline-size: max-content;
+      padding: 0;
+      border: 0;
+      white-space: nowrap;
+    }
+
+    /*
+     * The bar has room for one word, in every language (the full label runs
+     * to 30 characters under the system setting and would collide with the
+     * links). The full label stays in the button, unseen, as its accessible
+     * name; the visible word is a whole word of it. The footer's toggle says
+     * it all in full.
+     */
+    .lang__calm-short {
+      display: inline;
+    }
+
+    /* No room for the hint either. It stays the live region, read out on a
+       press; the footer's copy is the one that is seen. */
+    .lang__calm-label,
+    .lang__hint {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
   }
 
   /**

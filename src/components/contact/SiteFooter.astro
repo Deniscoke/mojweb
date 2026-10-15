@@ -10,9 +10,26 @@ const { lang } = Astro.props;
 const dict = useTranslations(lang);
 const locale = getLocale(lang);
 const year = new Date().getFullYear();
+
+/**
+ * THE BOOKEND (docs/motion-depth-plan.md §3.10). The hero's column rules
+ * return behind the footer: twelve on a desktop, four on a phone, standing
+ * on the page's last edge. As the footer comes into view they rise from it,
+ * so the grid that opened the page closes it, and they are fully up exactly
+ * when the page runs out. Under Calm, without scroll timelines and without
+ * JavaScript they simply stand.
+ *
+ * The Calm toggle is the second of two (the first is in the nav, reachable
+ * before any motion is met). The markup is the contract in
+ * src/motion/depth/README.md; DepthRuntime wires it on every site page.
+ */
 ---
 
 <footer class="footer">
+  <div class="footer__rules grid12" aria-hidden="true">
+    {Array.from({ length: 12 }, () => <span />)}
+  </div>
+
   <div class="wrap footer__inner">
     <div class="footer__col">
       <p class="mono footer__brand">{site.brand}</p>
@@ -28,18 +45,92 @@ const year = new Date().getFullYear();
       <p class="mono footer__legal">
         &copy; {year} {site.author.name}
       </p>
-      <a class="mono footer__top" href="#hero">{dict.footer.backToTop}</a>
+      <div class="footer__controls">
+        <button
+          type="button"
+          class="mono footer__calm"
+          data-motion-toggle
+          aria-pressed="false"
+          data-label-system={dict.motion.calmSystem}
+        >
+          <span class="footer__calm-box" aria-hidden="true"></span>
+          <span data-motion-label>{dict.motion.calm}</span>
+        </button>
+        <a class="mono footer__top" href="#hero">{dict.footer.backToTop}</a>
+      </div>
+      <p class="mono footer__hint" data-motion-hint hidden>{dict.motion.nextPage}</p>
     </div>
   </div>
 </footer>
 
 <style>
   .footer {
+    position: relative;
     border-block-start: 1px solid var(--c-line);
     padding-block: var(--s-6) var(--s-7);
   }
 
+  /* ----------------------------------------------------------- the bookend */
+
+  /*
+   * The same twelve columns as the hero's rules, on the same measure, faded
+   * towards the page above so they read as the grid surfacing, not a table.
+   * One box with one transform, not twelve: a single layer while it rises.
+   */
+  .footer__rules {
+    position: absolute;
+    inset-block: 0;
+    inset-inline: 0;
+    inline-size: min(100% - var(--gutter) * 2, var(--w-max));
+    margin-inline: auto;
+    pointer-events: none;
+    transform-origin: 50% 100%;
+    mask-image: linear-gradient(to top, #000 15%, transparent);
+  }
+
+  .footer__rules > span {
+    border-inline-start: 1px solid var(--c-line);
+    opacity: 0.55;
+  }
+
+  .footer__rules > span:first-child {
+    border-inline-start: 0;
+  }
+
+  /* A phone's grid has four columns. */
+  @media (max-width: 47.99rem) {
+    .footer__rules > span:nth-child(n + 5) {
+      display: none;
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* They rise over the footer's own entry, and stand fully at its end:
+         the last pixel of scroll. Easing out, so they settle as the page
+         stops rather than arriving at speed. */
+      :global(:root:not([data-calm])) .footer__rules {
+        animation: footer-rules-rise cubic-bezier(0.33, 1, 0.68, 1) backwards;
+        animation-timeline: view();
+        animation-range: entry 0% entry 100%;
+      }
+    }
+  }
+
+  /* From a stub, not from nothing: at the start of the range the footer's
+     foot is still below the viewport, so the stub is never seen, and the
+     rules never become a non-invertible, zero-height transform. */
+  @keyframes footer-rules-rise {
+    from {
+      scale: 1 0.04;
+    }
+  }
+
+  /* ------------------------------------------------------------- the text */
+
+  /* Positioned, so it paints above the rules that come before it. */
   .footer__inner {
+    position: relative;
     display: grid;
     gap: var(--s-5);
   }
@@ -63,12 +154,21 @@ const year = new Date().getFullYear();
   }
 
   .footer__legal,
-  .footer__top {
+  .footer__top,
+  .footer__calm,
+  .footer__hint {
     color: var(--c-bone-faint);
   }
 
-  .footer__top {
-    justify-self: start;
+  .footer__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--s-6);
+  }
+
+  .footer__top,
+  .footer__calm {
     min-block-size: 44px;
     display: inline-flex;
     align-items: center;
@@ -76,8 +176,57 @@ const year = new Date().getFullYear();
   }
 
   .footer__top:hover,
-  .footer__top:focus-visible {
+  .footer__top:focus-visible,
+  .footer__calm:hover,
+  .footer__calm:focus-visible {
     color: var(--c-bone);
+  }
+
+  /* --------------------------------------------------------- calm toggle */
+
+  /*
+   * A mono label behind a small square, the notebook's checkbox: open when
+   * the page moves, filled when it is calm. The state is aria-pressed, so
+   * the square only ever shows what assistive technology already reads.
+   */
+  .footer__calm {
+    gap: var(--s-3);
+    min-inline-size: 44px;
+    text-align: start;
+  }
+
+  .footer__calm-box {
+    flex: none;
+    inline-size: 0.75em;
+    block-size: 0.75em;
+    padding: 2px;
+    border: 1px solid currentColor;
+    background-clip: content-box;
+    transition: background-color var(--d-fast) var(--e-out);
+  }
+
+  .footer__calm[aria-pressed='true'] {
+    color: var(--c-bone-dim);
+  }
+
+  .footer__calm[aria-pressed='true'] .footer__calm-box {
+    background-color: currentColor;
+  }
+
+  /* The system setting decides: still focusable and read out, but inert. */
+  .footer__calm[aria-disabled='true'] {
+    cursor: default;
+    color: var(--c-bone-faint);
+  }
+
+  .footer__hint {
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* Without JavaScript nothing could answer the button, so there is none. */
+  :global(html:not(.js)) .footer__calm {
+    display: none;
   }
 
   @media (min-width: 48rem) {
@@ -91,8 +240,8 @@ const year = new Date().getFullYear();
       text-align: end;
     }
 
-    .footer__top {
-      justify-self: end;
+    .footer__controls {
+      justify-content: flex-end;
     }
   }
 </style>
