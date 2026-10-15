@@ -95,7 +95,10 @@ const MODES: Record<ScanMode, ModeSpec> = {
 const BAND_MAX_PX = 260;
 const BAND: ModeSpec['place'] = [0.5, 0.72, 0.62];
 
-const ALPHA = [0.2, 0.22]; // per-point cap [touch, fine], for contrast behind text (plan §7)
+// Per-point alpha cap [touch, fine]. Text the object may pass behind is
+// protected by the mask rects (20% of this inside them), so the cap only has
+// to keep the object itself quiet; at 0.2/0.22 it read as a grey smudge.
+const ALPHA = [0.28, 0.32];
 const SWEEP_MS = 1800;
 const FADE_MS = 900;
 const DISTANCE = 4.5; // camera distance in object radii: gentle perspective

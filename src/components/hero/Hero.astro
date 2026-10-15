@@ -166,9 +166,11 @@ const scan =
    * anchor is the box it stands in (its centre, its width, and its bottom
    * edge as the ground). The engine draws its canvas over the whole host.
    *
-   * Desktop: columns 6–9, the empty field between the statement and the
-   * readout, standing at 62% of the hero's height, directly over its caption.
-   * The mask weights it to the right, so the name keeps the left to itself.
+   * Desktop: columns 7–11, the empty field right of the statement, standing
+   * at 62% of the hero's height — above the readout, which starts lower, so
+   * the object rises into the empty upper right of the grid. The mask only
+   * keeps it off the statement (which ends near half the width); it used to
+   * start inside the object and fade its whole left half out.
    */
   .hero__scan {
     position: absolute;
@@ -181,11 +183,11 @@ const scan =
     padding-inline: calc((100% - min(100% - var(--gutter) * 2, var(--w-max))) / 2);
     pointer-events: none;
     overflow-anchor: none;
-    mask-image: linear-gradient(to right, transparent 36%, #000 50%);
+    mask-image: linear-gradient(to right, transparent 44%, #000 54%);
   }
 
   .hero__scan-anchor {
-    grid-column: 6 / span 4;
+    grid-column: 7 / span 5;
     grid-row: 1;
   }
 
