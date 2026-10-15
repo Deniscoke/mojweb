@@ -14,9 +14,10 @@ import { mount } from '../ambient/mount';
  * about HOW it moves is the engine's built-in inputs:
  *
  *   - scroll: one passive listener while the hero is on screen; as the hero
- *     leaves, the turntable turns 0 → 24° (30° on touch) and, with a fine
- *     pointer, dollies in up to 8%. Applied directly, so it keeps step with
- *     the CSS floor lying down underneath it.
+ *     leaves, the turntable turns a third of a turn (a quarter on touch,
+ *     where the stage crosses the whole screen) and, with a fine pointer,
+ *     dollies in up to 8%. Applied directly, so it keeps step with the CSS
+ *     floor lying down underneath it.
  *   - pointer: a real mouse looks around it, ±6° yaw and ±3° pitch, the same
  *     sign as the [data-parallax] layers. Never on touch.
  *
@@ -50,8 +51,9 @@ export function initHeroScan(hero: HTMLElement): () => void {
     // hero, so a mask can never swim away from its text during a fling.
     masks: [...hero.querySelectorAll('[data-scan-mask]')],
     inputs: { pointer: true, scroll: hero },
-    // Where it stands is the grid's decision, in Hero.astro's CSS.
-    anchor: host.querySelector('.hero__scan-anchor') ?? undefined,
+    // Where it stands is the grid's decision, in Hero.astro's CSS: a box in
+    // the hero's own grid, so it keeps its distance from the readout.
+    anchor: hero.querySelector('.hero__scan-anchor') ?? undefined,
     onReady: () => show(true),
     onFail: () => show(false),
   });

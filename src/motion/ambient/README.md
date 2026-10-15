@@ -45,18 +45,31 @@ its first drawn frame. CSS masks (the hero's column weighting) belong on the
 host.
 
 **Placement.** With `anchor`, the object is centred on the anchor's box, as
-wide as it, standing on its bottom edge. Without it: hero = columns 7–11
-(centre 71%, width 40%, ground at 62%); a host under 260 px tall is treated as
-the mobile stage band (centred, ground at 62%); poster = centred.
+wide as it, standing on its bottom edge. The anchor can be any element; the
+hero's is a box in the hero's own grid (`.hero__scan-anchor`, columns 7–11,
+its ground a quarter of its width above the end of the name block), so the
+object keeps clear of the readout at every window height. Without it: hero =
+about columns 7–11 (centre 71%, width 37%, ground at 50%); a host under
+260 px tall is treated as the mobile stage band (centred, at most 1.2× the
+band's height wide, ground at 55%); poster = centred.
+
+**Size.** The engine scales the scan's widest horizontal extent to the
+anchor's width, so what the capture keeps around its subject decides how big
+the subject is drawn. That is why the hero scan is cropped to the building
+and its plinth in `build-scans.mjs` (5.9 m): ground disc to roof it is about
+half as tall as it is wide, and its ground disc reaches about 0.23 of the
+width in front of the anchor's bottom edge.
 
 **Inputs** (all off by default; they add to the setters):
 
 - `pointer`: mouse only, eased. Hero: ±6° yaw, ±3° pitch across the viewport.
   Poster: ±15° / ±6° over the host, back to rest on leave.
 - `scroll: true | Element`: one passive listener, attached only while that
-  element intersects. Exit progress 0 → 1 maps to 0 → 24° yaw and ≤ 8% dolly
-  with a fine pointer, or 0 → 30° and no dolly on touch. Applied directly,
-  not eased, so the scan stays in step with the CSS floor.
+  element intersects. Exit progress 0 → 1 maps to 0 → 120° yaw and ≤ 8% dolly
+  with a fine pointer, or 0 → 90° and no dolly on touch. On a desk the hero
+  scan leaves the screen a little past half its exit (about 65° seen); on a
+  phone the stage crosses the whole screen. Applied directly, not eased, so
+  the scan stays in step with the CSS floor and stops when the page stops.
 - `drag`: poster on touch. Horizontal only, `touch-action: pan-y`, ±40°;
   ignores pointerdowns on `a` and `button`, so "Load scene" stays a button.
 
@@ -102,8 +115,12 @@ the mobile stage band (centred, ground at 62%); poster = centred.
 - **Context loss.** `webglcontextlost` is `preventDefault()`ed and hides the
   canvas; `webglcontextrestored` recompiles and re-uploads from the kept file
   body (no second request).
-- **Contrast.** Per-point alpha ≤ 0.22 (≤ 0.2 on touch), Gaussian falloff,
-  depth fog, and up to three mask rects behind text at 20%.
+- **Contrast.** Per-point alpha ≤ 0.44 (≤ 0.4 on touch), Gaussian falloff,
+  depth fog, and up to three mask rects behind text at 20%. A mask rect is
+  the text's own extent (a `Range` over the element's contents), not the
+  element's box: a paragraph's box runs to its max width, past its last
+  word, and would cut a dark slab out of the object. The hero places the
+  object clear of all its text, so the masks are a safety net there.
 - **Teardown** aborts the fetch, removes every listener and observer, calls
   `loseContext()`, and removes the canvas. `liveContexts()` in `gl.ts` counts
   what is still held.
