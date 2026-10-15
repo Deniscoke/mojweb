@@ -9,6 +9,12 @@ import { createLoop, hasFinePointer, lerp, prefersReducedMotion } from '../utils
  *
  * The loop is not permanent. It starts on pointer movement and shuts itself
  * down once the eased value has settled, so an idle tab costs zero frames.
+ *
+ * It writes the individual `translate` property on each [data-parallax] layer
+ * and nothing else. `[data-reveal]` owns `transform` (and its transition) on
+ * the same elements, and individual transforms compose with it instead of
+ * overwriting it. Nothing is written on `.hero` itself: an inherited custom
+ * property there would restyle the whole hero subtree on every frame.
  */
 
 interface Layer {
@@ -34,9 +40,7 @@ export function initHeroPointerField(root: HTMLElement): () => void {
     currentY = lerp(currentY, targetY, 0.08);
 
     for (const { el, depth } of layers) {
-      el.style.transform = `translate3d(${(currentX * depth).toFixed(2)}px, ${(
-        currentY * depth
-      ).toFixed(2)}px, 0)`;
+      el.style.translate = `${(currentX * depth).toFixed(2)}px ${(currentY * depth).toFixed(2)}px`;
     }
 
     // Settled — stop burning frames until the pointer moves again.
@@ -66,6 +70,6 @@ export function initHeroPointerField(root: HTMLElement): () => void {
     window.removeEventListener('pointermove', onPointerMove);
     document.removeEventListener('pointerleave', onLeave);
     loop.destroy();
-    layers.forEach(({ el }) => (el.style.transform = ''));
+    layers.forEach(({ el }) => (el.style.translate = ''));
   };
 }
