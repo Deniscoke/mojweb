@@ -1,5 +1,6 @@
 ---
 import SiteFooter from '~/components/contact/SiteFooter.astro';
+import DepthPhoto from '~/components/media/DepthPhoto.astro';
 import SiteNav from '~/components/navigation/SiteNav.astro';
 import ProjectVisual from '~/components/projects/ProjectVisual.astro';
 import TransitionCover from '~/components/ui/TransitionCover.astro';
@@ -75,6 +76,21 @@ const navLinks = [
 ];
 
 const contactTitle = copy.detail.contactTitle.replace('{lab}', lab.name);
+
+/**
+ * DEPTH (motion depth plan §3.13). This page is a brief for teachers, so it
+ * must read instantly: the blocks, formats, contact and pager stay flat.
+ * Two things are objects and get depth:
+ *
+ *   plate     the lab's plate is a tilt stage under a mouse (its accent sheet
+ *             lifts off) and tips back as it leaves through the top.
+ *   photos    workshop photographs, when Denis has registered them for this
+ *             lab in src/data/photos.ts (`laby:<slug>`). Until then the slot
+ *             renders nothing at all. Workshops are with children, and a
+ *             photo of children is Tier 0 only (the CSS window): photos.ts
+ *             refuses, at build time, any photo of minors without guardian
+ *             consent on file or with the depth-map treatment.
+ */
 ---
 
 <BaseLayout
@@ -107,7 +123,11 @@ const contactTitle = copy.detail.contactTitle.replace('{lab}', lab.name);
         <p class="lead lab-hero__lead" data-reveal style="--reveal-delay:160ms">{labCopy.lead}</p>
 
         <div class="lab-hero__plate" data-reveal data-draw-group style="--reveal-delay:220ms">
-          <ProjectVisual visual={lab.visual} hue={0} seed={`lab-${lab.slug}`} accent={lab.world.accent} />
+          <div class="lab-hero__recede" data-depth="recede">
+            <div class="lab-hero__stage" data-tilt>
+              <ProjectVisual visual={lab.visual} hue={0} seed={`lab-${lab.slug}`} accent={lab.world.accent} layered />
+            </div>
+          </div>
         </div>
 
         <p class="mono lab-hero__group" data-reveal style="--reveal-delay:260ms">{copy.group.short}</p>
@@ -123,6 +143,8 @@ const contactTitle = copy.detail.contactTitle.replace('{lab}', lab.name);
             {labCopy.studentsDo.map((item) => <li class="doing__item">{item}</li>)}
           </ul>
         </div>
+
+        <DepthPhoto placement={`laby:${lab.slug}`} lang={code} bleed class="lab-photos" />
 
         <div class="block" data-reveal style="--reveal-delay:60ms">
           <h2 class="mono block__label">{copy.detail.output}</h2>
@@ -286,11 +308,36 @@ const contactTitle = copy.detail.contactTitle.replace('{lab}', lab.name);
     color: var(--c-bone-dim);
   }
 
+  /*
+   * THE PLATE AS AN OBJECT. One owner per box: the outer box reveals and
+   * carries the accent rule, the recede wrapper leaves (tipping back off
+   * that rule as it goes), the stage leans under a mouse. The rule stays on
+   * the box that never animates, so at rest it is drawn exactly as before,
+   * not resampled in a moving layer. No overflow clip: the SVG crops itself,
+   * and a clip would flatten the lift.
+   */
   .lab-hero__plate {
     aspect-ratio: 16 / 10;
     max-inline-size: 100%;
-    overflow: hidden;
     border-block-end: 2px solid var(--lab-accent);
+  }
+
+  .lab-hero__recede,
+  .lab-hero__stage {
+    display: block;
+    block-size: 100%;
+  }
+
+  /* Workshop photographs, when there are any: the full width of the brief,
+     two to a row on a wide screen. */
+  .lab-detail__grid :global(.lab-photos) {
+    grid-column: 1 / -1;
+  }
+
+  @media (min-width: 62rem) {
+    .lab-detail__grid :global(.lab-photos) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   .lab-hero__group {
