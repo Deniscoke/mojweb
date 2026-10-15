@@ -151,7 +151,7 @@ const readout = [
               >
                 <a class="lab-card__link press" href={localePath(code, `laby/${lab.slug}`)} data-tilt>
                   <div class="lab-card__plate">
-                    <ProjectVisual visual={lab.visual} hue={0} seed={`lab-${lab.slug}`} accent={lab.world.accent} layered />
+                    <ProjectVisual visual={lab.visual} hue={0} seed={`lab-${lab.slug}`} accent={lab.world.accent} diorama />
                   </div>
                   <p class="mono lab-card__name">
                     <span class="lab-card__glyph" aria-hidden="true" data-lift>{lab.glyph}</span>
@@ -515,6 +515,8 @@ const readout = [
    * way out. Everything finishes by `entry 25vh` and restarts at `exit 0`,
    * so a card being read is one flat print, exactly the plate at rest.
    * The frame clips here, and only here: the window needs its edges.
+   * The plate is printed `diorama`, so the sheets switch by compositor
+   * opacity steps (lift and shade), never by main-thread style work.
    */
   @supports (animation-timeline: view()) {
     @media not all and (min-width: 48rem) and (hover: hover) and (pointer: fine) {
@@ -536,28 +538,17 @@ const readout = [
           animation-range: entry 0 entry 25vh;
         }
 
+        /* Whole-timeline keyframes (ProjectVisual): no range to give. */
         :global(:root:not([data-calm])) .lab-card__plate :global(.plate__lift) {
           animation:
-            plate-lift-arrive linear both,
-            plate-lift-depart linear forwards,
-            plate-lift-shown-arriving linear both,
-            plate-lift-shown-leaving linear forwards;
-          animation-timeline: --card, --card, --card, --card;
-          animation-range:
-            entry 0 entry 25vh,
-            exit 0 exit 25vh,
-            entry 0 entry 25vh,
-            exit 0 exit 25vh;
+            plate-lift linear,
+            plate-sheet step-start;
+          animation-timeline: --card;
         }
 
-        :global(:root:not([data-calm])) .lab-card__plate :global(.plate-stage .plate [data-accent]) {
-          animation:
-            plate-shadow-arriving step-end both,
-            plate-shadow-leaving step-start forwards;
-          animation-timeline: --card, --card;
-          animation-range:
-            entry 0 entry 25vh,
-            exit 0 exit 25vh;
+        :global(:root:not([data-calm])) .lab-card__plate :global(.plate__shade) {
+          animation: plate-sheet step-start;
+          animation-timeline: --card;
         }
       }
     }

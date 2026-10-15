@@ -35,7 +35,18 @@ import type { ProjectVisual } from '~/data/projects';
  * as "the lift is not there": the plate at rest is today's single image, pixel
  * for pixel. The swap only ever happens while the two sheets are in register.
  *
- * The sheet has no `data-visual`, so the plate transition, which clones
+ * DIORAMA PLATES (`diorama`, implies `layered`) come apart on a scroll
+ * timeline, so every switch has to be one the compositor can run. A
+ * scroll-driven `visibility` or `fill-opacity` step is main-thread style work
+ * on every scroll frame, page-wide; an `opacity` step is not. So a diorama
+ * plate prints one more sheet, the registration SHADE: the accent shapes
+ * again, attribute for attribute (brotli stores it as a back-reference),
+ * turned by one static CSS filter into the plate's ink at 60%. Laid over the
+ * base, it makes the accent the 40% registration shadow (0.6 ink + 0.4
+ * accent, the mix fill-opacity 0.4 gives), and one `opacity` animation on
+ * each sheet root switches lift and shade together.
+ *
+ * Neither extra sheet has `data-visual`, so the plate transition, which clones
  * `svg[data-visual]`, still takes exactly the base plate, at full accent.
  */
 
@@ -55,9 +66,15 @@ interface Props {
    * `--card` view timeline (see the styles below).
    */
   layered?: boolean;
+  /**
+   * Layered, plus the registration shade: for a plate whose consumer takes it
+   * apart on a scroll timeline (the diorama vocabulary below).
+   */
+  diorama?: boolean;
 }
 
-const { visual, hue, seed, class: className = '', accent: accentOverride, layered = false } = Astro.props;
+const { visual, hue, seed, class: className = '', accent: accentOverride, diorama = false } = Astro.props;
+const layered = diorama || Astro.props.layered === true;
 
 /** xmur3 + mulberry32: stable across builds, so the art never flickers. */
 function rng(str: string) {
@@ -166,34 +183,36 @@ if (visual === 'strata') {
 const isAccent = (s: Shape) => (s.t === 'rect' || s.t === 'circle' ? s.fill : s.stroke) === accent;
 
 /**
- * The sheets this plate is printed on: always the base, and with `layered`
- * the accent lift. Both are drawn by the one template below, so the lift's
- * shapes are the base's accent shapes attribute for attribute — same
- * geometry, same `data-draw` / `data-fade-in`, same delays — and the lift
- * draws itself in with its plate.
+ * The sheets this plate is printed on, in paint order: always the base; with
+ * `diorama` the shade; with `layered` the accent lift. One template draws
+ * them all, so the shade's and the lift's shapes are the base's accent shapes
+ * attribute for attribute — same geometry, same `data-draw` / `data-fade-in`,
+ * same delays — and they draw themselves in with their plate.
  */
+const accents = shapes.filter(isAccent);
 const sheets = [
-  { lift: false, shapes },
-  ...(layered ? [{ lift: true, shapes: shapes.filter(isAccent) }] : []),
+  { sheet: '', shapes },
+  ...(diorama ? [{ sheet: 'plate__shade', shapes: accents }] : []),
+  ...(layered ? [{ sheet: 'plate__lift', shapes: accents }] : []),
 ];
 ---
 
 {
   (layered ? [true] : [false]).map((staged) => {
-    const prints = sheets.map(({ lift, shapes: printed }) => (
+    const prints = sheets.map(({ sheet, shapes: printed }) => (
       <svg
-        class={lift ? 'plate__lift' : `plate ${className}`}
-        data-visual={lift ? undefined : visual}
-        data-lift={lift ? '' : undefined}
+        class={sheet || `plate ${className}`}
+        data-visual={sheet ? undefined : visual}
+        data-lift={sheet === 'plate__lift' ? '' : undefined}
         viewBox={`0 0 ${W} ${H}`}
         role="presentation"
         aria-hidden="true"
         preserveAspectRatio="xMidYMid slice"
       >
-        {!lift && <rect width={W} height={H} fill="var(--c-ink)" />}
+        {!sheet && <rect width={W} height={H} fill="var(--c-ink)" />}
 
         {/* The frame draws first: the shared gesture across all five families. */}
-        {!lift && (
+        {!sheet && (
           <rect
             x="0.5"
             y="0.5"
@@ -281,15 +300,24 @@ const sheets = [
     block-size: 100%;
   }
 
-  /* Laid exactly over the base, and not drawn until a stage separates it. */
-  .plate__lift {
+  /* Laid exactly over the base, and not drawn until a stage separates them.
+     An element at opacity 0 paints nothing, so at rest the plate is the base
+     alone, pixel for pixel. */
+  .plate__lift,
+  .plate__shade {
     position: absolute;
     inset: 0;
-    display: block;
     inline-size: 100%;
     block-size: 100%;
     pointer-events: none;
-    visibility: hidden;
+    opacity: 0;
+  }
+
+  /* The shade: the accent's own shapes in the plate's ink, at 60%. One
+     static filter, not a per-shape repaint: black, lifted to #0f0f0f (the
+     ink is #101014, three levels of blue away at 60%), then 60% alpha. */
+  .plate__shade {
+    filter: brightness(0) invert(6%) opacity(0.6);
   }
 
   /*
@@ -298,7 +326,9 @@ const sheets = [
    * is shown in register and the base accent drops to its 40% shadow in the
    * same frame; the stage then decides how far the sheet floats forward
    * (`translate: 0 0 <z>` on `[data-lift]`). The shadow is not transitioned:
-   * at the moment it changes, the lift is covering it.
+   * at the moment it changes, the lift is covering it. These switch on a
+   * pointer, a handful of times per gesture, never per scroll frame, so the
+   * base accent's own fill-opacity serves (a diorama's shade stays at 0).
    *
    * `preserve-3d` is here, and only while tilting, so the lift's Z reaches
    * the tilting ancestor's 3D context through this wrapper. A preserve-3d
@@ -310,7 +340,7 @@ const sheets = [
     }
 
     :global(:root:not([data-calm]) [data-tilting]) .plate__lift {
-      visibility: visible;
+      opacity: 1;
     }
 
     :global(:root:not([data-calm]) [data-tilting]) .plate-stage .plate [data-accent] {
@@ -320,34 +350,42 @@ const sheets = [
   }
 
   /*
-   * THE DIORAMA VOCABULARY. A card that wants its plate to come apart as it
-   * crosses the screen declares a view timeline and attaches these keyframes
-   * to the three parts, all on that timeline (Selected Work's phone cards do;
-   * the laby index cards can copy the same three rules):
+   * THE DIORAMA VOCABULARY. A card that wants its plate (printed `diorama`)
+   * to come apart as it crosses the screen declares a view timeline and
+   * attaches these keyframes to the parts, all on that timeline (Selected
+   * Work's phone cards and the laby index cards do):
    *
-   *   .plate-stage            plate-window                     entry range
-   *   .plate__lift            plate-lift-arrive, -depart,
-   *                           plate-lift-shown-arriving, -leaving
-   *                                                            entry, exit
-   *   .plate-stage .plate [data-accent]
-   *                           plate-shadow-arriving (step-end),
-   *                           plate-shadow-leaving (step-start) entry, exit
+   *   .plate-stage    plate-window   range entry 0 → entry 25vh, backwards
+   *   .plate__lift    plate-lift linear, plate-sheet step-start   (cover)
+   *   .plate__shade   plate-sheet step-start                      (cover)
    *
    *   arriving: the plate settles from a 1.06 window crop to 1, and the accent
-   *     sheet floats 12px below its print and closes into register;
-   *   in between: one flat print, today's plate exactly;
-   *   leaving: the sheet lifts 12px off, ahead of the travel, the way a
-   *     nearer layer moves faster.
+   *     sheet floats 12px below its print and closes into register by
+   *     `entry 40%` (inside 25vh for any card up to half a screen tall);
+   *   in between: lift and shade are off, one flat print, today's plate
+   *     exactly;
+   *   leaving: from `exit 0`, the sheet lifts 12px off, ahead of the travel,
+   *     the way a nearer layer moves faster.
    *
    * The consumer attaches them, not this component, because only the
    * consumer knows where its timeline exists: Chrome does not leave an
    * animation on a missing named timeline inert, it runs it to its end and
    * holds the fill, which would leave every desktop plate mid-lift.
    *
-   * Translate and scale are composited. The sheet's visibility and the base
-   * shadow are discrete steps that run together on the main thread, in the
-   * same style pass, so the shadow never shows without its sheet; both
-   * switch only at the instant the sheets are in register.
+   * ALL OF IT IS COMPOSITOR WORK, which takes three rules Chrome is strict
+   * about (each one measured on its `blink.animations` trace):
+   *   - one animation per property per element: two opacity (or two
+   *     transform) animations on one element are "incompatible" and both
+   *     fall back to the main thread, so each sheet has a single animation
+   *     whose keyframes sit on the timeline's named ranges;
+   *   - on an <svg> root, `transform`, never the individual `translate`:
+   *     Chrome cannot composite an independent transform property on an SVG
+   *     element;
+   *   - `opacity`, never `visibility` or `fill-opacity`, which it cannot
+   *     composite at all (the steps this replaced: 60–70 animations a page
+   *     on the main thread, every scroll frame).
+   * Lift and shade switch on the same timeline, in the same compositor
+   * frame, at the instant the sheets are in register.
    */
   @keyframes plate-window {
     from {
@@ -358,62 +396,19 @@ const sheets = [
     }
   }
 
-  @keyframes plate-lift-arrive {
-    from {
-      translate: 0 12px;
-    }
-    to {
-      translate: 0 0;
-    }
-  }
+  /*
+   * Written minified: the build's CSS minifier passes keyframes with named
+   * range selectors through untouched, whitespace and all. `to` has its own
+   * block: in one selector list with a named range Chrome gives it the
+   * wrong value.
+   *
+   * plate-sheet is on while the sheets are apart, off while they are in
+   * register: the consumer runs it with `step-start`, so it switches the
+   * instant each segment begins.
+   */
+  /* prettier-ignore */
+  @keyframes plate-lift{from{transform:translateY(12px)}entry 40%,exit 0%{transform:none}exit 40%{transform:translateY(-12px)}to{transform:translateY(-12px)}}
 
-  @keyframes plate-lift-depart {
-    from {
-      translate: 0 0;
-    }
-    to {
-      translate: 0 -12px;
-    }
-  }
-
-  /* `visibility` interpolates as a step: visible everywhere but the end. */
-  @keyframes plate-lift-shown-arriving {
-    from {
-      visibility: visible;
-    }
-    to {
-      visibility: hidden;
-    }
-  }
-
-  @keyframes plate-lift-shown-leaving {
-    from {
-      visibility: hidden;
-    }
-    to {
-      visibility: visible;
-    }
-  }
-
-  @keyframes plate-shadow-arriving {
-    from {
-      fill-opacity: 0.4;
-      stroke-opacity: 0.4;
-    }
-    to {
-      fill-opacity: 1;
-      stroke-opacity: 1;
-    }
-  }
-
-  @keyframes plate-shadow-leaving {
-    from {
-      fill-opacity: 1;
-      stroke-opacity: 1;
-    }
-    to {
-      fill-opacity: 0.4;
-      stroke-opacity: 0.4;
-    }
-  }
+  /* prettier-ignore */
+  @keyframes plate-sheet{from,to{opacity:1}entry 40%{opacity:1}exit 0%{opacity:0}}
 </style>
