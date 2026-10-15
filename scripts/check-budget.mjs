@@ -65,6 +65,13 @@ const KB = 1024;
  * (+0.53 KB), which is the feature, not overhead. Lighthouse ≥ 95 remains the
  * gate that decides whether any of this is too much.
  *
+ * Home is 2.65 since the final-review fixes (2026-10-16), measured to the
+ * byte: +36 B in the depth runtime to re-read Calm when a page comes back
+ * from the back/forward cache (a visitor who chose Calm got full motion
+ * after Back), and +36 B in Selected Work so a still pointer under scrolling
+ * rows does not summon the cursor preview over the band. Both are behaviour
+ * the page needs, not overhead; the other page types stay inside 2.1.
+ *
  * The other site pages are 2.1, not 2: the hero scan is scheduled from the
  * shared depth runtime, and Rollup then places the env helpers the scan
  * engine shares (whenVisible and friends) in the env chunk every page loads.
@@ -73,7 +80,7 @@ const KB = 1024;
  * The runtime is cheaper everywhere; the 0.1 is the price of that sharing.
  */
 const PAGE_CAPS = {
-  home: { css: 5, js: 2.6 },
+  home: { css: 5, js: 2.65 },
   case: { css: 3, js: 2.1 },
   laby: { css: 3, js: 2.1 },
   'laby-detail': { css: 3, js: 2.1 },

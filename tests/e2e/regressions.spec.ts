@@ -389,3 +389,34 @@ test.describe('transition start frame is unchanged (W4)', () => {
     });
   }
 });
+
+// ───────────────────────────────────────── the Selected Work band (≥ 80rem)
+
+test.describe('Selected Work band (desktop, no hover)', () => {
+  test('a row crossing the middle shows its plate; a still pointer summons nothing @desktop-only', async ({ page }) => {
+    await page.goto(PAGES.home);
+    await settle(page);
+    const row = page.locator('[data-project-row]').nth(1);
+    // Scroll with the wheel only: the pointer never moves.
+    await row.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      window.scrollBy({ top: r.top + r.height / 2 - innerHeight / 2, behavior: 'instant' });
+    });
+    await frames(page);
+    await page.waitForTimeout(300);
+    const plate = row.locator('.project__plate');
+    const state = await plate.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { opacity: Number(cs.opacity), position: cs.position };
+    });
+    expect(state.position, 'the band plate stands in its row, not under the cursor').toBe('absolute');
+    expect(state.opacity, 'the band plate is visible mid-band').toBeGreaterThan(0);
+    expect(await page.locator('[data-project-row][data-preview-active]').count(), 'a still pointer summoned the cursor preview').toBe(0);
+
+    // The first real move over a row summons the cursor-carried plate.
+    const box = (await row.boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.3, box.y + box.height / 2);
+    await page.mouse.move(box.x + box.width * 0.32, box.y + box.height / 2 + 4);
+    await expect(page.locator('[data-project-row][data-preview-active]')).toHaveCount(1);
+  });
+});

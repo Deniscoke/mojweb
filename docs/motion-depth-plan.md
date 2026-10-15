@@ -29,6 +29,43 @@ This plan is the merge of three competing proposals after three judging lenses
   -75° index-card flips, kinetic `rotateX` on `.line__inner`, and the
   main-thread scroll-timeline fallback for Firefox and iOS < 26.
 
+### As built (2026-10-16) — where the site now differs from this plan
+
+The sections below are the plan as approved. These changes came out of
+integration and the final four-lens review; the code and its comments are
+the source of truth.
+
+- **Hero, desktop:** a lit floor (`.hero__floor`, the twelve rules in bone at
+  16%, solid at the hinge, a ground rule and two cross rules) takes over from
+  the standing rules by 35% of the range instead of the rules dimming as they
+  lie down. The scan anchor lives in the hero's own grid (columns 7–11, the
+  rows of the name block) so its footprint clears the readout at every
+  window height; the kasna scan is cut to the pavilion and its plinth (radius
+  5.9 m), point alpha 0.40 / 0.44 (touch / fine), and the turntable turns
+  120° (desktop) / 90° (touch) over the hero's exit.
+- **Hero, phone (§2 "The stage"):** the rules no longer lie down or squash
+  into the stage. They end above the scroll cue, and the stage has a static
+  perspective ground (`.hero__ground`, inline SVG) with an oval clearing where
+  the object stands. Nothing rotates below 62rem.
+- **Selected Work, desktop ≥ 80rem:** "the band" — before the hand moves, the
+  row crossing the middle of the screen presents its own plate in the empty
+  right side of the row: it arrives turned 8°, its accent sheet lifted, and
+  settles. A still pointer under scrolling rows does not summon the cursor
+  preview; the first real move does and picks the plate up from the band.
+  Below 80rem the rows have no empty right side and keep the list.
+- **Dioramas:** every switch is a compositable `opacity` step; no
+  `visibility` or `fill-opacity` on a scroll timeline (see the compositor
+  rules in src/motion/depth/README.md).
+- **Lab (§3.6, §3.14):** not a full-width line but a short index mark (1px
+  rule + 7px riser) that moves through the gutter between `.lab__num` and
+  `.lab__title`, translate only, on the same timelines.
+- **Case study:** no next-project ghost plate (a 17 KB SVG per page for a
+  faint decoration); the next title still approaches.
+- **depth.css:** inlined on the homepage, linked (preloaded, applied at the
+  end of `<body>`) everywhere else — docs/motion-depth-qa.md note 2.
+- **Calm:** re-read on a back/forward-cache restore; the page's one
+  `role=status` region sits in the header, outside the language menu.
+
 ### A finding that changes the plan
 
 Real scans already exist on Denis's machine:

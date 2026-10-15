@@ -214,6 +214,8 @@ with `E2E_STRICT=1`.
 | 2026-10-15 | `9d86518` stage 1 (W1 W2 W4 W6 W8) | ✓ (home JS cap 2.6, see check-budget) | — | ✓ 126 passed, 13 pending | — | — | lead |
 | 2026-10-17 | stage 2 (W3 W5 W7) + integration fixes | ✓ (other page types 2.1, see check-budget) | 5/6 ✓ — home 2.56 ≈ b, splatoo 2.41, circus 2.41, lab 2.41, 404 2.10; perf 96–99, a11y 100, CLS 0. `/en/laby/` TBT: see note 1 | ✓ strict, 145 passed | not run (no GPU runner) | pending — Denis's devices | lead |
 
+| 2026-10-16 | final-review fixes (f1 hero, f2 Selected Work band + compositable dioramas, f3 Lab mark, f4 Calm on bfcache + live region) | ✓ (home JS cap 2.65, see check-budget) | 5/6 ✓ — home 2.56 ≈ b, splatoo 2.41, circus 2.41, lab 2.41, 404 2.10; perf 96–99, a11y 100, CLS 0; `/en/laby/` TBT per note 1 | ✓ strict, 150 passed (new: bfcache.spec, Selected Work band) | run alone with `--workers=1` on a loaded machine (the throttled-scroll test can time out when several headed windows share the GPU) | pending — Denis's devices | lead |
+
 **Note 1 — `/en/laby/` TBT.** The gate reads 57–69 ms in a 3-run median on
 some runs and 0 on others (a 7-run median was 0). The cause is one long task
 at the reveal (`enterReveal`, ~1.66 s simulated) that sits on the FCP

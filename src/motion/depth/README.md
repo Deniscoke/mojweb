@@ -247,3 +247,38 @@ W8 real-device protocol): iOS 26 Safari and Chrome Android for the four rows
 above, and per-scroll-frame main-thread cost in a performance trace. If iOS
 fails length offsets, switch the entry primitives to percentage ranges
 (percentages of the `entry` range, tuned per primitive).
+
+## Compositor rules (measured 2026-10-16)
+
+Scroll-driven animations only stay off the main thread if they are
+compositable. Measured on /sk/laby/ at 375×812 with 4× CPU throttle, these
+are the rules that decide it:
+
+1. **One animation per property per element.** Two `opacity` (or two
+   `transform`) animations on one element are incompatible and both run on
+   the main thread. Put the second on a wrapper.
+2. **Never `translate` / `rotate` / `scale` on an SVG element** — use
+   `transform`. The individual properties on SVG are not composited.
+3. **Never `visibility` or `fill-opacity` / `stroke-opacity` on a scroll
+   timeline.** Express a switch as an `opacity` step (`step-end` /
+   `step-start`), which composites.
+
+Two Chrome keyframe quirks met on the way: keyframe blocks at the same
+offset with different easings stay separate keyframes, and `to` in one
+selector list together with a named range (`entry 40%`) gets the wrong value.
+The build's CSS minifier passes keyframes with named-range selectors through
+unminified (the `css-syntax-error` warnings in the build log are this, not a
+broken rule).
+
+## Calm across the back/forward cache
+
+A page restored from the bfcache does not run the boot script, so
+`motionPreference.ts` re-reads `irl:motion` on `pageshow` with `persisted`
+(capture phase, before the scan's and the plate transition's own handlers)
+and, if it differs, re-applies `html[data-calm]` and dispatches
+`irl:motionchange`. The hint stays hidden after a restore. The page's single
+`role="status"` region lives in SiteNav's header, outside `<details>`; the
+other `[data-motion-hint]` copies are plain text, so a press is announced once.
+Covered by tests/e2e/bfcache.spec.ts, which re-enables the cache Playwright
+disables by default.
+
