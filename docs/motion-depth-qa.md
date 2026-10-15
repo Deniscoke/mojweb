@@ -211,4 +211,27 @@ with `E2E_STRICT=1`.
 | Date | Commit | budget | lhci | e2e | gpu | D1–D9 | By |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-10-15 | `eca3f17` (baseline) | ✓ | ✓ (LCP ≈ b on `/en/`, `/en/laby/`) | ✓ 125 passed, 20 pending (not strict) | ✓ 1 passed, 2 pending | — | W8 |
-| | | | | | | | |
+| 2026-10-15 | `9d86518` stage 1 (W1 W2 W4 W6 W8) | ✓ (home JS cap 2.6, see check-budget) | — | ✓ 126 passed, 13 pending | — | — | lead |
+| 2026-10-17 | stage 2 (W3 W5 W7) + integration fixes | ✓ (other page types 2.1, see check-budget) | 5/6 ✓ — home 2.56 ≈ b, splatoo 2.41, circus 2.41, lab 2.41, 404 2.10; perf 96–99, a11y 100, CLS 0. `/en/laby/` TBT: see note 1 | ✓ strict, 145 passed | not run (no GPU runner) | pending — Denis's devices | lead |
+
+**Note 1 — `/en/laby/` TBT.** The gate reads 57–69 ms in a 3-run median on
+some runs and 0 on others (a 7-run median was 0). The cause is one long task
+at the reveal (`enterReveal`, ~1.66 s simulated) that sits on the FCP
+boundary, so the simulation counts it or not. The baseline has the same task:
+measured 2026-10-17 against `eca3f17` with three Lighthouse runs each, longest
+task 144–183 ms and TBT 0 / 0 / 94 before, 166–256 ms and TBT 0 / 0 / 58
+after. Not a regression of this work; recorded rather than gated around.
+
+**Note 2 — first TCP window.** Measured with Vercel's real compression
+(brotli quality 3: it matches the live byte counts exactly) plus ~1 KB of
+response headers, 140 of 152 pages fitted the first 14.6 KB window before this
+work. After it, 65 case-study and laby pages exceed it by 0.6–1.3 KB on a
+first visit, which can cost those pages one round trip before the reveal.
+What was done about it: the next-project ghost plate was removed (a 17 KB SVG
+per case study), and depth.css is linked rather than inlined on every page
+except the homepage (cached across pages, preloaded, applied before the
+reveal). The rest is the cost of the Calm toggles, the footer bookend, the
+dioramas and the photo frames. The homepage inlines depth.css and is not
+given a prefetch: in Lighthouse any extra request before LCP moved it from
+2.56 s to 2.71 s, even at idle priority.
+

@@ -31,7 +31,7 @@ const { code } = Astro.props;
 const dict = useTranslations(code);
 ---
 
-<BaseLayout lang={code} title={dict.meta.title} description={dict.meta.description}>
+<BaseLayout lang={code} title={dict.meta.title} description={dict.meta.description} depthCss="inline">
   <TransitionCover />
   <SiteNav lang={code} />
 
