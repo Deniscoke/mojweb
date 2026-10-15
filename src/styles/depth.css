@@ -1,0 +1,256 @@
+/**
+ * DEPTH LAYER
+ * ===========
+ * Shared, attribute-driven depth primitives. A component opts in by putting
+ * an attribute on a wrapper; it never writes keyframes of its own for these.
+ * The full contract (owner rule, forbidden ancestors, the reading band) is in
+ * src/motion/depth/README.md, and it is a merge gate, not a suggestion.
+ *
+ * Three rules hold everywhere in this file:
+ *
+ *  1. IDENTITY IS THE DESIGN. Every primitive rests at no transform, so with
+ *     the layer absent (Firefox, iOS < 26, reduced motion, Calm, no JS) the
+ *     page is exactly the composition that was drawn. Nothing here hides
+ *     anything; depth is only ever added on top.
+ *  2. THE TRIPLE GATE. Every animated rule sits inside
+ *     `@supports (animation-timeline: view())`, inside
+ *     `prefers-reduced-motion: no-preference`, behind
+ *     `:root:not([data-calm])`. Browsers without scroll timelines get no
+ *     main-thread fallback: they get today's site.
+ *  3. ZERO SPECIFICITY. Every selector is wrapped in `:where()`, so a
+ *     component's scoped style always wins, and opting out is one line.
+ *
+ * Each `animation` shorthand is followed by `animation-timeline` and
+ * `animation-range`, because the shorthand resets both.
+ */
+
+/* ----------------------------------------------- at rest, in every browser */
+
+/**
+ * A scrubbed hairline exists at rest: drawn, static, the same 1px rule a
+ * border would give. Only its drawing-in is motion, below. It sits at the
+ * element's block-start edge; a component can move it (inset-block-end) or
+ * recolour it (`--rule-color`) in its own scoped style.
+ */
+:where([data-scrub='rule']) {
+  position: relative;
+}
+
+:where([data-scrub='rule'])::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  block-size: 1px;
+  background-color: var(--rule-color, var(--c-line));
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------- scroll-driven primitives */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /**
+     * RISE — the element stands up out of the page as it enters, and is
+     * upright by `entry 25vh` (its top at 75% of the viewport), before it
+     * reaches the reading band. `--rise-offset` (a length) staggers a set.
+     *
+     * The rotation is written as `transform: perspective() rotateX()` rather
+     * than the `rotate` property: individual transforms are applied outside
+     * `transform`, so a perspective inside `transform` could never
+     * foreshorten them, and an unforeshortened 8° tilt is invisible.
+     */
+    :where(:root:not([data-calm])) :where([data-depth='rise']) {
+      transform-origin: 50% 0;
+      animation: depth-rise linear backwards;
+      animation-timeline: var(--depth-timeline, view());
+      animation-range: entry var(--rise-offset, 0px) entry calc(25vh + var(--rise-offset, 0px));
+    }
+
+    /**
+     * RECEDE — the element tips back about its bottom edge and steps away as
+     * it leaves through the top. It ends at `exit 100%`, the moment the box is
+     * fully gone: with fill `none`, ending any earlier would snap it back to
+     * identity while part of it is still on screen.
+     */
+    :where(:root:not([data-calm])) :where([data-depth='recede']) {
+      transform-origin: 50% 100%;
+      animation: depth-recede linear;
+      animation-timeline: var(--depth-timeline, view());
+      animation-range: exit 0% exit 100%;
+    }
+
+    /**
+     * DRIFT — a plane at another depth, for decoration only (an index
+     * numeral, a ghost plate). Negative `--drift` is farther away and slides
+     * slower than the page; positive is nearer. 1 = 3vh each way.
+     */
+    :where(:root:not([data-calm])) :where([data-depth='drift']) {
+      animation: depth-drift linear both;
+      animation-timeline: var(--depth-timeline, view());
+      animation-range: cover 0% cover 100%;
+    }
+
+    /**
+     * APPROACH — a closing statement arrives from slightly behind the page.
+     * Settled by `entry 25vh`, like every entry primitive (the reading band).
+     */
+    :where(:root:not([data-calm])) :where([data-depth='approach']) {
+      animation: depth-approach linear backwards;
+      animation-timeline: var(--depth-timeline, view());
+      animation-range: entry 0% entry 25vh;
+    }
+
+    /**
+     * WINDOW — a photograph seen through its frame. The image is inside an
+     * `overflow: hidden` frame, which is itself a scroll container, so it
+     * cannot use `view()`: it reads the `--frame` view timeline that the
+     * figure (outside the frame) declares. 1.08 leaves 4% of overscan on
+     * each side, more than the 3% of travel.
+     */
+    :where(:root:not([data-calm])) :where([data-depth='window']) {
+      animation: depth-window linear both;
+      animation-timeline: --frame;
+      animation-range: cover 0% cover 100%;
+    }
+
+    /**
+     * SCRUBBED RULE — the hairline draws itself open from the inline start
+     * as its element enters. The timeline is the element's own, so the 1px
+     * pseudo-element is driven by the height of what it heads.
+     */
+    :where(:root:not([data-calm])) :where([data-scrub='rule']) {
+      view-timeline: --rule;
+    }
+
+    :where(:root:not([data-calm])) :where([data-scrub='rule'])::before {
+      animation: depth-draw linear backwards;
+      animation-timeline: --rule;
+      animation-range: entry 0% entry 40vh;
+    }
+
+    /* Phones: translate and scale only, never a rotation. */
+    @media (max-width: 47.99rem) {
+      :where(:root:not([data-calm])) :where([data-depth='rise']) {
+        animation-name: depth-rise-flat;
+      }
+
+      :where(:root:not([data-calm])) :where([data-depth='recede']) {
+        animation-name: depth-recede-flat;
+      }
+    }
+  }
+}
+
+@keyframes depth-rise {
+  from {
+    translate: 0 2rem;
+    transform: perspective(var(--persp)) rotateX(8deg);
+  }
+
+  to {
+    transform: perspective(var(--persp)) rotateX(0deg);
+  }
+}
+
+@keyframes depth-rise-flat {
+  from {
+    translate: 0 1.25rem;
+  }
+}
+
+@keyframes depth-recede {
+  from {
+    transform: perspective(var(--persp)) rotateX(0deg);
+  }
+
+  to {
+    scale: 0.96;
+    translate: 0 -3vh;
+    transform: perspective(var(--persp)) rotateX(6deg);
+  }
+}
+
+@keyframes depth-recede-flat {
+  to {
+    scale: 0.96;
+    translate: 0 -3vh;
+  }
+}
+
+@keyframes depth-drift {
+  from {
+    translate: 0 calc(var(--drift, -0.5) * 3vh * var(--depth-amp));
+  }
+
+  to {
+    translate: 0 calc(var(--drift, -0.5) * -3vh * var(--depth-amp));
+  }
+}
+
+@keyframes depth-approach {
+  from {
+    translate: 0 calc(3rem * var(--depth-amp));
+    scale: calc(1 - 0.04 * var(--depth-amp));
+  }
+}
+
+@keyframes depth-window {
+  from {
+    translate: 0 -3%;
+    scale: 1.08;
+  }
+
+  to {
+    translate: 0 3%;
+    scale: 1.08;
+  }
+}
+
+@keyframes depth-draw {
+  from {
+    scale: 0 1;
+  }
+}
+
+/* ------------------------------------------------------ pointer primitives */
+
+/**
+ * TILT — a stage leans away under a real mouse (src/motion/depth/tilt.ts
+ * writes `--tilt-x` / `--tilt-y` in -1…1 and `--tilt-z` in 0…1, on the
+ * active stage only). Not gated on scroll timelines: it is pointer-driven
+ * and works wherever the module loads. At rest, and whenever
+ * `data-tilting` is absent, the stage is `transform: none`, so its layer
+ * de-promotes and its text is crisp again.
+ *
+ * A `[data-lift]` inside a tilting stage floats toward the viewer. It must be
+ * a direct child of the stage, or every element between them must keep the
+ * 3D context (no opacity, overflow, filter, mask or clip-path).
+ */
+@media (prefers-reduced-motion: no-preference) and (min-width: 48rem) and (hover: hover) and (pointer: fine) {
+  :where(:root:not([data-calm])) :where([data-tilt][data-tilting]) {
+    transform: perspective(var(--persp)) rotateX(calc(var(--tilt-y, 0) * var(--tilt-max-x) * -1))
+      rotateY(calc(var(--tilt-x, 0) * var(--tilt-max-y)));
+    transform-style: preserve-3d;
+  }
+
+  :where(:root:not([data-calm])) :where([data-tilting] [data-lift]) {
+    translate: 0 0 calc(var(--lift) * var(--tilt-z, 0));
+  }
+}
+
+/**
+ * PRESS — on touch, the depth cue a hover would give: the control sinks a
+ * hair under the finger. Touch only, so it can never transform a desktop
+ * row whose fixed preview plate depends on it staying untransformed.
+ */
+@media (prefers-reduced-motion: no-preference) and (pointer: coarse) {
+  :where(:root:not([data-calm])) :where(.press) {
+    transition: scale var(--d-instant) var(--e-out);
+  }
+
+  :where(:root:not([data-calm])) :where(.press:active) {
+    scale: 0.985;
+  }
+}

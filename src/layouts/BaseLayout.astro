@@ -2,6 +2,8 @@
 import { site } from '~/config/site';
 import { ENTER_FLAG_SNIPPET } from '~/i18n/memory';
 import { LOCALES, getLocale } from '~/i18n/locales';
+import DepthRuntime from '~/motion/depth/DepthRuntime.astro';
+import { CALM_ATTRIBUTE, MOTION_STORAGE_KEY } from '~/motion/utils/env';
 import '~/styles/global.css';
 
 interface Props {
@@ -79,12 +81,21 @@ const OG_LOCALES: Record<string, string> = {
 };
 
 /**
+ * Calm is read before first paint, so a visitor who chose it never sees one
+ * frame of the full-motion page. It runs on every page, the gate included:
+ * a returning calm visitor arrives at the gate first, and its greeting morph
+ * already asks `prefersReducedMotion()`, which honours the attribute.
+ */
+const CALM_SNIPPET = `try{if(localStorage.getItem('${MOTION_STORAGE_KEY}')==='calm')document.documentElement.setAttribute('${CALM_ATTRIBUTE}','')}catch(e){}`;
+
+/**
  * One inline script, before first paint, doing only what must happen before
  * first paint: mark that JS is available (the CSS motion layer is gated on
- * it) and raise the entering flag so the transition panels are already opaque
- * when the browser paints. Everything else is deferred module script.
+ * it), apply Calm, and raise the entering flag so the transition panels are
+ * already opaque when the browser paints. Everything else is deferred module
+ * script. (integrations/csp.mjs hashes whatever this ends up being.)
  */
-const bootScript = `document.documentElement.classList.add('js');${
+const bootScript = `document.documentElement.classList.add('js');${CALM_SNIPPET}${
   variant === 'site' ? ENTER_FLAG_SNIPPET : ''
 }`;
 ---
@@ -167,6 +178,9 @@ const bootScript = `document.documentElement.classList.add('js');${
 
       initCursorField();
     </script>
+
+    {/* Site chrome: the gate and the 404 (both 'gate') neither run nor download it. */}
+    {variant === 'site' && <DepthRuntime />}
   </body>
 </html>
 

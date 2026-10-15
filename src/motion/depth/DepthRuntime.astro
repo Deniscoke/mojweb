@@ -1,0 +1,22 @@
+---
+/**
+ * The depth runtime and the Calm toggles, as one deferred module.
+ *
+ * A component of its own, rendered by BaseLayout on site pages only, because
+ * Astro bundles a component's script into exactly the pages that render the
+ * component. The gate and the 404 never render it, so they never download
+ * it. (A conditional `<script>` written inline in the layout is not safe: the
+ * compiler and the bundler number inline scripts differently, and the gate
+ * ended up loading this script instead of the cursor field.)
+ */
+---
+
+<script>
+  import { initDepth } from '~/motion/depth';
+  import { initMotionToggles } from '~/motion/depth/motionPreference';
+
+  // Toggles first: they are controls, and must answer a click immediately.
+  // Depth itself waits for the reveal and an idle moment.
+  initMotionToggles();
+  initDepth();
+</script>
