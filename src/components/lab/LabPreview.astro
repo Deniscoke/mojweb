@@ -19,6 +19,13 @@ const experiments = await getExperiments(lang);
  * another room in the same building rather than another building. The only
  * thing it does differently is the cold accent, which appears nowhere else.
  *
+ * DEPTH (docs/motion-depth-plan.md §3.6): the notebook under an instrument.
+ * A single lab-green hairline travels down the list as you scroll, and since
+ * the list moves up while the line moves down, it hangs close to the middle
+ * of the screen like a reading head. On a desktop each entry number lights up
+ * in the cold accent as its entry crosses that middle. The ink surface stays
+ * opaque and nothing turns over. Under Calm this is today's notebook.
+ *
  * This is a preview. The full list, with each question and note, lives at
  * /[lang]/lab/ and the entries that have a written log link on from there.
  */
@@ -128,6 +135,73 @@ const experiments = await getExperiments(lang);
     .lab__state {
       grid-column: 4;
       text-align: end;
+    }
+  }
+
+  /* ------------------------------------------------------- the instrument */
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /*
+       * The scan line. The pseudo-element is the list's full box with the
+       * hairline along its top edge, so `translate: 0 100%` is the list's own
+       * height and the whole travel is one composited layer (its empty tiles
+       * are never rastered). It starts on the first entry's rule and comes to
+       * rest on the last one; it exists only while it can move. It runs
+       * *under* the entries (the list isolates, the line sits at -1), so the
+       * letters it crosses occlude it and it never reads as a strike-through.
+       */
+      :global(:root:not([data-calm])) .lab__list {
+        position: relative;
+        isolation: isolate;
+        view-timeline: --lab-list;
+      }
+
+      :global(:root:not([data-calm])) .lab__list::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-block-start: 1px solid color-mix(in srgb, var(--c-lab) 50%, transparent);
+        pointer-events: none;
+        animation: lab-scan linear both;
+        animation-timeline: --lab-list;
+        animation-range: cover 20% cover 80%;
+      }
+
+      /*
+       * The reading. On a desktop each entry number waits in faint bone and
+       * takes the cold accent as it crosses the middle of the screen, which is
+       * where the scan line hangs. A colour, on a three-digit label: a small
+       * paint, not a layer. Phones keep today's numbers.
+       */
+      @media (min-width: 48rem) {
+        :global(:root:not([data-calm])) .lab__num {
+          animation: lab-num-read linear both;
+          animation-timeline: view();
+          animation-range: cover 44% cover 50%;
+        }
+      }
+    }
+  }
+
+  @keyframes lab-scan {
+    from {
+      translate: 0 0;
+    }
+
+    to {
+      translate: 0 calc(100% - 1px);
+    }
+  }
+
+  @keyframes lab-num-read {
+    from {
+      color: var(--c-bone-faint);
+    }
+
+    to {
+      color: var(--c-lab);
     }
   }
 </style>

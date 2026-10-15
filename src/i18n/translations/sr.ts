@@ -172,4 +172,10 @@ export const sr: Dictionary = {
     languageLabel: 'Promeni jezik',
     workingTranslation: 'Ovaj prevod je radna verzija.',
   },
+  motion: {
+    calm: 'Mirno kretanje',
+    calmShort: 'Mirno',
+    calmSystem: 'Mirno (sistemsko podešavanje)',
+    nextPage: 'U potpunosti važi od sledeće stranice.',
+  },
 };

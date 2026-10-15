@@ -20,6 +20,11 @@ const dict = useTranslations(lang);
  * This is the second and last use of the SVG line-drawing motif (motion
  * reference 07). A single long stroke closes the page — the same gesture the
  * project plates open with.
+ *
+ * DEPTH (docs/motion-depth-plan.md §3.9): the landing. The title arrives
+ * from slightly behind the page and has settled before it reaches the
+ * reading band. The stroke keeps its one-off draw (never scrubbed, so it can
+ * never be left half drawn) and the actions get no scroll motion at all.
  */
 const email = site.contact.email;
 const phone = site.contact.phone;
@@ -33,9 +38,12 @@ const links = site.contact.links.filter((link) => Boolean(link.href));
       {dict.contact.label}
     </p>
 
-    <h2 id="contact-title" class="contact__title is-say" data-reveal style="--reveal-delay:80ms">
-      {dict.contact.title}
-    </h2>
+    <!-- The approach wraps the title: the title's own reveal owns its transform. -->
+    <div class="contact__approach" data-depth="approach">
+      <h2 id="contact-title" class="contact__title is-say" data-reveal style="--reveal-delay:80ms">
+        {dict.contact.title}
+      </h2>
+    </div>
 
     <!-- The closing stroke. Draws once, when the section arrives. -->
     <svg
@@ -121,6 +129,12 @@ const links = site.contact.links.filter((link) => Boolean(link.href));
     .contact__inner > * {
       grid-column: 1 / -1;
     }
+  }
+
+  /* Scales about its inline start, so the title keeps the page's left edge
+     as it arrives. */
+  .contact__approach {
+    transform-origin: 0 50%;
   }
 
   .contact__title {

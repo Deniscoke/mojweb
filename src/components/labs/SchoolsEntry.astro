@@ -13,6 +13,13 @@ interface Props {
  * Sits directly under the hero. The hero stays about the person; this band is
  * where the project labs branch off, as the natural consequence of the work
  * listed further down the page rather than a separate business stuck on top.
+ *
+ * DEPTH (docs/motion-depth-plan.md §3.2). The band draws itself open: its top
+ * and bottom rules are scrubbed hairlines instead of borders. Each lab entry
+ * is a small tilt stage under a desktop mouse, and its glyph is the one layer
+ * that lifts off it, in the lab's own colour. The glyphs stand up out of the
+ * page as their row arrives (on a phone they slide in instead). Names and
+ * questions stay flat: they are what is read. Under Calm this is today's band.
  */
 const { lang } = Astro.props;
 const copy = getLabsCopy(lang);
@@ -21,7 +28,7 @@ const labsHref = localePath(lang, 'laby');
 
 <section class="section section--sm schools" id="pro-skoly" aria-labelledby="schools-title">
   <div class="wrap">
-    <div class="schools__frame grid12">
+    <div class="schools__frame grid12" data-scrub="rule">
       <p class="mono section__label schools__label" data-reveal>
         <span class="section__index" aria-hidden="true">→</span>
         {copy.entry.label}
@@ -34,10 +41,14 @@ const labsHref = localePath(lang, 'laby');
 
       <ul class="schools__labs" role="list" data-reveal style="--reveal-delay:160ms">
         {
-          LABS.map((lab) => (
-            <li style={`--lab-accent:${lab.world.accent}`}>
-              <a class="schools__lab" href={localePath(lang, `laby/${lab.slug}`)}>
-                <span class="mono schools__glyph" aria-hidden="true">{lab.glyph}</span>
+          LABS.map((lab, index) => (
+            <li style={`--lab-accent:${lab.world.accent};--i:${index}`}>
+              <a class="schools__lab press" href={localePath(lang, `laby/${lab.slug}`)} data-tilt>
+                <span class="schools__lift" data-lift aria-hidden="true">
+                  <span class="mono schools__glyph" data-depth="rise">
+                    {lab.glyph}
+                  </span>
+                </span>
                 <span class="schools__lab-name">{lab.name}</span>
                 <span class="schools__lab-q">{copy.labs[lab.slug].question}</span>
               </a>
@@ -53,15 +64,37 @@ const labsHref = localePath(lang, 'laby');
         </a>
         <p class="mono schools__group">{copy.group.short}</p>
       </div>
+
+      <!-- The band's closing rule. An element of its own, so it draws as it
+           arrives instead of with the top of a tall band. -->
+      <span class="schools__rule-end" data-scrub="rule" aria-hidden="true"></span>
     </div>
   </div>
 </section>
 
 <style>
+  /*
+   * The frame's two rules are scrubbed hairlines (styles/depth.css), drawn at
+   * rest exactly where the borders were. The borders stay, transparent, so
+   * not a pixel of layout moves; each hairline sits on its border at -1px.
+   */
   .schools__frame {
+    --rule-color: var(--c-line-strong);
+    position: relative;
     row-gap: var(--s-6);
     padding-block: clamp(2rem, 4vw, 3.5rem);
-    border-block: 1px solid var(--c-line-strong);
+    border-block: 1px solid transparent;
+  }
+
+  .schools__frame::before {
+    inset-block-start: -1px;
+  }
+
+  .schools__rule-end {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: -1px;
+    block-size: 1px;
   }
 
   .schools__label {
@@ -119,7 +152,15 @@ const labsHref = localePath(lang, 'laby');
     }
   }
 
+  /*
+   * Each entry is a tilt stage (src/motion/depth/tilt.ts): under a desktop
+   * mouse it leans at most 4° each way. A stage may carry no opacity,
+   * overflow, filter, mask or clip-path, so the glyph's lift keeps its 3D
+   * context. On touch, `.press` sinks it a hair under the finger instead.
+   */
   .schools__lab {
+    --tilt-max-x: 4deg;
+    --tilt-max-y: 4deg;
     display: grid;
     /* Rows hug their content, so every entry in a row starts at the same line. */
     align-content: start;
@@ -148,10 +189,44 @@ const labsHref = localePath(lang, 'laby');
     transform: scaleX(1);
   }
 
+  /* The lift is the stage's direct child, as the 3D context requires. A flex
+     box, so the glyph inside it is laid out exactly as it was without one. */
+  .schools__lift {
+    display: flex;
+    justify-self: start;
+  }
+
   .schools__glyph {
     color: var(--lab-accent);
     font-size: var(--t-body);
     letter-spacing: 0;
+    /* Staggered left to right, but every glyph still settles by `entry 25vh`:
+       the first is upright 8vh early, the fifth exactly on time, so none is
+       still moving inside the reading band. */
+    --rise-offset: calc((var(--i, 4) - 4) * 2vh);
+  }
+
+  /* Lifted, the glyph glows faintly in its lab's colour, in proportion to how
+     far it has come off the plate, so nothing pops as the tilt engages or
+     settles. */
+  .schools__lab[data-tilting] .schools__glyph {
+    text-shadow: 0 0 0.9em color-mix(in srgb, var(--lab-accent) calc(var(--tilt-z, 0) * 60%), transparent);
+  }
+
+  /* A phone gets no rotation: each glyph slides in from the inline start as
+     its row arrives, on the rise primitive's own range. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) and (max-width: 47.99rem) {
+      :global(:root:not([data-calm])) .schools__glyph {
+        animation-name: schools-glyph-in;
+      }
+    }
+  }
+
+  @keyframes schools-glyph-in {
+    from {
+      translate: -0.75rem 0;
+    }
   }
 
   .schools__lab-name {
