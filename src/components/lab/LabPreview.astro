@@ -20,11 +20,13 @@ const experiments = await getExperiments(lang);
  * thing it does differently is the cold accent, which appears nowhere else.
  *
  * DEPTH (docs/motion-depth-plan.md §3.6): the notebook under an instrument.
- * A single lab-green hairline travels down the list as you scroll, and since
- * the list moves up while the line moves down, it hangs close to the middle
- * of the screen like a reading head. On a desktop each entry number lights up
- * in the cold accent as its entry crosses that middle. The ink surface stays
- * opaque and nothing turns over. Under Calm this is today's notebook.
+ * A short lab-green reading head travels down the list's margin as you
+ * scroll, and since the list moves up while the head moves down, it hangs
+ * close to the middle of the screen. It lives in the empty strip between the
+ * entry numbers and the questions, so it points at the line being read and
+ * never crosses a letter. On a desktop each entry number lights up in the
+ * cold accent as its entry crosses that middle. The ink surface stays opaque
+ * and nothing turns over. Under Calm this is today's notebook.
  *
  * This is a preview. The full list, with each question and note, lives at
  * /[lang]/lab/ and the entries that have a written log link on from there.
@@ -72,7 +74,14 @@ const experiments = await getExperiments(lang);
     border-block: 1px solid var(--c-line);
   }
 
+  /*
+   * The index gutter is named once here, because the reading head below is
+   * placed inside it: the number column and the gap after it.
+   */
   .lab__list {
+    --lab-gutter: 2.75rem;
+    --lab-gap: var(--s-4);
+
     display: grid;
     margin: 0;
     padding: 0;
@@ -80,8 +89,8 @@ const experiments = await getExperiments(lang);
 
   .lab__item {
     display: grid;
-    grid-template-columns: 2.75rem minmax(0, 1fr);
-    gap: var(--s-2) var(--s-4);
+    grid-template-columns: var(--lab-gutter) minmax(0, 1fr);
+    gap: var(--s-2) var(--lab-gap);
     padding-block: var(--s-5);
     border-block-start: 1px solid var(--c-line-strong);
     align-items: baseline;
@@ -122,9 +131,14 @@ const experiments = await getExperiments(lang);
   }
 
   @media (min-width: 48rem) {
+    .lab__list {
+      --lab-gutter: 3.5rem;
+      --lab-gap: var(--s-5);
+    }
+
     .lab__item {
-      grid-template-columns: 3.5rem minmax(0, 1fr) 10rem 9rem;
-      gap: var(--s-5);
+      grid-template-columns: var(--lab-gutter) minmax(0, 1fr) 10rem 9rem;
+      gap: var(--lab-gap);
       align-items: baseline;
     }
 
@@ -143,26 +157,39 @@ const experiments = await getExperiments(lang);
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
       /*
-       * The scan line. The pseudo-element is the list's full box with the
-       * hairline along its top edge, so `translate: 0 100%` is the list's own
-       * height and the whole travel is one composited layer (its empty tiles
-       * are never rastered). It starts on the first entry's rule and comes to
-       * rest on the last one; it exists only while it can move. It runs
-       * *under* the entries (the list isolates, the line sits at -1), so the
-       * letters it crosses occlude it and it never reads as a strike-through.
+       * The reading head. A full-width line read as a strike-through across
+       * the questions (thin type covers only a few pixels of it), so the head
+       * is a short index mark that lives only where nothing is printed: the
+       * strip between the three-digit number and the title, in every locale
+       * and at every width. It starts 2.125rem in (1.25rem before the end of
+       * the wide number column), clear of the digits, which are 2.3em of
+       * 0.75-0.81rem mono, so 1.86rem at most, and it stops 0.75rem short of
+       * the title.
+       *
+       * The mark is a 1px rule with a 7px riser across its end, an index
+       * mark pointing at the title, so it reads as an instrument and not as
+       * a stray piece of a row rule. The pseudo-element is the strip, as tall
+       * as the list, with the mark 3px above its bottom edge (the riser takes
+       * the 3px either side). `translate` moves it from one list-height above
+       * (rule on the first entry's rule) to rest (rule on the last), so the
+       * travel is one small composited layer and it overhangs the list by
+       * 3px at most below, never enough to extend the page. It exists only
+       * while it can move.
        */
       :global(:root:not([data-calm])) .lab__list {
         position: relative;
-        isolation: isolate;
         view-timeline: --lab-list;
       }
 
       :global(:root:not([data-calm])) .lab__list::after {
         content: '';
         position: absolute;
-        inset: 0;
-        z-index: -1;
-        border-block-start: 1px solid color-mix(in srgb, var(--c-lab) 50%, transparent);
+        inset-block: 0;
+        inset-inline-start: max(calc(var(--lab-gutter) - 1.25rem), 2.125rem);
+        inline-size: calc(var(--lab-gutter) + var(--lab-gap) - 0.75rem - max(calc(var(--lab-gutter) - 1.25rem), 2.125rem));
+        background:
+          linear-gradient(var(--c-lab), var(--c-lab)) right bottom / 1px 7px no-repeat,
+          linear-gradient(var(--c-lab), var(--c-lab)) left bottom 3px / 100% 1px no-repeat;
         pointer-events: none;
         animation: lab-scan linear both;
         animation-timeline: --lab-list;
@@ -172,7 +199,7 @@ const experiments = await getExperiments(lang);
       /*
        * The reading. On a desktop each entry number waits in faint bone and
        * takes the cold accent as it crosses the middle of the screen, which is
-       * where the scan line hangs. A colour, on a three-digit label: a small
+       * where the reading head hangs. A colour, on a three-digit label: a small
        * paint, not a layer. Phones keep today's numbers.
        */
       @media (min-width: 48rem) {
@@ -187,11 +214,11 @@ const experiments = await getExperiments(lang);
 
   @keyframes lab-scan {
     from {
-      translate: 0 0;
+      translate: 0 calc(4px - 100%);
     }
 
     to {
-      translate: 0 calc(100% - 1px);
+      translate: 0 3px;
     }
   }
 
