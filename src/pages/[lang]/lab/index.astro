@@ -14,6 +14,13 @@ import { getExperiments, hasLabDetail } from '~/lib/cms';
  * question and note. Entries with a written log link through to their own
  * page; entries that are still only a question stay inline rather than
  * generating a page with nothing on it.
+ *
+ * DEPTH (motion depth plan §3.14). One thing moves, and only while you
+ * scroll: the homepage preview's instrument line, a 1px hairline in the lab's
+ * cold accent that travels down the whole list as you read it, like a scanner
+ * passing over a notebook. The entries themselves stay flat and still. The
+ * notes behind them (lab/[slug]) get no motion at all: the least finished
+ * pages must not be the most decorated.
  */
 export function getStaticPaths() {
   return LOCALES.map((locale) => ({
@@ -112,10 +119,59 @@ const title = `${dict.lab.indexTitle} — ${site.author.name}`;
   }
 
   .lab-page__list {
+    position: relative;
     display: grid;
     margin: 0;
     padding: 0;
     border-block-start: 1px solid var(--c-line-strong);
+  }
+
+  /*
+   * THE INSTRUMENT LINE. A box the size of the list carries the hairline on
+   * its bottom edge and slides from one list-height above to the list
+   * itself, so the line runs from the list's top rule to its bottom rule.
+   * Only `translate` changes, so the compositor does it; the box is
+   * transparent apart from its 1px, and its overhang is above the list,
+   * where it can never extend the page.
+   *
+   * It is driven by the page's own scroll, start to end, not by the list's
+   * view: at the top of the page the line lies on the top rule, exactly
+   * where the page was drawn; at the end it lies on the bottom rule; and in
+   * between it travels down the screen with the reading, never leaving it
+   * (both rules are on screen at the two ends of the scroll, at any size).
+   *
+   * It exists only where it can move: without scroll timelines, under
+   * reduced motion or under Calm, the list is exactly as it was.
+   */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* The line passes under the entries, never through them: the words
+         are printed over it. */
+      :global(:root:not([data-calm])) .lab-page__list {
+        isolation: isolate;
+      }
+
+      :global(:root:not([data-calm])) .lab-page__list::after {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        background: linear-gradient(var(--c-lab), var(--c-lab)) left bottom / 100% 1px no-repeat;
+        pointer-events: none;
+        animation: notebook-scan linear both;
+        animation-timeline: scroll(root block);
+        animation-range: normal;
+      }
+    }
+  }
+
+  @keyframes notebook-scan {
+    from {
+      translate: 0 -100%;
+    }
+    to {
+      translate: 0 0;
+    }
   }
 
   .entry {

@@ -113,6 +113,26 @@ const restMedia = embed ? media : media.slice(1);
  */
 const ogCard = `/assets/og/${project.slug}.png`;
 const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
+
+/**
+ * DEPTH (motion depth plan §3.12). The page arrives exactly as before — plate
+ * transition, enter cover, panels — and the h1 is never hidden. Depth is then
+ * added to the things that are objects, never to the things that are read:
+ *
+ *   plate      the generated plate is printed `layered` on a tilt stage, so
+ *              under a mouse its accent sheet lifts off and the plate that
+ *              just grew out of the homepage shows it was layered all along.
+ *              Leaving through the top it tips back and steps away (recede).
+ *   evidence   by kind, in MediaFigure: photos and renders are seen through
+ *              their frame, screenshots stand up like a monitor, diagrams and
+ *              video never move. The priority image keeps only its window.
+ *   labels     on a wide screen the section labels hold their place while the
+ *              prose scrolls past them: two planes, no script.
+ *   next       the next project's plate waits behind its title as a faint,
+ *              far plane, and the title arrives from slightly behind the page.
+ *
+ * The reading surfaces — title, question, prose, related list — stay flat.
+ */
 ---
 
 <BaseLayout
@@ -180,9 +200,13 @@ const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
           embed ? (
             <EmbedFrame embed={embed} lang={code} visual={project.visual} hue={project.hue} seed={project.slug} />
           ) : heroMedia ? (
-            <MediaFigure item={heroMedia} priority />
+            <MediaFigure item={heroMedia} priority depth />
           ) : (
-            <ProjectVisual visual={project.visual} hue={project.hue} seed={project.slug} />
+            <div class="project-page__recede" data-depth="recede">
+              <div class="project-page__stage" data-tilt>
+                <ProjectVisual visual={project.visual} hue={project.hue} seed={project.slug} layered />
+              </div>
+            </div>
           )
         }
       </div>
@@ -231,7 +255,7 @@ const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
             <h2 class="mono project-page__evidence-label">{dict.project.evidence}</h2>
             <div class="project-page__media">
               {restMedia.map((m) => (
-                <MediaFigure item={m} />
+                <MediaFigure item={m} depth />
               ))}
             </div>
           </section>
@@ -273,8 +297,15 @@ const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
       {
         showNext && (
           <a class="project-page__next" href={localePath(code, `projects/${next.slug}`)}>
+            <span class="project-page__next-ghost" aria-hidden="true" data-reveal data-draw-group>
+              <span class="project-page__next-far" data-depth="drift">
+                <ProjectVisual visual={next.visual} hue={next.hue} seed={next.slug} />
+              </span>
+            </span>
             <span class="mono project-page__next-label">{dict.project.next}</span>
-            <span class="project-page__next-title is-name">{t(next.title, code)}</span>
+            <span class="project-page__next-approach" data-depth="approach">
+              <span class="project-page__next-title is-name">{t(next.title, code)}</span>
+            </span>
           </a>
         )
       }
@@ -360,9 +391,10 @@ const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
     justify-self: start;
   }
 
+  /* No overflow clip: the plate's SVG crops itself, and a leaning stage must
+     be free to bring its near edge forward. */
   .project-page__plate {
     aspect-ratio: 16 / 9;
-    overflow: hidden;
     margin-block-end: var(--s-7);
   }
 
@@ -370,7 +402,47 @@ const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
      generated plate's 16:9. */
   .project-page__plate[data-has-evidence] {
     aspect-ratio: auto;
-    overflow: visible;
+  }
+
+  /*
+   * THE PLATE AS AN OBJECT. Three boxes, one owner each:
+   *
+   *   .project-page__plate    [data-reveal]   arrives (transform, opacity)
+   *     .project-page__recede [data-depth]    leaves: tips back, steps away
+   *       .project-page__stage [data-tilt]    leans under a mouse; the plate's
+   *                                           accent sheet is its [data-lift]
+   *
+   * The plate runs the full width of the page, so the stage is tuned for its
+   * size: a longer perspective and smaller angles than a card, so it leans
+   * about as far as a card would look leaning from the same distance, and a
+   * deeper lift so the sheet still visibly separates.
+   */
+  .project-page__recede,
+  .project-page__stage {
+    display: block;
+    block-size: 100%;
+  }
+
+  .project-page__stage {
+    --persp: 2400px;
+    --tilt-max-x: 3deg;
+    --tilt-max-y: 5deg;
+    --lift: 40px;
+  }
+
+  /* Phones: the plate only steps back as it leaves (plan §3.12, mobile). */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) and (max-width: 47.99rem) {
+      :global(:root:not([data-calm])) .project-page__recede {
+        animation-name: project-plate-recede-scale;
+      }
+    }
+  }
+
+  @keyframes project-plate-recede-scale {
+    to {
+      scale: 0.96;
+    }
   }
 
   .project-page__note {
@@ -406,13 +478,57 @@ const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
     text-wrap: pretty;
   }
 
+  /* `isolation` keeps the ghost plate's negative z-index inside the link:
+     behind its text, in front of the page. */
   .project-page__next {
+    position: relative;
+    isolation: isolate;
     display: grid;
     gap: var(--s-3);
     margin-block-start: clamp(3rem, 9vw, 7rem);
     padding-block-start: var(--s-5);
     border-block-start: 1px solid var(--c-line);
     color: var(--c-bone);
+  }
+
+  .project-page__next-approach {
+    display: block;
+  }
+
+  /*
+   * THE NEXT PLATE, FAR AWAY. Behind the closing line, the next project's
+   * own plate is seen through a long low window under the rule, fading in
+   * from the left and out at the foot, at a fifth of its strength. It is a
+   * plane well behind the page: it slides slower than the page inside its
+   * window (drift -1, at most 3vh either way), so the title passes in front
+   * of it. It draws itself in as it is reached, like every plate.
+   * Decoration only: hidden from assistive tech, never hit-tested, and not
+   * wired to the plate transition, which belongs to the homepage rows.
+   *
+   * Two boxes, one owner each: the window reveals (transform, opacity) and
+   * clips; the far plane inside it drifts (translate) and carries the
+   * faintness. The plane overhangs the window by the drift's full travel,
+   * so an edge never shows.
+   */
+  .project-page__next-ghost {
+    position: absolute;
+    z-index: -1;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: min(48rem, 72%);
+    overflow: clip;
+    pointer-events: none;
+    mask-image:
+      linear-gradient(to right, transparent, #000 55%),
+      linear-gradient(to bottom, #000 60%, transparent);
+    mask-composite: intersect;
+  }
+
+  .project-page__next-far {
+    --drift: -1;
+    position: absolute;
+    inset: calc(-3vh - 2px) 0;
+    opacity: 0.22;
   }
 
   .project-page__next-label {
@@ -423,7 +539,10 @@ const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
     text-transform: uppercase;
   }
 
+  /* A block, as it was when it was a grid item itself: inside the approach
+     wrapper an inline title would sit on a line box of the link's font. */
   .project-page__next-title {
+    display: block;
     font-size: var(--t-project);
     transition: color var(--d-base) var(--e-out);
   }
@@ -545,9 +664,18 @@ const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
       grid-row: 2;
     }
 
+    /*
+     * TWO PLANES. The label holds below the nav while its section's prose
+     * scrolls past, and leaves with the section's last line (a sticky box
+     * never leaves its grid area). No script, and the same in every browser
+     * and under Calm: it is layout, not motion. 6rem clears the nav, and is
+     * the offset anchor jumps already land at.
+     */
     .project-page__section-label {
       grid-column: 1 / span 3;
       padding-block-start: 0.35em;
+      position: sticky;
+      inset-block-start: 6rem;
     }
 
     .project-page__prose {
