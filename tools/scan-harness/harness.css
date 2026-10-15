@@ -1,0 +1,235 @@
+/* Scan harness only. A close stand-in for the homepage hero, built from the
+   site's own tokens, so what is judged here is what ships. */
+
+.h-hero {
+  position: relative;
+  min-block-size: 86svb;
+  display: flex;
+  align-items: center;
+  padding-block: clamp(4rem, 10vh, 8rem) var(--s-8);
+}
+
+.h-rules,
+.h-anchor-grid {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  inline-size: min(100% - var(--gutter) * 2, var(--w-max));
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+.h-rules {
+  block-size: 100%;
+  mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 65%, transparent);
+}
+
+.h-rules > span {
+  border-inline-start: 1px solid var(--c-line);
+  opacity: 0.55;
+}
+
+.h-rules > span:first-child {
+  border-inline-start: 0;
+}
+
+/* The host covers the hero and scrolls with it; the mask weights the canvas
+   to the right-hand columns (plan §3.1). */
+.h-scan {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  mask-image: linear-gradient(to right, transparent 42%, #000 62%);
+}
+
+.h-anchor-grid {
+  block-size: 62%;
+}
+
+.h-anchor-grid > span {
+  grid-column: 7 / span 5;
+}
+
+.h-inner {
+  position: relative;
+  z-index: 1;
+  row-gap: clamp(1.25rem, 3.5vh, 2.5rem);
+  align-content: center;
+}
+
+.h-inner > * {
+  grid-column: 1 / -1;
+}
+
+.h-role {
+  color: var(--c-bone-faint);
+}
+
+.h-name {
+  font-size: var(--t-mega);
+}
+
+.h-statement {
+  font-size: var(--t-statement);
+  max-inline-size: 18ch;
+  margin-block-start: var(--s-5, 1.5rem);
+}
+
+.h-intro {
+  color: var(--c-bone-dim);
+  max-inline-size: 34ch;
+}
+
+.h-cue,
+.h-cap {
+  color: var(--c-bone-faint);
+  text-decoration: none;
+}
+
+.h-cap {
+  justify-self: end;
+}
+
+.h-cap:hover,
+.h-cap:focus-visible {
+  color: var(--c-bone);
+}
+
+@media (min-width: 62rem) {
+  .h-block {
+    grid-column: 1 / span 10;
+  }
+  .h-statement {
+    grid-column: 1 / span 7;
+  }
+  .h-aside {
+    grid-column: 10 / span 3;
+    grid-row: 2;
+    align-self: end;
+  }
+  .h-cue {
+    grid-column: 1 / span 3;
+  }
+  .h-cap {
+    grid-column: 9 / span 4;
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 61.99rem) {
+  .h-scan,
+  .h-anchor-grid {
+    display: none;
+  }
+}
+
+.h-stage-wrap,
+.h-poster-wrap,
+.h-after {
+  padding-block: var(--s-8);
+}
+
+.h-note {
+  color: var(--c-bone-faint);
+  margin-block-end: 1rem;
+}
+
+.h-stage {
+  position: relative;
+  block-size: 11rem;
+  border-block: 1px solid var(--c-line);
+}
+
+.h-poster {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  max-inline-size: 48rem;
+  background: var(--c-ink);
+  border: 1px solid var(--c-line);
+  display: grid;
+  place-items: end start;
+  padding: 1rem;
+}
+
+.h-load {
+  position: relative;
+  z-index: 1;
+  min-block-size: 44px;
+  padding-inline: 1rem;
+  background: var(--c-bone);
+  color: var(--c-void);
+  border: 0;
+}
+
+.h-after {
+  min-block-size: 120vh;
+}
+
+/* ------------------------------------------------------------ controls */
+
+.panel {
+  position: fixed;
+  inset-block-end: 0.75rem;
+  inset-inline-end: 0.75rem;
+  z-index: 300;
+  inline-size: min(19rem, calc(100% - 1.5rem));
+  max-block-size: calc(100% - 1.5rem);
+  overflow: auto;
+  padding: 0.75rem;
+  background: color-mix(in srgb, var(--c-ink) 92%, transparent);
+  border: 1px solid var(--c-line-strong);
+  font-size: 11px;
+  text-transform: none;
+  letter-spacing: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.panel__stats {
+  white-space: pre;
+  color: var(--c-bone);
+  line-height: 1.5;
+}
+
+.panel fieldset {
+  border: 1px solid var(--c-line);
+  padding: 0.5rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.panel legend {
+  color: var(--c-bone-faint);
+  padding-inline: 0.25rem;
+}
+
+.panel label {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  color: var(--c-bone-dim);
+}
+
+.panel input[type='range'] {
+  flex: 1;
+}
+
+.panel .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.panel button {
+  font: inherit;
+  padding: 0.3rem 0.5rem;
+  background: var(--c-ink-2);
+  color: var(--c-bone);
+  border: 1px solid var(--c-line-strong);
+  cursor: pointer;
+}
+
+:root[data-bare] .panel {
+  display: none;
+}
