@@ -1,0 +1,135 @@
+---
+import PhotoWindow from './PhotoWindow.astro';
+import { photosFor, type PhotoPlacement } from '~/data/photos';
+
+interface Props {
+  /** Registry slot to draw: `about`, or `laby:<slug>`. */
+  placement: PhotoPlacement;
+  lang: string;
+  /** Below 62rem the frames run edge to edge, out of the page gutter. */
+  bleed?: boolean;
+  /** Placed by the parent in its grid; the parent styles it with :global(). */
+  class?: string;
+}
+
+const { placement, lang, bleed = false, class: className } = Astro.props;
+
+/**
+ * A PHOTOGRAPH WITH DEPTH
+ * =======================
+ * Denis's own frames, registered in src/data/photos.ts. The structure is the
+ * depth system's, layer by layer, each with one owner:
+ *
+ *   .depth-photo                [data-depth="rise"]  arrives on entry
+ *     figure.depth-photo__stage [data-tilt]          desktop pointer tilt
+ *       PhotoWindow             overflow: hidden     the frame; owns the
+ *         img                                        scroll window (Tier 0)
+ *       figcaption              the readout          floats above a tilting
+ *                                                    stage, like a HUD label
+ *
+ * The rise wrapper exists because the stage may not carry a second owner,
+ * and the readout must be a direct child of the figure to be its caption.
+ *
+ * EMPTY STATE. With nothing registered for this placement the component
+ * renders nothing at all — not a frame, not a grey box. The surrounding
+ * section is designed to stand without it.
+ *
+ * Every photo is a real <img> with Denis's alt, visible at rest, with or
+ * without JavaScript. Depth is only ever added on top of it.
+ */
+const photos = photosFor(placement, lang);
+---
+
+{
+  photos.length > 0 && (
+    <div class:list={['depth-photos', className]} data-bleed={bleed ? '' : undefined}>
+      {photos.map((photo) => (
+        <div class="depth-photo" data-depth="rise">
+          <figure class="depth-photo__stage" data-tilt>
+            <PhotoWindow
+              src={photo.src}
+              srcset={photo.srcset}
+              sizes={photo.sizes}
+              alt={photo.alt}
+              width={photo.width}
+              height={photo.height}
+              ratio={photo.ratio}
+              focal={photo.focal}
+              placeholder={photo.placeholder}
+              depthMap={photo.depthMap}
+            />
+            {photo.readout.length > 0 && (
+              <figcaption class="mono depth-photo__readout">
+                {photo.readout.map((part, i) => (
+                  <>
+                    {i > 0 && <span class="depth-photo__sep" aria-hidden="true">·</span>}
+                    <span>{part}</span>
+                  </>
+                ))}
+              </figcaption>
+            )}
+          </figure>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+<style>
+  .depth-photos {
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  .depth-photo__stage {
+    margin: 0;
+    display: grid;
+    gap: var(--s-3);
+  }
+
+  .depth-photo__readout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    /* Real text, so it keeps the mono size with the 12 px floor and the
+       faint bone that holds AA on every surface. */
+    color: var(--c-bone-faint);
+  }
+
+  .depth-photo__sep {
+    color: var(--c-line-strong);
+  }
+
+  /*
+   * Full bleed on a phone: out of the page gutter to the screen edges, so a
+   * 4:5 frame reads as a photograph rather than a thumbnail. The readout
+   * steps back into the gutter so its text keeps the page's left edge.
+   */
+  @media (max-width: 61.999rem) {
+    .depth-photos[data-bleed] {
+      margin-inline: calc(var(--gutter) * -1);
+    }
+
+    .depth-photos[data-bleed] .depth-photo__readout {
+      padding-inline: var(--gutter);
+    }
+  }
+
+  /*
+   * The readout as a HUD label. While the desktop tilt runs, the stage is a
+   * 3D context and the readout floats 16 px in front of the photograph, so
+   * it parallaxes against it. At rest (and on touch, and under Calm, where
+   * tilt never loads) there is no `data-tilting` and everything is flat.
+   */
+  .depth-photo__stage[data-tilting] {
+    transform-style: preserve-3d;
+  }
+
+  .depth-photo__readout {
+    transition: translate var(--d-base) var(--e-out);
+  }
+
+  .depth-photo__stage[data-tilting] .depth-photo__readout {
+    translate: 0 0 16px;
+  }
+</style>

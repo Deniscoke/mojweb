@@ -1,15 +1,22 @@
 ---
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import PhotoWindow from './PhotoWindow.astro';
+import { EVIDENCE } from '~/data/evidence';
 import type { MediaItem } from '~/data/projects';
 
 interface Props {
   item: MediaItem;
   /** First item on a page loads eagerly; the rest stay lazy. */
   priority?: boolean;
+  /**
+   * Opt in to the depth treatment by kind (see below). Off by default, so
+   * pages that must stay still — the lab notes — stay exactly as they are.
+   */
+  depth?: boolean;
 }
 
-const { item, priority = false } = Astro.props;
+const { item, priority = false, depth = false } = Astro.props;
 
 /**
  * EVIDENCE, not decoration.
@@ -39,43 +46,92 @@ const srcset = (() => {
   if (!entries.length) return undefined;
   return [...entries.map(({ w, url }) => `${url} ${w}w`), `${item.url} ${item.width}w`].join(', ');
 })();
+const sizes = '(min-width: 62rem) 70vw, 100vw';
 
 const isVideo = item.kind === 'video' || item.mimeType.startsWith('video/');
 const described = Boolean(item.alt);
 
 const ratio = item.width && item.height ? `${item.width} / ${item.height}` : undefined;
+
+/**
+ * Where the subject sits, from the evidence record when this file came from
+ * one. CMS media carry no focal point yet and frame from the centre.
+ */
+const focal = EVIDENCE.find((spec) => `/media/evidence/${spec.file}` === item.url)?.focal;
+const objectPosition = focal ? `object-position:${focal[0]}% ${focal[1]}%` : undefined;
+
+/**
+ * DEPTH BY KIND
+ * =============
+ *   photo, generated   Tier 0 window: the image moves inside its frame on
+ *                      scroll, at identity in the reading band. The figure
+ *                      rises on entry.
+ *   screenshot         Monitor settle: the frame stands up from a slight
+ *                      recline as it enters (desktop), or slides up (phone).
+ *   diagram            Never moves. It has to be read.
+ *   video              Never moves.
+ *
+ * The priority image is the page's LCP: it keeps the window — a transform
+ * inside its own frame — and nothing else. Never opacity, never a rise.
+ *
+ * Tier 1 (the depth-map shader) needs consent recorded as `adult`, and
+ * evidence records no consent, so evidence photos are Tier 0. Photos that
+ * may go further are registered in src/data/photos.ts.
+ */
+const windowed = depth && !isVideo && (item.kind === 'photo' || item.kind === 'generated');
+const settles = depth && !priority && item.kind === 'screenshot';
+const rises = windowed && !priority;
 ---
 
-<figure class="media" data-kind={item.kind}>
-  <div class="media__frame" style={ratio ? `--media-ratio:${ratio}` : undefined}>
-    {
-      isVideo ? (
-        <video
-          class="media__el"
-          src={item.url}
-          controls
-          preload="metadata"
-          playsinline
-          width={item.width ?? undefined}
-          height={item.height ?? undefined}
-        />
-      ) : (
-        <img
-          class="media__el"
-          src={item.url}
-          srcset={srcset}
-          sizes={srcset ? '(min-width: 62rem) 70vw, 100vw' : undefined}
-          alt={item.alt ?? ''}
-          aria-hidden={described ? undefined : 'true'}
-          width={item.width ?? undefined}
-          height={item.height ?? undefined}
-          loading={priority ? 'eager' : 'lazy'}
-          fetchpriority={priority ? 'high' : undefined}
-          decoding="async"
-        />
-      )
-    }
-  </div>
+<figure
+  class="media"
+  data-kind={item.kind}
+  data-depth={rises ? 'rise' : undefined}
+  data-settle={settles ? '' : undefined}
+>
+  {
+    windowed ? (
+      <PhotoWindow
+        src={item.url}
+        srcset={srcset}
+        sizes={sizes}
+        alt={item.alt}
+        width={item.width}
+        height={item.height}
+        focal={focal}
+        priority={priority}
+      />
+    ) : (
+      <div class="media__frame" style={ratio ? `--media-ratio:${ratio}` : undefined}>
+        {isVideo ? (
+          <video
+            class="media__el"
+            src={item.url}
+            controls
+            preload="metadata"
+            playsinline
+            width={item.width ?? undefined}
+            height={item.height ?? undefined}
+          />
+        ) : (
+          <img
+            class="media__el"
+            src={item.url}
+            srcset={srcset}
+            sizes={srcset ? sizes : undefined}
+            alt={item.alt ?? ''}
+            aria-hidden={described ? undefined : 'true'}
+            width={item.width ?? undefined}
+            height={item.height ?? undefined}
+            loading={priority ? 'eager' : 'lazy'}
+            fetchpriority={priority ? 'high' : undefined}
+            decoding="async"
+            style={objectPosition}
+          />
+        )}
+      </div>
+    )
+  }
 
   {
     (item.caption || item.credit) && (
@@ -145,5 +201,63 @@ const ratio = item.width && item.height ? `${item.width} / ${item.height}` : und
 
   .media__credit::before {
     content: '— ';
+  }
+
+  /*
+   * MONITOR SETTLE. A screenshot is a screen, so it arrives like one being
+   * set upright: reclined 6° about its bottom edge, standing up by the time
+   * its top reaches 75% of the viewport. Perspective sits on the frame itself,
+   * never on an ancestor. The caption stays flat. On a phone there is no
+   * rotation at all; the whole figure slides up instead, caption included,
+   * so the frame can never ride over its own caption.
+   *
+   * The figure is the timeline subject and does not move on desktop; on a
+   * phone it does, which a view timeline ignores (it measures layout, not
+   * transforms). Entry only, fill backwards: after the range it is gone, and
+   * the frame is `transform: none` again.
+   */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      :global(:root:not([data-calm])) .media[data-settle] {
+        view-timeline: --settle block;
+      }
+
+      :global(:root:not([data-calm])) .media[data-settle] .media__frame {
+        transform-origin: 50% 100%;
+        animation: media-settle linear backwards;
+        animation-timeline: --settle;
+        animation-range: entry 0% entry 25vh;
+      }
+
+      @media (max-width: 47.999rem) {
+        :global(:root:not([data-calm])) .media[data-settle] .media__frame {
+          animation: none;
+        }
+
+        :global(:root:not([data-calm])) .media[data-settle] {
+          animation: media-settle-flat linear backwards;
+          animation-timeline: --settle;
+          animation-range: entry 0% entry 25vh;
+        }
+      }
+    }
+  }
+
+  @keyframes media-settle {
+    from {
+      transform: perspective(var(--persp, 1100px)) rotateX(6deg);
+    }
+    to {
+      transform: perspective(var(--persp, 1100px)) rotateX(0deg);
+    }
+  }
+
+  @keyframes media-settle-flat {
+    from {
+      translate: 0 1.25rem;
+    }
+    to {
+      translate: 0 0;
+    }
   }
 </style>
