@@ -1,0 +1,1046 @@
+{
+  "$comment": "Pre-change measurements for scripts/check-budget.mjs. Bytes, gzip level 9, each file on its own. css = every inline <style> on the page; js = inline scripts + the static import closure of its module scripts. Regenerate ONLY from the commit before the motion-depth work: node scripts/check-budget.mjs --write-baseline",
+  "measuredAt": "2026-10-15",
+  "commit": "eca3f17",
+  "pages": 152,
+  "js": {
+    "total": 12663,
+    "files": 18
+  },
+  "types": {
+    "404": {
+      "pages": 1,
+      "css": {
+        "min": 4352,
+        "max": 4352
+      },
+      "js": {
+        "min": 3040,
+        "max": 3040
+      },
+      "html": {
+        "min": 6923,
+        "max": 6923
+      }
+    },
+    "gate": {
+      "pages": 1,
+      "css": {
+        "min": 4716,
+        "max": 4716
+      },
+      "js": {
+        "min": 6018,
+        "max": 6018
+      },
+      "html": {
+        "min": 7101,
+        "max": 7101
+      }
+    },
+    "home": {
+      "pages": 6,
+      "css": {
+        "min": 7466,
+        "max": 7466
+      },
+      "js": {
+        "min": 9383,
+        "max": 9383
+      },
+      "html": {
+        "min": 18491,
+        "max": 19012
+      }
+    },
+    "lab": {
+      "pages": 6,
+      "css": {
+        "min": 5439,
+        "max": 5439
+      },
+      "js": {
+        "min": 5199,
+        "max": 5199
+      },
+      "html": {
+        "min": 9014,
+        "max": 9219
+      }
+    },
+    "note": {
+      "pages": 66,
+      "css": {
+        "min": 5643,
+        "max": 5643
+      },
+      "js": {
+        "min": 5199,
+        "max": 5199
+      },
+      "html": {
+        "min": 8383,
+        "max": 9579
+      }
+    },
+    "laby": {
+      "pages": 6,
+      "css": {
+        "min": 6291,
+        "max": 6291
+      },
+      "js": {
+        "min": 5199,
+        "max": 5199
+      },
+      "html": {
+        "min": 15881,
+        "max": 16307
+      }
+    },
+    "laby-detail": {
+      "pages": 30,
+      "css": {
+        "min": 6006,
+        "max": 6006
+      },
+      "js": {
+        "min": 5199,
+        "max": 5199
+      },
+      "html": {
+        "min": 10818,
+        "max": 11919
+      }
+    },
+    "case": {
+      "pages": 36,
+      "css": {
+        "min": 6244,
+        "max": 6244
+      },
+      "js": {
+        "min": 5199,
+        "max": 5494
+      },
+      "html": {
+        "min": 10737,
+        "max": 12119
+      }
+    }
+  },
+  "routes": {
+    "/": {
+      "type": "gate",
+      "css": 4716,
+      "js": 6018,
+      "html": 7101
+    },
+    "/404.html": {
+      "type": "404",
+      "css": 4352,
+      "js": 3040,
+      "html": 6923
+    },
+    "/cs/": {
+      "type": "home",
+      "css": 7466,
+      "js": 9383,
+      "html": 18956
+    },
+    "/cs/lab/": {
+      "type": "lab",
+      "css": 5439,
+      "js": 5199,
+      "html": 9205
+    },
+    "/cs/lab/ai-commerce-engine/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 9416
+    },
+    "/cs/lab/ai-controlling-unreal/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8846
+    },
+    "/cs/lab/art-learning/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8812
+    },
+    "/cs/lab/can-ai-answer-my-phone/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8492
+    },
+    "/cs/lab/digital-space/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 9579
+    },
+    "/cs/lab/drawing-as-daily-habit/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8824
+    },
+    "/cs/lab/generated-product-pipelines/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8820
+    },
+    "/cs/lab/lidar-and-photogrammetry/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8756
+    },
+    "/cs/lab/navigable-space/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8640
+    },
+    "/cs/lab/spatial-computing/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8601
+    },
+    "/cs/lab/voice-agents/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8582
+    },
+    "/cs/laby/": {
+      "type": "laby",
+      "css": 6291,
+      "js": 5199,
+      "html": 16167
+    },
+    "/cs/laby/ai-builder/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11030
+    },
+    "/cs/laby/future/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11364
+    },
+    "/cs/laby/invok/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11844
+    },
+    "/cs/laby/unreal/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11110
+    },
+    "/cs/laby/usage/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11781
+    },
+    "/cs/projects/circus-movement/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 10987
+    },
+    "/cs/projects/moodpack-director/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11196
+    },
+    "/cs/projects/pravo365/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11402
+    },
+    "/cs/projects/snowboard-coaching/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11159
+    },
+    "/cs/projects/splatoo/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5494,
+      "html": 12054
+    },
+    "/cs/projects/web-digital-work/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 10876
+    },
+    "/en/": {
+      "type": "home",
+      "css": 7466,
+      "js": 9383,
+      "html": 18491
+    },
+    "/en/lab/": {
+      "type": "lab",
+      "css": 5439,
+      "js": 5199,
+      "html": 9014
+    },
+    "/en/lab/ai-commerce-engine/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 9147
+    },
+    "/en/lab/ai-controlling-unreal/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8691
+    },
+    "/en/lab/art-learning/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8678
+    },
+    "/en/lab/can-ai-answer-my-phone/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8383
+    },
+    "/en/lab/digital-space/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 9300
+    },
+    "/en/lab/drawing-as-daily-habit/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8661
+    },
+    "/en/lab/generated-product-pipelines/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8645
+    },
+    "/en/lab/lidar-and-photogrammetry/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8600
+    },
+    "/en/lab/navigable-space/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8505
+    },
+    "/en/lab/spatial-computing/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8468
+    },
+    "/en/lab/voice-agents/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8433
+    },
+    "/en/laby/": {
+      "type": "laby",
+      "css": 6291,
+      "js": 5199,
+      "html": 15881
+    },
+    "/en/laby/ai-builder/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 10818
+    },
+    "/en/laby/future/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11099
+    },
+    "/en/laby/invok/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11614
+    },
+    "/en/laby/unreal/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 10885
+    },
+    "/en/laby/usage/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11526
+    },
+    "/en/projects/circus-movement/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 10825
+    },
+    "/en/projects/moodpack-director/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 10912
+    },
+    "/en/projects/pravo365/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11037
+    },
+    "/en/projects/snowboard-coaching/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11009
+    },
+    "/en/projects/splatoo/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5494,
+      "html": 11849
+    },
+    "/en/projects/web-digital-work/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 10737
+    },
+    "/es/": {
+      "type": "home",
+      "css": 7466,
+      "js": 9383,
+      "html": 18793
+    },
+    "/es/lab/": {
+      "type": "lab",
+      "css": 5439,
+      "js": 5199,
+      "html": 9179
+    },
+    "/es/lab/ai-commerce-engine/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 9229
+    },
+    "/es/lab/ai-controlling-unreal/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8792
+    },
+    "/es/lab/art-learning/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8762
+    },
+    "/es/lab/can-ai-answer-my-phone/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8482
+    },
+    "/es/lab/digital-space/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 9384
+    },
+    "/es/lab/drawing-as-daily-habit/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8759
+    },
+    "/es/lab/generated-product-pipelines/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8740
+    },
+    "/es/lab/lidar-and-photogrammetry/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8674
+    },
+    "/es/lab/navigable-space/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8613
+    },
+    "/es/lab/spatial-computing/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8556
+    },
+    "/es/lab/voice-agents/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8521
+    },
+    "/es/laby/": {
+      "type": "laby",
+      "css": 6291,
+      "js": 5199,
+      "html": 16203
+    },
+    "/es/laby/ai-builder/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11009
+    },
+    "/es/laby/future/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11331
+    },
+    "/es/laby/invok/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11820
+    },
+    "/es/laby/unreal/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11106
+    },
+    "/es/laby/usage/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11722
+    },
+    "/es/projects/circus-movement/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 10979
+    },
+    "/es/projects/moodpack-director/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11097
+    },
+    "/es/projects/pravo365/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11220
+    },
+    "/es/projects/snowboard-coaching/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11150
+    },
+    "/es/projects/splatoo/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5494,
+      "html": 12040
+    },
+    "/es/projects/web-digital-work/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 10880
+    },
+    "/sk/": {
+      "type": "home",
+      "css": 7466,
+      "js": 9383,
+      "html": 18930
+    },
+    "/sk/lab/": {
+      "type": "lab",
+      "css": 5439,
+      "js": 5199,
+      "html": 9186
+    },
+    "/sk/lab/ai-commerce-engine/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 9405
+    },
+    "/sk/lab/ai-controlling-unreal/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8843
+    },
+    "/sk/lab/art-learning/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8807
+    },
+    "/sk/lab/can-ai-answer-my-phone/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8492
+    },
+    "/sk/lab/digital-space/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 9560
+    },
+    "/sk/lab/drawing-as-daily-habit/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8793
+    },
+    "/sk/lab/generated-product-pipelines/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8817
+    },
+    "/sk/lab/lidar-and-photogrammetry/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8749
+    },
+    "/sk/lab/navigable-space/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8602
+    },
+    "/sk/lab/spatial-computing/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8576
+    },
+    "/sk/lab/voice-agents/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8561
+    },
+    "/sk/laby/": {
+      "type": "laby",
+      "css": 6291,
+      "js": 5199,
+      "html": 16207
+    },
+    "/sk/laby/ai-builder/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11059
+    },
+    "/sk/laby/future/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11400
+    },
+    "/sk/laby/invok/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11867
+    },
+    "/sk/laby/unreal/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11125
+    },
+    "/sk/laby/usage/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11795
+    },
+    "/sk/projects/circus-movement/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11022
+    },
+    "/sk/projects/moodpack-director/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11208
+    },
+    "/sk/projects/pravo365/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11409
+    },
+    "/sk/projects/snowboard-coaching/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11129
+    },
+    "/sk/projects/splatoo/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5494,
+      "html": 12049
+    },
+    "/sk/projects/web-digital-work/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 10888
+    },
+    "/sr/": {
+      "type": "home",
+      "css": 7466,
+      "js": 9383,
+      "html": 18742
+    },
+    "/sr/lab/": {
+      "type": "lab",
+      "css": 5439,
+      "js": 5199,
+      "html": 9196
+    },
+    "/sr/lab/ai-commerce-engine/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 9224
+    },
+    "/sr/lab/ai-controlling-unreal/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8790
+    },
+    "/sr/lab/art-learning/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8758
+    },
+    "/sr/lab/can-ai-answer-my-phone/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8476
+    },
+    "/sr/lab/digital-space/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 9382
+    },
+    "/sr/lab/drawing-as-daily-habit/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8748
+    },
+    "/sr/lab/generated-product-pipelines/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8736
+    },
+    "/sr/lab/lidar-and-photogrammetry/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8675
+    },
+    "/sr/lab/navigable-space/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8593
+    },
+    "/sr/lab/spatial-computing/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8560
+    },
+    "/sr/lab/voice-agents/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8522
+    },
+    "/sr/laby/": {
+      "type": "laby",
+      "css": 6291,
+      "js": 5199,
+      "html": 16102
+    },
+    "/sr/laby/ai-builder/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 10975
+    },
+    "/sr/laby/future/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11270
+    },
+    "/sr/laby/invok/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11777
+    },
+    "/sr/laby/unreal/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11058
+    },
+    "/sr/laby/usage/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11700
+    },
+    "/sr/projects/circus-movement/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 10986
+    },
+    "/sr/projects/moodpack-director/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11115
+    },
+    "/sr/projects/pravo365/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11223
+    },
+    "/sr/projects/snowboard-coaching/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11161
+    },
+    "/sr/projects/splatoo/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5494,
+      "html": 12049
+    },
+    "/sr/projects/web-digital-work/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 10881
+    },
+    "/tr/": {
+      "type": "home",
+      "css": 7466,
+      "js": 9383,
+      "html": 19012
+    },
+    "/tr/lab/": {
+      "type": "lab",
+      "css": 5439,
+      "js": 5199,
+      "html": 9219
+    },
+    "/tr/lab/ai-commerce-engine/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 9236
+    },
+    "/tr/lab/ai-controlling-unreal/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8805
+    },
+    "/tr/lab/art-learning/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8768
+    },
+    "/tr/lab/can-ai-answer-my-phone/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8492
+    },
+    "/tr/lab/digital-space/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 9390
+    },
+    "/tr/lab/drawing-as-daily-habit/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8755
+    },
+    "/tr/lab/generated-product-pipelines/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8762
+    },
+    "/tr/lab/lidar-and-photogrammetry/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8681
+    },
+    "/tr/lab/navigable-space/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8610
+    },
+    "/tr/lab/spatial-computing/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8567
+    },
+    "/tr/lab/voice-agents/": {
+      "type": "note",
+      "css": 5643,
+      "js": 5199,
+      "html": 8533
+    },
+    "/tr/laby/": {
+      "type": "laby",
+      "css": 6291,
+      "js": 5199,
+      "html": 16307
+    },
+    "/tr/laby/ai-builder/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11106
+    },
+    "/tr/laby/future/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11389
+    },
+    "/tr/laby/invok/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11919
+    },
+    "/tr/laby/unreal/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11149
+    },
+    "/tr/laby/usage/": {
+      "type": "laby-detail",
+      "css": 6006,
+      "js": 5199,
+      "html": 11834
+    },
+    "/tr/projects/circus-movement/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11027
+    },
+    "/tr/projects/moodpack-director/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11181
+    },
+    "/tr/projects/pravo365/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11292
+    },
+    "/tr/projects/snowboard-coaching/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 11199
+    },
+    "/tr/projects/splatoo/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5494,
+      "html": 12119
+    },
+    "/tr/projects/web-digital-work/": {
+      "type": "case",
+      "css": 6244,
+      "js": 5199,
+      "html": 10957
+    }
+  }
+}
