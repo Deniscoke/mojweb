@@ -18,6 +18,25 @@ import type { ProjectVisual } from '~/data/projects';
  * frame draws first and gives the whole family a common gesture.
  *
  * Rendered once at build time into static SVG. No runtime cost, no requests.
+ *
+ * LAYERED PLATES (motion depth plan §3.4)
+ * Every plate is two prints: the bone-tinted figure, and the one or two
+ * shapes struck in the accent. Those carry `data-accent`. With `layered`, the
+ * accent shapes are also printed a second time on their own transparent sheet,
+ * a sibling `<svg class="plate__lift" data-lift>` with the same viewBox and
+ * crop, laid exactly over the plate. When a stage separates the two (a carried
+ * preview leaning, a card crossing a phone screen), the sheet floats off and
+ * the base accent stays behind at 40%, a registration shadow, so the plate
+ * reads as a small layered object.
+ *
+ * At rest the sheet is not drawn at all. Alpha-compositing a second copy over
+ * the accent would thicken every anti-aliased edge (and the accent's 1px rings
+ * and scan lines are almost all edge), so "the lift sits flush" is implemented
+ * as "the lift is not there": the plate at rest is today's single image, pixel
+ * for pixel. The swap only ever happens while the two sheets are in register.
+ *
+ * The sheet has no `data-visual`, so the plate transition, which clones
+ * `svg[data-visual]`, still takes exactly the base plate, at full accent.
  */
 
 interface Props {
@@ -30,9 +49,15 @@ interface Props {
    * colour worlds come from the printed poster palettes.
    */
   accent?: string;
+  /**
+   * Wrap the plate in a `.plate-stage` and add the accent lift sheet. The
+   * stage is inert until an ancestor tilts (`[data-tilting]`) or provides a
+   * `--card` view timeline (see the styles below).
+   */
+  layered?: boolean;
 }
 
-const { visual, hue, seed, class: className = '', accent: accentOverride } = Astro.props;
+const { visual, hue, seed, class: className = '', accent: accentOverride, layered = false } = Astro.props;
 
 /** xmur3 + mulberry32: stable across builds, so the art never flickers. */
 function rng(str: string) {
@@ -136,73 +161,107 @@ if (visual === 'strata') {
   }
   shapes.push({ t: 'circle', cx: 12, cy: H / 2, r: 4, fill: accent, d: 640 });
 }
+
+/** Accent shapes are the ones painted in the accent, whatever their family. */
+const isAccent = (s: Shape) => (s.t === 'rect' || s.t === 'circle' ? s.fill : s.stroke) === accent;
+
+/**
+ * The sheets this plate is printed on: always the base, and with `layered`
+ * the accent lift. Both are drawn by the one template below, so the lift's
+ * shapes are the base's accent shapes attribute for attribute — same
+ * geometry, same `data-draw` / `data-fade-in`, same delays — and the lift
+ * draws itself in with its plate.
+ */
+const sheets = [
+  { lift: false, shapes },
+  ...(layered ? [{ lift: true, shapes: shapes.filter(isAccent) }] : []),
+];
 ---
 
-<svg
-  class={`plate ${className}`}
-  data-visual={visual}
-  viewBox={`0 0 ${W} ${H}`}
-  role="presentation"
-  aria-hidden="true"
-  preserveAspectRatio="xMidYMid slice"
->
-  <rect width={W} height={H} fill="var(--c-ink)"></rect>
+{
+  (layered ? [true] : [false]).map((staged) => {
+    const prints = sheets.map(({ lift, shapes: printed }) => (
+      <svg
+        class={lift ? 'plate__lift' : `plate ${className}`}
+        data-visual={lift ? undefined : visual}
+        data-lift={lift ? '' : undefined}
+        viewBox={`0 0 ${W} ${H}`}
+        role="presentation"
+        aria-hidden="true"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        {!lift && <rect width={W} height={H} fill="var(--c-ink)" />}
 
-  <!-- The frame draws first: the shared gesture across all five families. -->
-  <rect
-    x="0.5"
-    y="0.5"
-    width={W - 1}
-    height={H - 1}
-    fill="none"
-    stroke="var(--c-line-strong)"
-    stroke-width="1"
-    pathLength="1"
-    data-draw
-  ></rect>
+        {/* The frame draws first: the shared gesture across all five families. */}
+        {!lift && (
+          <rect
+            x="0.5"
+            y="0.5"
+            width={W - 1}
+            height={H - 1}
+            fill="none"
+            stroke="var(--c-line-strong)"
+            stroke-width="1"
+            pathLength="1"
+            data-draw
+          />
+        )}
 
-  {
-    shapes.map((s) =>
-      s.t === 'rect' ? (
-        <rect
-          x={s.x}
-          y={s.y}
-          width={s.w}
-          height={s.h}
-          fill={s.fill}
-          data-fade-in
-          style={`--draw-delay:${s.d}ms`}
-        />
-      ) : s.t === 'circle' ? (
-        <circle cx={s.cx} cy={s.cy} r={s.r} fill={s.fill} data-fade-in style={`--draw-delay:${s.d}ms`} />
-      ) : s.t === 'ellipse' ? (
-        <ellipse
-          cx={s.cx}
-          cy={s.cy}
-          rx={s.rx}
-          ry={s.ry}
-          fill="none"
-          stroke={s.stroke}
-          stroke-width="1"
-          transform={`rotate(${s.rot} ${s.cx} ${s.cy})`}
-          pathLength="1"
-          data-draw
-          style={`--draw-delay:${s.d}ms`}
-        />
-      ) : (
-        <path
-          d={s.d}
-          fill="none"
-          stroke={s.stroke}
-          stroke-width={s.sw}
-          pathLength="1"
-          data-draw
-          style={`--draw-delay:${s.delay}ms`}
-        />
-      ),
-    )
-  }
-</svg>
+        {printed.map((s) =>
+          s.t === 'rect' ? (
+            <rect
+              x={s.x}
+              y={s.y}
+              width={s.w}
+              height={s.h}
+              fill={s.fill}
+              data-fade-in
+              data-accent={isAccent(s) ? '' : undefined}
+              style={`--draw-delay:${s.d}ms`}
+            />
+          ) : s.t === 'circle' ? (
+            <circle
+              cx={s.cx}
+              cy={s.cy}
+              r={s.r}
+              fill={s.fill}
+              data-fade-in
+              data-accent={isAccent(s) ? '' : undefined}
+              style={`--draw-delay:${s.d}ms`}
+            />
+          ) : s.t === 'ellipse' ? (
+            <ellipse
+              cx={s.cx}
+              cy={s.cy}
+              rx={s.rx}
+              ry={s.ry}
+              fill="none"
+              stroke={s.stroke}
+              stroke-width="1"
+              transform={`rotate(${s.rot} ${s.cx} ${s.cy})`}
+              pathLength="1"
+              data-draw
+              data-accent={isAccent(s) ? '' : undefined}
+              style={`--draw-delay:${s.d}ms`}
+            />
+          ) : (
+            <path
+              d={s.d}
+              fill="none"
+              stroke={s.stroke}
+              stroke-width={s.sw}
+              pathLength="1"
+              data-draw
+              data-accent={isAccent(s) ? '' : undefined}
+              style={`--draw-delay:${s.delay}ms`}
+            />
+          ),
+        )}
+      </svg>
+    ));
+    return staged ? <span class="plate-stage">{prints}</span> : prints;
+  })
+}
 
 <style>
   .plate {
@@ -210,5 +269,151 @@ if (visual === 'strata') {
     block-size: 100%;
     display: block;
     background-color: var(--c-ink);
+  }
+
+  /* ------------------------------------------------------ LAYERED PLATES */
+
+  /* Takes the plate's place in whatever frame holds it, and nothing else. */
+  .plate-stage {
+    position: relative;
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /* Laid exactly over the base, and not drawn until a stage separates it. */
+  .plate__lift {
+    position: absolute;
+    inset: 0;
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  /*
+   * CARRIED OR TILTED: any ancestor stage that sets `[data-tilting]` (the
+   * Selected Work preview, or a `[data-tilt]` stage from depth.css). The lift
+   * is shown in register and the base accent drops to its 40% shadow in the
+   * same frame; the stage then decides how far the sheet floats forward
+   * (`translate: 0 0 <z>` on `[data-lift]`). The shadow is not transitioned:
+   * at the moment it changes, the lift is covering it.
+   *
+   * `preserve-3d` is here, and only while tilting, so the lift's Z reaches
+   * the tilting ancestor's 3D context through this wrapper. A preserve-3d
+   * element carries no opacity, overflow, filter, mask or clip-path.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(:root:not([data-calm]) [data-tilting]) .plate-stage {
+      transform-style: preserve-3d;
+    }
+
+    :global(:root:not([data-calm]) [data-tilting]) .plate__lift {
+      visibility: visible;
+    }
+
+    :global(:root:not([data-calm]) [data-tilting]) .plate-stage .plate [data-accent] {
+      fill-opacity: 0.4;
+      stroke-opacity: 0.4;
+    }
+  }
+
+  /*
+   * THE DIORAMA VOCABULARY. A card that wants its plate to come apart as it
+   * crosses the screen declares a view timeline and attaches these keyframes
+   * to the three parts, all on that timeline (Selected Work's phone cards do;
+   * the laby index cards can copy the same three rules):
+   *
+   *   .plate-stage            plate-window                     entry range
+   *   .plate__lift            plate-lift-arrive, -depart,
+   *                           plate-lift-shown-arriving, -leaving
+   *                                                            entry, exit
+   *   .plate-stage .plate [data-accent]
+   *                           plate-shadow-arriving (step-end),
+   *                           plate-shadow-leaving (step-start) entry, exit
+   *
+   *   arriving: the plate settles from a 1.06 window crop to 1, and the accent
+   *     sheet floats 12px below its print and closes into register;
+   *   in between: one flat print, today's plate exactly;
+   *   leaving: the sheet lifts 12px off, ahead of the travel, the way a
+   *     nearer layer moves faster.
+   *
+   * The consumer attaches them, not this component, because only the
+   * consumer knows where its timeline exists: Chrome does not leave an
+   * animation on a missing named timeline inert, it runs it to its end and
+   * holds the fill, which would leave every desktop plate mid-lift.
+   *
+   * Translate and scale are composited. The sheet's visibility and the base
+   * shadow are discrete steps that run together on the main thread, in the
+   * same style pass, so the shadow never shows without its sheet; both
+   * switch only at the instant the sheets are in register.
+   */
+  @keyframes plate-window {
+    from {
+      scale: 1.06;
+    }
+    to {
+      scale: 1;
+    }
+  }
+
+  @keyframes plate-lift-arrive {
+    from {
+      translate: 0 12px;
+    }
+    to {
+      translate: 0 0;
+    }
+  }
+
+  @keyframes plate-lift-depart {
+    from {
+      translate: 0 0;
+    }
+    to {
+      translate: 0 -12px;
+    }
+  }
+
+  /* `visibility` interpolates as a step: visible everywhere but the end. */
+  @keyframes plate-lift-shown-arriving {
+    from {
+      visibility: visible;
+    }
+    to {
+      visibility: hidden;
+    }
+  }
+
+  @keyframes plate-lift-shown-leaving {
+    from {
+      visibility: hidden;
+    }
+    to {
+      visibility: visible;
+    }
+  }
+
+  @keyframes plate-shadow-arriving {
+    from {
+      fill-opacity: 0.4;
+      stroke-opacity: 0.4;
+    }
+    to {
+      fill-opacity: 1;
+      stroke-opacity: 1;
+    }
+  }
+
+  @keyframes plate-shadow-leaving {
+    from {
+      fill-opacity: 1;
+      stroke-opacity: 1;
+    }
+    to {
+      fill-opacity: 0.4;
+      stroke-opacity: 0.4;
+    }
   }
 </style>
