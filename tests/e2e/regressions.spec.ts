@@ -52,10 +52,16 @@ async function holdNavigation(page: Page, href: string): Promise<() => void> {
   return release;
 }
 
-/** Freezes every running animation at its start, as the first frame paints it. */
+/**
+ * Freezes every running time-based animation at its start, as the first frame
+ * paints it. Scroll-driven animations (the phone card dioramas) are left
+ * alone: they are progress-based, reject an absolute currentTime, and are
+ * already pinned by the scroll position the test does not change.
+ */
 async function freezeAtStart(page: Page): Promise<void> {
   await page.evaluate(() =>
     document.getAnimations().forEach((a) => {
+      if (!(a.timeline instanceof DocumentTimeline)) return;
       a.pause();
       a.currentTime = 0;
     }),

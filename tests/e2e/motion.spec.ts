@@ -330,7 +330,11 @@ test.describe('what loads where (§5.2, §5.3)', () => {
     await page.mouse.move(400, 400);
     await page.waitForTimeout(3000);
     pending(await page.evaluate(() => document.documentElement.classList.contains('depth-ready')), 'W1', 'initDepth (html.depth-ready)');
-    expect(requested.some((p) => /\/_astro\/tilt\./.test(p))).toBe(true);
+    // §5.2: the tilt loads only where a [data-tilt] stage exists. Selected
+    // Work's carry is driven by pointerPreview itself, so until a stage ships
+    // on the page (the About photo, W5/W6) the correct outcome is no tilt.
+    const hasStage = (await page.locator('[data-tilt]').count()) > 0;
+    expect(requested.some((p) => /\/_astro\/tilt\./.test(p))).toBe(hasStage);
   });
 
   for (const path of [PAGES.gate, PAGES.notFound]) {

@@ -55,9 +55,18 @@ const KB = 1024;
  * The gate and the 404 run no depth code (§3.15); the 0.6 KB they may grow is
  * the env.ts additions (calm-aware `prefersReducedMotion`, `idle`, …) that
  * land in the env chunk every page already shares.
+ *
+ * Home is 2.6, not the plan's 2: the plan priced the depth runtime without
+ * Vite's dynamic-import preload helper (~0.6 KB gz), which Vite injects with
+ * the first lazy `import()` on the initial path and which neither
+ * `build.modulePreload: false` nor an `astro:build:setup` override removes
+ * (both measured, 2026-10-15). Every other page type stays inside 2 with the
+ * helper included; home alone also carries Selected Work's plate carry
+ * (+0.53 KB), which is the feature, not overhead. Lighthouse ≥ 95 remains the
+ * gate that decides whether any of this is too much.
  */
 const PAGE_CAPS = {
-  home: { css: 5, js: 2 },
+  home: { css: 5, js: 2.6 },
   case: { css: 3, js: 2 },
   laby: { css: 3, js: 2 },
   'laby-detail': { css: 3, js: 2 },
@@ -117,6 +126,18 @@ const FORBIDDEN_CLASSES = ['wrap', 'work__list', 'project', 'project__link'];
 /** Fixed layers that exist in the markup. `.pt` and `.cursor-field` are added
  *  to <body> at runtime, so their only ancestors are body and html. */
 const FIXED_LAYERS = ['project__plate', 'transition-cover'];
+/**
+ * `.project__plate` is position: fixed only in the cursor-preview layout
+ * (SelectedWork: min-width 62rem, hover, fine pointer). Under the negation of
+ * that query it is an ordinary in-flow card plate, so a transform on its
+ * ancestors there cannot re-scope a fixed layer — the phone card's :active
+ * press lives exactly there. The exemption covers only the plate's own
+ * ancestors below `.wrap`; html, body, main and `.wrap` stay forbidden in every
+ * layout, because the transition cover and the runtime layers sit under them.
+ */
+const PLATE_ONLY_ANCESTORS = new Set(['work__list', 'project', 'project__link']);
+const OUTSIDE_PREVIEW_LAYOUT =
+  /^@media\s*not\s+all\s+and\s*\(min-width:\s*62rem\)\s*and\s*\(hover:\s*hover\)\s*and\s*\(pointer:\s*fine\)/i;
 /** Attributes that put a transform-family property on their element. */
 const TRANSFORMING_ATTRS = ['data-depth', 'data-tilt', 'data-lift', 'data-parallax'];
 
@@ -612,9 +633,18 @@ function lintPage(page, initial, { error, warn }) {
       // Rule 6 in CSS.
       const bad = rule.decls.filter(containingBlockDecl);
       if (bad.length) {
+        const outsidePreview = rule.context.some((c) => OUTSIDE_PREVIEW_LAYOUT.test(c));
         for (const selector of selectors) {
           const s = compoundParts(subjectOf(selector));
           if (s.pseudoElement) continue;
+          if (
+            outsidePreview &&
+            !FORBIDDEN_TAGS.has(s.tag) &&
+            !s.root &&
+            s.ids.length === 0 &&
+            s.classes.length > 0 &&
+            s.classes.every((c) => PLATE_ONLY_ANCESTORS.has(c) || !forbiddenClasses.has(c))
+          ) continue;
           const hit =
             FORBIDDEN_TAGS.has(s.tag) ||
             s.root ||
@@ -837,6 +867,8 @@ async function selfTest() {
     ['forbidden-ancestor', home({ css: '.wrap{will-change:transform}' })],
     ['forbidden-ancestor', home({ css: '.work{filter:blur(1px)}' })],
     ['forbidden-ancestor', home({ css: 'main{contain:paint}' })],
+    // The card-layout exemption must not reach `.wrap`: the transition cover sits under it in every layout.
+    ['forbidden-ancestor', home({ css: '@media not all and (min-width:62rem) and (hover:hover) and (pointer:fine){.wrap:active{scale:.98}}' })],
     ['triple-gate', home({ css: '.x{animation:a linear;animation-timeline:view()}' })],
     ['triple-gate', home({ css: '@supports (animation-timeline:view()){.x{animation-timeline:scroll(root)}}' })],
     ['flatten', home({ css: '.stage{transform-style:preserve-3d;overflow:hidden}' })],
@@ -855,6 +887,14 @@ async function selfTest() {
 
   const cleanResult = await runChecks({ dist: clean, baseline, depthCss: smallDepthCss });
   report(cleanResult.errors.length === 0, `clean fixture passes${cleanResult.errors.length ? ` — ${cleanResult.errors.map((e) => `[${e.rule}] ${e.message}`).join('; ')}` : ''}`);
+
+  // The phone card's press lives outside the cursor-preview layout, where the
+  // plate is in flow, not fixed: it must not be reported.
+  const cardPress = join(work, 'card-press');
+  await fixture(cardPress, home({ css: `.hero{position:relative}${GATED}@media not all and (min-width:62rem) and (hover:hover) and (pointer:fine){.project__link:active{scale:.985}}` }));
+  const cardPressResult = await runChecks({ dist: cardPress, baseline, depthCss: smallDepthCss });
+  const cardPressErrors = cardPressResult.errors.filter((e) => e.rule === 'forbidden-ancestor');
+  report(cardPressErrors.length === 0, `card-layout press on .project__link is allowed${cardPressErrors.length ? ` — ${cardPressErrors.map((e) => e.message).join('; ')}` : ''}`);
 
   for (const [i, [rule, files, opts = {}]] of cases.entries()) {
     const dir = join(work, `case-${i}`);
