@@ -29,6 +29,12 @@ export interface EvidenceSpec {
   alt: Record<'en' | 'cs' | 'sk', string>;
   caption?: Record<'en' | 'cs' | 'sk', string>;
   credit?: string;
+  /**
+   * The point that must stay in frame, as [x%, y%] of the image. Sets
+   * `object-position` and the origin of the photo window, so a subject near
+   * an edge survives any crop. Omitted = the centre.
+   */
+  focal?: readonly [number, number];
   /** Project or lab-note slug this belongs to, in intended display order. */
   project: string;
   order: number;

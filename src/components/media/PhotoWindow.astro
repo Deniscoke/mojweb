@@ -1,0 +1,152 @@
+---
+interface Props {
+  src: string;
+  srcset?: string;
+  sizes?: string;
+  /** `null` = undescribed: empty alt and `aria-hidden`, never an invented one. */
+  alt: string | null;
+  width?: number | null;
+  height?: number | null;
+  /** CSS aspect-ratio of the frame. Defaults to the image's own. */
+  ratio?: string;
+  /** The point that must stay in frame, as [x%, y%] of the image. */
+  focal?: readonly [number, number];
+  /** A data: URI painted behind the image until it decodes. */
+  placeholder?: string | null;
+  /** The page's LCP image: eager, high priority. It still gets the window, never opacity. */
+  priority?: boolean;
+  /** Tier 1 hook (see `depthMapFor` in src/data/photos.ts). */
+  depthMap?: string | null;
+}
+
+const {
+  src,
+  srcset,
+  sizes,
+  alt,
+  width,
+  height,
+  ratio,
+  focal = [50, 50],
+  placeholder,
+  priority = false,
+  depthMap,
+} = Astro.props;
+
+/**
+ * TIER 0 — THE WINDOW
+ * ===================
+ * A photograph seen through its frame, the way a view through a real window
+ * shifts as you walk past it. CSS only: a view timeline on the frame drives
+ * the image's individual `translate` and `scale`, so the compositor does the
+ * work and no script runs.
+ *
+ * The motion lives only at the edges of the viewport. The image settles to
+ * identity by the time the frame's top reaches 75% of the viewport and only
+ * leaves identity once that top has passed the top edge, so anywhere in the
+ * reading band the photograph is exactly as Denis framed it: unscaled, crisp,
+ * at full contrast. It is never hidden and never faded; with no JS, under
+ * reduced motion, under Calm, or in a browser without view timelines, the
+ * frame simply shows the photo.
+ *
+ * `focal` sets `object-position`, so the subject survives any crop, and it
+ * is also the origin the image scales around, so the subject holds still
+ * while the window moves. The origin's vertical part is clamped to
+ * 37.5–62.5%: at 1.08 the image then always overhangs the frame by at least
+ * the 3% it travels, on both sides, so an edge can never show.
+ */
+const [fx, fy] = focal;
+const originY = Math.min(62.5, Math.max(37.5, fy));
+const frameRatio = ratio ?? (width && height ? `${width} / ${height}` : undefined);
+
+const style = [
+  frameRatio && `--window-ratio:${frameRatio}`,
+  `--window-focal:${fx}% ${fy}%`,
+  `--window-origin:${fx}% ${originY}%`,
+  placeholder && `background-image:url(${placeholder})`,
+]
+  .filter(Boolean)
+  .join(';');
+---
+
+<div class="photo-window" style={style} data-depth-map={depthMap ?? undefined}>
+  <img
+    class="photo-window__img"
+    src={src}
+    srcset={srcset}
+    sizes={srcset ? sizes : undefined}
+    alt={alt ?? ''}
+    aria-hidden={alt ? undefined : 'true'}
+    width={width ?? undefined}
+    height={height ?? undefined}
+    loading={priority ? 'eager' : 'lazy'}
+    fetchpriority={priority ? 'high' : undefined}
+    decoding="async"
+  />
+</div>
+
+<style>
+  .photo-window {
+    aspect-ratio: var(--window-ratio, 16 / 10);
+    overflow: hidden;
+    background-color: var(--c-ink);
+    background-position: var(--window-focal);
+    background-size: cover;
+    border: 1px solid var(--c-line);
+  }
+
+  .photo-window__img {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    object-position: var(--window-focal);
+    transform-origin: var(--window-origin);
+  }
+
+  /*
+   * Two animations on one timeline, so the reading band in between belongs
+   * to neither: `in` fills backwards (the "from" state holds below the fold)
+   * and ends at `entry 25vh`; `out` has no fill and starts at `exit 0`.
+   * The shorthand resets timeline and range, so both follow it.
+   */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      :global(:root:not([data-calm])) .photo-window {
+        view-timeline: --frame block;
+      }
+
+      :global(:root:not([data-calm])) .photo-window__img {
+        animation:
+          photo-window-in linear backwards,
+          photo-window-out linear none;
+        animation-timeline: --frame, --frame;
+        animation-range:
+          entry 0% entry 25vh,
+          exit 0% exit 100%;
+      }
+    }
+  }
+
+  @keyframes photo-window-in {
+    from {
+      scale: 1.08;
+      translate: 0 -3%;
+    }
+    to {
+      scale: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes photo-window-out {
+    from {
+      scale: 1;
+      translate: 0 0;
+    }
+    to {
+      scale: 1.08;
+      translate: 0 3%;
+    }
+  }
+</style>
