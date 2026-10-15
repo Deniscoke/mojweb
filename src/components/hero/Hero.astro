@@ -1,8 +1,11 @@
 ---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import Readout from '~/components/ui/Readout.astro';
 import { site } from '~/config/site';
+import { getScan, scanCaption } from '~/data/scans';
 import { getExperiments, getProjects } from '~/lib/cms';
-import { getLocale, useTranslations } from '~/i18n';
+import { getLocale, localePath, useTranslations } from '~/i18n';
 
 interface Props {
   lang: string;
@@ -26,13 +29,35 @@ const readout = [
   { key: 'Live', value: String(projects.filter((p) => p.status.includes('live')).length).padStart(2, '0') },
   { key: 'Experiments', value: String(experiments.length).padStart(2, '0') },
 ];
+
+/**
+ * Denis's own captured point cloud, if one is approved for the hero AND both
+ * of its files are in this build. Otherwise neither the host nor the caption
+ * is rendered, and the hero is the floor alone, which is still the idea.
+ */
+const approved = getScan('hero');
+const scan =
+  approved && [approved.files.desktop, approved.files.mobile].every((url) => existsSync(join(process.cwd(), 'public', url)))
+    ? approved
+    : undefined;
 ---
 
 <section class="hero" id="hero" data-hero>
-  <!-- Column rules. The editorial grid, made faintly visible. -->
+  <!-- Column rules. The editorial grid, made faintly visible. As the hero
+       scrolls out they lie down into a floor (see "The floor" below). -->
   <div class="hero__rules grid12" aria-hidden="true">
     {Array.from({ length: 12 }, () => <span />)}
   </div>
+
+  {
+    /* The scan host. The engine appends its own canvas here once the page has
+       revealed, loaded and gone idle, and only on a GPU that can afford it. */
+    scan && (
+      <div class="hero__scan" aria-hidden="true" data-desktop={scan.files.desktop} data-mobile={scan.files.mobile}>
+        <span class="hero__scan-anchor" />
+      </div>
+    )
+  }
 
   <div class="wrap hero__inner grid12">
     <p class="mono hero__role" data-reveal>{site.author.role}</p>
@@ -45,7 +70,7 @@ const readout = [
         >
       </h1>
 
-      <p class="hero__statement is-say" data-reveal style="--reveal-delay:280ms">
+      <p class="hero__statement is-say" data-reveal style="--reveal-delay:280ms" data-scan-mask>
         {dict.hero.statement}
       </p>
     </div>
@@ -54,15 +79,32 @@ const readout = [
       {site.author.disciplines.join('  ·  ')}
     </p>
 
-    <div class="hero__aside" data-reveal style="--reveal-delay:460ms" data-parallax="0.8">
+    <div class="hero__aside" data-reveal style="--reveal-delay:460ms" data-parallax="0.8" data-scan-mask>
       <Readout rows={readout} />
       <p class="hero__intro">{dict.hero.intro}</p>
     </div>
 
-    <a class="mono hero__cue" href="#work" data-reveal style="--reveal-delay:560ms">
+    <a class="mono hero__cue" href="#work" data-reveal style="--reveal-delay:560ms" data-scan-mask>
       <span class="hero__cue-line" aria-hidden="true"></span>
       {dict.hero.scrollCue}
     </a>
+
+    <!-- The stage (below 62rem): a fixed band under the readout, part of the
+         layout from first paint, where the rules come to rest and the scan
+         stands. Empty, it is still framed by the rules running through it. -->
+    <div class="hero__stage" aria-hidden="true"></div>
+
+    {
+      /* What the scan is, and where it comes from. It captions a JS-only
+         visual, so it ships hidden and heroScan shows it once a frame is
+         actually on screen. Absolutely placed: showing it moves nothing. */
+      scan && (
+        <a class="mono hero__scan-cap" href={localePath(lang, scan.href)} hidden>
+          {scanCaption(scan, lang)}
+          <span class="hero__scan-arrow" aria-hidden="true">→</span>
+        </a>
+      )
+    }
   </div>
 </section>
 
@@ -84,6 +126,11 @@ const readout = [
     inline-size: min(100% - var(--gutter) * 2, var(--w-max));
     margin-inline: auto;
     pointer-events: none;
+    /* Never the scroll anchor. When the phone nav folds on the first scroll,
+       the browser keeps the page still by anchoring to what the reader sees;
+       a rule whose floor animation attaches in that same moment would
+       suppress the anchoring and the whole page would jump. */
+    overflow-anchor: none;
     /* Faded top and bottom so the grid reads as a watermark of the layout
        rather than as a table. */
     mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 65%, transparent);
@@ -98,17 +145,94 @@ const readout = [
     border-inline-start: 0;
   }
 
+  /* A phone's grid has four columns, so it gets four rules, not twelve. They
+     run on down through the stage, so the band is framed even when empty,
+     and fade out only over the hero's bottom padding. */
   @media (max-width: 47.99rem) {
     .hero__rules {
+      mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 calc(100% - var(--s-7)), transparent);
+    }
+
+    .hero__rules > span:nth-child(n + 5) {
       display: none;
     }
+  }
+
+  /* -------------------------------------------------------------- the scan */
+
+  /**
+   * Over the whole hero, under the text, laid out on the same twelve columns
+   * as the page so the object is placed by the grid, not by the window: the
+   * anchor is the box it stands in (its centre, its width, and its bottom
+   * edge as the ground). The engine draws its canvas over the whole host.
+   *
+   * Desktop: columns 6–9, the empty field between the statement and the
+   * readout, standing at 62% of the hero's height, directly over its caption.
+   * The mask weights it to the right, so the name keeps the left to itself.
+   */
+  .hero__scan {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-ambient);
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: 62%;
+    column-gap: var(--col-gap);
+    padding-inline: calc((100% - min(100% - var(--gutter) * 2, var(--w-max))) / 2);
+    pointer-events: none;
+    overflow-anchor: none;
+    mask-image: linear-gradient(to right, transparent 36%, #000 50%);
+  }
+
+  .hero__scan-anchor {
+    grid-column: 6 / span 4;
+    grid-row: 1;
+  }
+
+  .hero__scan-cap {
+    position: absolute;
+    color: var(--c-bone-faint);
+    white-space: nowrap;
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .hero__scan-cap:not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-block-size: 44px;
+    /* It arrives with the scan's own fade, once. Calm collapses it. */
+    transition:
+      color var(--d-fast) var(--e-out),
+      opacity var(--d-slow) var(--e-out);
+  }
+
+  @starting-style {
+    .hero__scan-cap:not([hidden]) {
+      opacity: 0;
+    }
+  }
+
+  .hero__scan-arrow {
+    display: inline-block;
+    transition: translate var(--d-base) var(--e-out);
+  }
+
+  .hero__scan-cap:hover,
+  .hero__scan-cap:focus-visible {
+    color: var(--c-bone);
+  }
+
+  .hero__scan-cap:hover .hero__scan-arrow {
+    translate: 0.25em 0;
   }
 
   /* ------------------------------------------------------------ composition */
 
   .hero__inner {
+    --hero-gap: clamp(1.25rem, 3.5vh, 2.5rem);
     position: relative;
-    row-gap: clamp(1.25rem, 3.5vh, 2.5rem);
+    row-gap: var(--hero-gap);
     align-content: center;
   }
 
@@ -116,7 +240,8 @@ const readout = [
   .hero__block,
   .hero__disciplines,
   .hero__aside,
-  .hero__cue {
+  .hero__cue,
+  .hero__stage {
     grid-column: 1 / -1;
   }
 
@@ -207,6 +332,22 @@ const readout = [
     .hero__cue {
       grid-column: 1 / span 3;
     }
+
+    .hero__stage {
+      display: none;
+    }
+
+    /* Under the object, on the cue's line: columns 7–9 of the row that holds
+       SCROLL, right-aligned so a longer locale grows into the empty column 6,
+       never into the readout. */
+    .hero__scan-cap {
+      grid-column: 7 / span 3;
+      grid-row: 4;
+      inset-block: 0;
+      inset-inline-end: 0;
+      margin-block: auto;
+      block-size: fit-content;
+    }
   }
 
   /**
@@ -231,6 +372,131 @@ const readout = [
       grid-template-columns: repeat(2, minmax(0, 1fr));
       column-gap: var(--col-gap);
     }
+
+    /* The stage: 11rem, static, in the flow from first paint (CLS 0). It sits
+       a fixed --s-5 under the cue rather than the hero's viewport-relative
+       row gap, so it adds a whole number of pixels to the page and nothing
+       below it is moved onto a different sub-pixel. */
+    .hero__stage {
+      block-size: 11rem;
+      margin-block-start: calc(var(--s-5) - var(--hero-gap));
+    }
+
+    /* The host lies exactly over the stage, which ends where the hero's
+       bottom padding begins. The object stands centred in it, at 62% of the
+       band, as wide as the band allows without crowding its edges. */
+    .hero__scan {
+      inset: auto 0 var(--s-7);
+      block-size: 11rem;
+      grid-template-columns: minmax(0, 1fr);
+      mask-image: none;
+    }
+
+    .hero__scan-anchor {
+      grid-column: 1;
+      justify-self: center;
+      inline-size: min(100%, 18rem);
+    }
+
+    /* Under the stage, right-aligned, like the caption of a figure. The stage
+       is the sixth row: role, name, disciplines, aside, cue, stage. */
+    .hero__scan-cap {
+      grid-column: 1 / -1;
+      grid-row: 6;
+      inset-block-start: 100%;
+      inset-inline-end: 0;
+    }
+  }
+
+  /**
+   * THE FLOOR — the grid lies down, and the scan stands on it.
+   * As the hero scrolls out, the column rules rotate back about their bottom
+   * edge into a perspective floor (at most --floor-max-rot, 50°) and dim from
+   * 0.55 to 0.3; the first name drifts onto a farther plane, higher and a
+   * little smaller, the way things recede along a floor; the last name
+   * follows at a third of the distance. The statement holds its plane, and
+   * the aside and disciplines belong to the pointer, never to scroll.
+   *
+   * Everything is on the root scroll timeline, so it runs on the compositor
+   * and is exactly in step with the page. It starts at 8vh, so at scroll 0
+   * nothing has a transform. `forwards` holds the floor down for as long as
+   * the hero is still leaving. The names move on `.line`, never on
+   * `.line__inner`, which owns the reveal.
+   *
+   * The floor is attached on the first scroll (`data-floor`, set by the
+   * script below), not at load: a 3D animation gets a compositor layer even
+   * before its range starts, and a layer under the hero's text re-rasterises
+   * the text over it. Until the page moves, the hero is today's to the pixel.
+   */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      :global(:root:not([data-calm])) .hero[data-floor] .hero__rules {
+        transform-origin: 50% 100%;
+        animation: hero-floor linear forwards;
+        animation-timeline: scroll(root);
+        animation-range: 8vh 70vh;
+      }
+
+      :global(:root:not([data-calm])) .hero__name .line {
+        transform-origin: 0 50%;
+        animation: hero-plane-near linear forwards;
+        animation-timeline: scroll(root);
+        animation-range: 8vh 60vh;
+      }
+
+      :global(:root:not([data-calm])) .hero__name .line:first-child {
+        animation-name: hero-plane-far;
+      }
+
+      /* Below 62rem the hero is shorter than the viewport: it is gone sooner. */
+      @media (max-width: 61.99rem) {
+        :global(:root:not([data-calm])) .hero[data-floor] .hero__rules,
+        :global(:root:not([data-calm])) .hero__name .line {
+          animation-range: 4vh 50vh;
+        }
+      }
+
+      /* Phones never rotate (§1 rule 8): the four rules settle down into the
+         stage instead, scaling about its floor line. */
+      @media (max-width: 47.99rem) {
+        :global(:root:not([data-calm])) .hero[data-floor] .hero__rules {
+          transform-origin: 50% calc(100% - var(--s-7));
+          animation-name: hero-floor-settle;
+        }
+      }
+    }
+  }
+
+  @keyframes hero-floor {
+    from {
+      transform: perspective(var(--persp)) rotateX(0deg);
+    }
+
+    to {
+      transform: perspective(var(--persp)) rotateX(var(--floor-max-rot));
+      /* × the rules' own 0.55 = 0.3 */
+      opacity: 0.55;
+    }
+  }
+
+  /* 0.24: about the stage's share of a phone hero, measured from its floor. */
+  @keyframes hero-floor-settle {
+    to {
+      scale: 1 0.24;
+    }
+  }
+
+  @keyframes hero-plane-far {
+    to {
+      translate: 0 calc(-5vh * var(--depth-amp));
+      scale: calc(1 - 0.03 * var(--depth-amp));
+    }
+  }
+
+  @keyframes hero-plane-near {
+    to {
+      translate: 0 calc(-1.5vh * var(--depth-amp));
+    }
   }
 </style>
 
@@ -251,8 +517,13 @@ const readout = [
         el.classList.add('is-revealed');
       });
       initHeroPointerField(hero);
+      // The scan and its scheduler are not on the initial path: they arrive
+      // in their own chunk after the reveal, and wait further in there.
     };
 
     document.addEventListener(REVEAL_EVENT, reveal, { once: true });
+
+    // The floor (CSS) is attached once the page first moves; see the styles.
+    addEventListener('scroll', () => hero.setAttribute('data-floor', ''), { once: true, passive: true });
   }
 </script>
