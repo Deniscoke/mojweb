@@ -519,9 +519,6 @@ const scan =
       initHeroPointerField(hero);
       // The scan and its scheduler are not on the initial path: they arrive
       // in their own chunk after the reveal, and wait further in there.
-      if (hero.querySelector('.hero__scan')) {
-        import('~/motion/hero/heroScan').then((m) => m.initHeroScan(hero)).catch(() => {});
-      }
     };
 
     document.addEventListener(REVEAL_EVENT, reveal, { once: true });

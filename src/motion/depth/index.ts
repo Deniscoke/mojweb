@@ -89,6 +89,8 @@ export function initDepth(): () => void {
   const cancelReveal = afterReveal(() => {
     cancelIdle = idle(() => {
       booted = true;
+      const hero = document.querySelector<HTMLElement>('[data-hero]');
+      if (hero?.querySelector('.hero__scan')) import('../hero/heroScan').then((m) => m.initHeroScan(hero)).catch(() => {});
       if (press) document.addEventListener('touchstart', noop, { passive: true });
       sync();
     }, IDLE_TIMEOUT_MS);
