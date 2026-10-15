@@ -11,8 +11,9 @@
  * loud that role is allowed to be, and the order is the design.
  *
  * All motion durations are `calc(<time> * var(--motion-mult))`. One
- * `prefers-reduced-motion` block at the bottom collapses the whole CSS
- * motion layer at once.
+ * `prefers-reduced-motion` block at the bottom, and its twin for the site's
+ * own Calm toggle (`html[data-calm]`), collapse the whole CSS motion layer
+ * at once.
  */
 
 :root {
@@ -137,6 +138,21 @@
   --e-in-out: cubic-bezier(0.76, 0, 0.24, 1);
   --e-in: cubic-bezier(0.5, 0, 0.75, 0);
 
+  /* ----------------------------------------------------------------- depth */
+  /**
+   * The vestibular limits of the depth layer (styles/depth.css), written down
+   * as numbers so they can be read and argued with rather than discovered.
+   * Pointer tilt never passes 6°, nothing rotates on a phone, and the hero
+   * floor stops at 50°: steep enough to read as a floor, shallow enough not
+   * to swing the whole first screen.
+   */
+  --persp: 1100px;
+  --depth-amp: 1;
+  --tilt-max-x: 4deg; /* about the X axis: pointer up / down */
+  --tilt-max-y: 6deg; /* about the Y axis: pointer left / right */
+  --lift: 24px;
+  --floor-max-rot: 50deg;
+
   /* ---------------------------------------------------------------- layers */
   --z-ambient: 0;
   --z-content: 1;
@@ -147,10 +163,26 @@
   --z-transition: 100;
 }
 
+/* A phone is its own composition, not the desktop shrunk: a closer eye
+   (shorter perspective) and roughly half the travel. */
+@media (max-width: 47.99rem) {
+  :root {
+    --persp: 800px;
+    --depth-amp: 0.6;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     /* Not 0: a hair of duration keeps transitionend/finish events firing,
        which several progressive-enhancement paths depend on. */
     --motion-mult: 0.012;
   }
+}
+
+/* The site's own "Calm motion" toggle collapses exactly what the system
+   setting collapses. It is set before first paint (see BaseLayout), so a
+   calm visitor never sees one frame of the full-motion page. */
+html[data-calm] {
+  --motion-mult: 0.012;
 }
