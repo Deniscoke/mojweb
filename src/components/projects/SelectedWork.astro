@@ -25,6 +25,21 @@ const featuredProjects = await getFeaturedProjects(lang);
  * 2. The per-project hue is confined to the plate. In v0.1 it also coloured
  *    the category line, which put five different colours down one list —
  *    the exact "colour funfair" the brief warned about.
+ *
+ * And one depth decision (motion depth plan §3.4): the plates are layered
+ * (`ProjectVisual layered`), so each generated plate can come apart into its
+ * print and its accent sheet. The rows themselves never move — the oversized
+ * titles are the reading surface. Only the plate gains depth:
+ *
+ *   desktop  the carried preview leans with the hand's momentum and its
+ *            accent sheet lifts forward (pointerPreview.ts writes the lean on
+ *            `.project__plate-tilt`, an inner stage, never on the fixed plate
+ *            the plate transition measures);
+ *   phone    each card plate is a small diorama as it crosses the screen,
+ *            on a `--card` view timeline, and the card presses under a thumb.
+ *
+ * Calm, reduced motion and browsers without scroll timelines get exactly the
+ * plates and rows this section had before.
  */
 ---
 
@@ -78,7 +93,9 @@ const featuredProjects = await getFeaturedProjects(lang);
                 </span>
 
                 <span class="project__plate">
-                  <ProjectVisual visual={project.visual} hue={project.hue} seed={project.slug} />
+                  <span class="project__plate-tilt">
+                    <ProjectVisual visual={project.visual} hue={project.hue} seed={project.slug} layered />
+                  </span>
                 </span>
               </a>
             </li>
@@ -197,6 +214,100 @@ const featuredProjects = await getFeaturedProjects(lang);
     order: -1;
   }
 
+  /* The plate's own stage. Flat and transform-free unless it is carried. */
+  .project__plate-tilt {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /**
+   * THE DIORAMA (cards only). The card is the view timeline. The plate frame
+   * keeps `overflow: hidden` and rises into place; inside it, the plate's
+   * window, accent sheet and registration shadow run ProjectVisual's diorama
+   * keyframes on the same `--card` timeline. They are attached here, in the
+   * one block where `--card` exists, never where it does not (see
+   * ProjectVisual for why that matters).
+   *
+   * Everything finishes by `entry 25vh` and restarts at `exit 0`, so a card
+   * in the reading band is one flat print, today's plate exactly, and a tap
+   * starts the plate transition from exactly the plate on screen.
+   *
+   * The rise can overlap the card's head by half a rem at its very start;
+   * at that moment the head is still below the fold on any phone.
+   */
+  @supports (animation-timeline: view()) {
+    @media not all and (min-width: 62rem) and (hover: hover) and (pointer: fine) {
+      @media (prefers-reduced-motion: no-preference) {
+        :global(:root:not([data-calm])) .project {
+          view-timeline: --card block;
+        }
+
+        :global(:root:not([data-calm])) .project__plate {
+          animation: work-plate-rise linear backwards;
+          animation-timeline: --card;
+          animation-range: entry 0 entry 25vh;
+        }
+
+        :global(:root:not([data-calm])) .project__plate :global(.plate-stage) {
+          animation: plate-window linear backwards;
+          animation-timeline: --card;
+          animation-range: entry 0 entry 25vh;
+        }
+
+        :global(:root:not([data-calm])) .project__plate :global(.plate__lift) {
+          animation:
+            plate-lift-arrive linear both,
+            plate-lift-depart linear forwards,
+            plate-lift-shown-arriving linear both,
+            plate-lift-shown-leaving linear forwards;
+          animation-timeline: --card, --card, --card, --card;
+          animation-range:
+            entry 0 entry 25vh,
+            exit 0 exit 25vh,
+            entry 0 entry 25vh,
+            exit 0 exit 25vh;
+        }
+
+        :global(:root:not([data-calm])) .project__plate :global(.plate-stage .plate [data-accent]) {
+          animation:
+            plate-shadow-arriving step-end both,
+            plate-shadow-leaving step-start forwards;
+          animation-timeline: --card, --card;
+          animation-range:
+            entry 0 entry 25vh,
+            exit 0 exit 25vh;
+        }
+      }
+    }
+  }
+
+  @keyframes work-plate-rise {
+    from {
+      translate: 0 1.5rem;
+    }
+    to {
+      translate: 0 0;
+    }
+  }
+
+  /**
+   * Press depth for the thumb. Cards only: on the desktop layout the link is
+   * an ancestor of the fixed preview plate, and any scale on it would make it
+   * the plate's containing block mid-click.
+   */
+  @media not all and (min-width: 62rem) and (hover: hover) and (pointer: fine) {
+    @media (prefers-reduced-motion: no-preference) {
+      :global(:root:not([data-calm])) .project__link {
+        transition: scale var(--d-instant) var(--e-out);
+      }
+
+      :global(:root:not([data-calm])) .project__link:active {
+        scale: 0.985;
+      }
+    }
+  }
+
   /* -------------------------------------------------- DESKTOP / FINE POINTER */
 
   @media (min-width: 62rem) and (hover: hover) and (pointer: fine) {
@@ -270,6 +381,10 @@ const featuredProjects = await getFeaturedProjects(lang);
         scale var(--d-base) var(--e-out),
         rotate var(--d-base) var(--e-out);
       box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.6);
+      /* The carried plate leans in 3D inside this box (see below); its near
+         edge and its accent sheet must not be cropped by it. The flat plate
+         fills the box exactly, so at rest nothing changes. */
+      overflow: visible;
     }
 
     .project[data-preview-active] .project__plate {
@@ -294,6 +409,39 @@ const featuredProjects = await getFeaturedProjects(lang);
 
     .project__link:hover .project__title {
       color: oklch(0.82 0.15 var(--project-hue));
+    }
+  }
+
+  /**
+   * THE CARRY. While the plate is being carried, pointerPreview.ts sets
+   * `data-tilting` on its stage and writes the lean, -1..1 on each axis, from
+   * how far the eased plate trails the pointer:
+   *   --lean-x / --lean-y  the plate leans away from the direction of travel,
+   *                        up to 10° across and 6° up/down (the vestibular
+   *                        limit for a plate the visitor is moving);
+   *   --lean-lift          0..1, how hard it is being carried: the accent
+   *                        sheet floats up to 28px forward in proportion, so
+   *                        it settles back into register as the hand stops.
+   * Settled, the attribute comes off and the stage is `transform: none`
+   * again, not `rotate(0)`, so its layer de-promotes and the plate is the
+   * same flat image as before.
+   *
+   * Perspective lives in the stage's own transform. Nothing above it (the
+   * fixed plate, the row, the link, the list) gains a transform, a
+   * perspective or a will-change. A keyboard-anchored plate never leans.
+   */
+  @media (min-width: 62rem) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    :global(:root:not([data-calm])) .project:not(:has(:focus-visible)) .project__plate-tilt[data-tilting] {
+      transform: perspective(900px) rotateY(calc(var(--lean-x, 0) * 10deg))
+        rotateX(calc(var(--lean-y, 0) * -6deg));
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    /* Half a pixel at the least: in register, but never coplanar with its
+       print, so no engine has to guess which of the two paints in front. */
+    :global(:root:not([data-calm])) .project__plate-tilt[data-tilting] :global(.plate__lift) {
+      translate: 0 0 calc(0.5px + var(--lean-lift, 0) * 27.5px);
     }
   }
 </style>
