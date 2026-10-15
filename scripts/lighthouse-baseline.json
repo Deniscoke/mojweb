@@ -1,0 +1,51 @@
+{
+  "$comment": "Pre-change Lighthouse medians for scripts/check-lighthouse.mjs. Only LCP is used as a fallback gate; the rest is a record.",
+  "measuredAt": "2026-10-15",
+  "commit": "eca3f17",
+  "runs": 3,
+  "lighthouse": "lighthouse@13",
+  "pages": {
+    "/en/": {
+      "performance": 96,
+      "accessibility": 100,
+      "lcp": 2557.2325999999994,
+      "tbt": 0,
+      "cls": 0
+    },
+    "/en/projects/splatoo/": {
+      "performance": 97,
+      "accessibility": 100,
+      "lcp": 2405.8774000000003,
+      "tbt": 57,
+      "cls": 0.0001461026653350704
+    },
+    "/en/projects/circus-movement/": {
+      "performance": 97,
+      "accessibility": 100,
+      "lcp": 2404.7304000000004,
+      "tbt": 16,
+      "cls": 0.0001855546504181968
+    },
+    "/en/laby/": {
+      "performance": 96,
+      "accessibility": 100,
+      "lcp": 2556.795,
+      "tbt": 0,
+      "cls": 0.00004003894537950015
+    },
+    "/en/lab/": {
+      "performance": 97,
+      "accessibility": 100,
+      "lcp": 2405.0245999999997,
+      "tbt": 15,
+      "cls": 0
+    },
+    "/404.html": {
+      "performance": 99,
+      "accessibility": 100,
+      "lcp": 2104.4008,
+      "tbt": 0,
+      "cls": 0.000002612345663227406
+    }
+  }
+}

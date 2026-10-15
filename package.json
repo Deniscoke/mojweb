@@ -13,7 +13,13 @@
     "og": "node scripts/build-og.ts",
     "icons": "node scripts/build-icons.ts",
     "cms:snapshot-fallback": "npm --prefix cms run snapshot:fallback",
-    "images": "node scripts/build-image-variants.mjs"
+    "images": "node scripts/build-image-variants.mjs",
+    "scans": "node scripts/build-scans.mjs",
+    "budget": "node scripts/check-budget.mjs",
+    "budget:self-test": "node scripts/check-budget.mjs --self-test",
+    "test:e2e": "playwright test",
+    "test:e2e:gpu": "playwright test --project=gpu",
+    "lhci": "node scripts/check-lighthouse.mjs"
   },
   "dependencies": {
     "astro": "^5.14.1"
@@ -22,6 +28,7 @@
     "@astrojs/check": "^0.9.4",
     "@fontsource-variable/inter-tight": "^5.2.5",
     "@fontsource-variable/jetbrains-mono": "^5.2.5",
+    "@playwright/test": "^1.63.0",
     "sharp": "^0.35.4",
     "typescript": "^5.9.2"
   }
