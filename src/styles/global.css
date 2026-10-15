@@ -2,7 +2,8 @@
 @import './reset.css';
 @import './typography.css';
 @import './motion.css';
-@import './depth.css';
+/* depth.css is not imported here: BaseLayout links it at the end of <body>
+   so it stays out of every page's inline CSS (see the note there). */
 
 /**
  * GLOBAL LAYOUT + CHROME

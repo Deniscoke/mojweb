@@ -14,6 +14,7 @@ import {
   settle,
   textContrast,
   useStoredCalm,
+  untilQuiet,
 } from './support';
 
 /**
@@ -129,8 +130,15 @@ for (const mode of CALM_MODES) {
       expect(await scrollDrivenAnimations(page)).toBe(0);
       await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
 
-      await page.waitForTimeout(2000);
-      expect(await rafDuring(page, 1000), 'rAF loops still running 2 s after load').toBe(0);
+      // The scan mounts late on purpose and draws one static frame under calm
+      // (snapshot, then loseContext). That is a handful of frames, never a loop.
+      // Its caption appears with that frame, so wait for it before judging quiet.
+      const calmCap = page.locator('.hero__scan-cap');
+      if (await calmCap.count()) await calmCap.waitFor({ state: 'visible', timeout: 8000 }).catch(() => {});
+      const calmQuiet = await untilQuiet(page, { quietMs: 1500, timeoutMs: 9000 });
+      expect(calmQuiet.quietAt, 'something keeps animating under calm').not.toBeNull();
+      expect(calmQuiet.frames, 'more than one static frame was drawn under calm').toBeLessThanOrEqual(12);
+      expect(await rafDuring(page, 1000), 'a loop restarted under calm').toBe(0);
       expect((await readProbe(page)).glLive, 'a GL context is still alive under calm').toBe(0);
     });
 
@@ -187,10 +195,14 @@ test.describe('idle (WCAG 2.2.2)', () => {
     await settle(page);
     // The scan's arrival is the one autonomous moment (< 3 s). If it played,
     // the clock starts from its first frame.
+    // It mounts after load + idle + on screen (about 3 s), so wait for its
+    // caption — shown with the first frame — unless this browser cannot run it.
     const cap = page.locator('.hero__scan-cap');
-    if ((await cap.count()) && (await readProbe(page)).gl > 0) await expect(cap).toBeVisible({ timeout: 8000 });
-    await page.waitForTimeout(3000);
-    expect(await rafDuring(page, 1500)).toBe(0);
+    if (await cap.count()) await cap.waitFor({ state: 'visible', timeout: 8000 }).catch(() => {});
+    const idle = await untilQuiet(page, { quietMs: 1500, timeoutMs: 9000 });
+    expect(idle.quietAt, 'the page never stopped animating on its own').not.toBeNull();
+    expect(idle.quietAt!, 'autonomous motion ran longer than 5 s (WCAG 2.2.2)').toBeLessThanOrEqual(5000);
+    expect(await rafDuring(page, 1500), 'motion restarted without input').toBe(0);
   });
 
   test('after scrolling stops, every loop stops within 2 s', async ({ page }) => {

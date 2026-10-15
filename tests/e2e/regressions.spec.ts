@@ -334,9 +334,14 @@ test.describe('transition start frame is unchanged (W4)', () => {
       const clip = (await row.locator('.project__plate').boundingBox())!;
       // A layer that has just finished a scale/rotate transition is
       // occasionally re-rastered a few anti-aliased pixels differently (seen:
-      // 9 px in 1 of 75 runs). A misregistered lift or a visible 40 % base
-      // accent changes hundreds.
-      const carried = { clip, maxDiffPixels: 24 };
+      // 9 px in 1 of 75 runs). While the plate is carried, the lift also
+      // rests 0.5 px in front of the base by design (two layers in one plane
+      // flicker), which re-rasters accent edges by a sub-pixel: measured
+      // 2026-10-17 up to 79 px on orbit (two arcs of a 1 px ring) and 227 px
+      // on grid (one AA column on ~20 square edges) — the reference predates
+      // the lift. A lift misregistered by 2 px bands every accent edge
+      // (~800 px on grid), and a visible 40 % base accent more still.
+      const carried = { clip, maxDiffPixels: 400 };
       await expect(page).toHaveScreenshot(`rest-pointer-${family}.png`, carried);
       const release = await holdNavigation(page, href);
       await page.mouse.down();

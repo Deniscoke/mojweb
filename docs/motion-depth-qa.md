@@ -201,6 +201,7 @@ there. These are the only checks of what the visitor actually gets.
 | D7 | iPhone with iOS < 26, and Firefox desktop | whole homepage, one case study, `/laby/` | today's site exactly; nothing stuck in a "from" state |
 | D8 | 1440p / retina laptop, Chrome | hero at rest and while scrolling | the rules and name are crisp at rest (no raster blur); scan cost acceptable at renderScale 1.5 |
 | D9 | any phone and any desktop | toggle Calm in the nav, reload, navigate, toggle back | applied before paint, persists, label says the next page takes full effect |
+| D10 | a browser without `::details-content` (Chrome < 131, Safari < 18.4, Firefox < 143) | open the language menu in the desktop nav | the Calm toggle appears beside EN inside the menu and is reachable by keyboard |
 
 ### Merge record
 

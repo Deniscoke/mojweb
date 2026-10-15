@@ -164,6 +164,34 @@ export async function rafDuring(page: Page, ms: number): Promise<number> {
 }
 
 /**
+ * Waits until no animation frame has been requested for `quietMs`, and returns
+ * how long that took (from the call) and how many frames were requested on
+ * the way. Returns `quietAt: null` if the page never went quiet before
+ * `timeoutMs`. Use this instead of one fixed rAF window wherever something
+ * mounts late on purpose (the hero scan waits for load, idle and visibility).
+ */
+export async function untilQuiet(
+  page: Page,
+  { quietMs = 1500, timeoutMs = 9000 } = {},
+): Promise<{ quietAt: number | null; frames: number }> {
+  const start = Date.now();
+  const first = (await readProbe(page)).raf;
+  let last = first;
+  let lastChange = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    await page.waitForTimeout(100);
+    const now = (await readProbe(page)).raf;
+    if (now !== last) {
+      last = now;
+      lastChange = Date.now();
+    } else if (Date.now() - lastChange >= quietMs) {
+      return { quietAt: lastChange - start, frames: last - first };
+    }
+  }
+  return { quietAt: null, frames: last - first };
+}
+
+/**
  * Persisted calm, exactly as the toggle stores it (§5.2). Set in an init
  * script so it is in storage before the boot snippet reads it.
  */

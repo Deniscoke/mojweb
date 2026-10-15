@@ -13,7 +13,7 @@ import { PAGES, instrument, settle } from './support';
  */
 
 /** Things that are allowed to be new, or that differ from run to run. */
-const NEW_LAYERS = '.hero__scan, .hero__scan-cap, .cursor-field { visibility: hidden !important; }';
+const NEW_LAYERS = '.hero__scan, .hero__scan-cap, .cursor-field, [data-nav] .lang__motion { visibility: hidden !important; }';
 
 test.beforeEach(async ({ page }) => {
   await instrument(page);

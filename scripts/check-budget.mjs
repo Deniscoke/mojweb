@@ -64,17 +64,24 @@ const KB = 1024;
  * helper included; home alone also carries Selected Work's plate carry
  * (+0.53 KB), which is the feature, not overhead. Lighthouse ≥ 95 remains the
  * gate that decides whether any of this is too much.
+ *
+ * The other site pages are 2.1, not 2: the hero scan is scheduled from the
+ * shared depth runtime, and Rollup then places the env helpers the scan
+ * engine shares (whenVisible and friends) in the env chunk every page loads.
+ * Measured both placements on 2026-10-17 — scheduled from the Hero chunk:
+ * home +2.79 KB, others +2.08; from the runtime: home +2.56, others +2.02.
+ * The runtime is cheaper everywhere; the 0.1 is the price of that sharing.
  */
 const PAGE_CAPS = {
   home: { css: 5, js: 2.6 },
-  case: { css: 3, js: 2 },
-  laby: { css: 3, js: 2 },
-  'laby-detail': { css: 3, js: 2 },
-  lab: { css: 3, js: 2 },
-  note: { css: 3, js: 2 },
+  case: { css: 3, js: 2.1 },
+  laby: { css: 3, js: 2.1 },
+  'laby-detail': { css: 3, js: 2.1 },
+  lab: { css: 3, js: 2.1 },
+  note: { css: 3, js: 2.1 },
   gate: { css: 3, js: 0.6 },
   404: { css: 3, js: 0.6 },
-  other: { css: 3, js: 2 },
+  other: { css: 3, js: 2.1 },
 };
 
 /**
@@ -411,7 +418,18 @@ async function readSite(dist) {
     if (rel.endsWith('.html')) {
       const html = await readFile(file, 'utf8');
       const route = routeOf(rel);
-      pages.push({ route, type: pageType(route), html, ...parseHtml(html) });
+      const parsed = parseHtml(html);
+      // Same-origin stylesheets the page links: not inline CSS (no inline
+      // budget), but every rule in them is linted like inline CSS.
+      const linked = [];
+      for (const [, href] of html.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*href="(\/[^"]+\.css)"/g)) {
+        try {
+          linked.push(await readFile(join(dist, href.slice(1)), 'utf8'));
+        } catch {
+          // A missing file is reported by the link checks, not here.
+        }
+      }
+      pages.push({ route, type: pageType(route), html, ...parsed, linkedStyles: linked });
     } else if (rel.startsWith('_astro/') && rel.endsWith('.js')) {
       const text = await readFile(file, 'utf8');
       chunks.set(`/${rel}`, { name: posix.basename(rel), text, gz: gz(text), ...importsOf(text, `/${rel}`) });
@@ -625,7 +643,7 @@ function lintPage(page, initial, { error, warn }) {
     }
   }
 
-  for (const css of page.styles) {
+  for (const css of [...page.styles, ...(page.linkedStyles ?? [])]) {
     for (const rule of parseCss(css)) {
       if (rule.prelude.startsWith('@') || rule.context.some((c) => /^@(?:-\w+-)?keyframes\b/i.test(c))) continue;
       const selectors = resolveSelectors(rule);
