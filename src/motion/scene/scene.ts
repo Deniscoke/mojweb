@@ -185,6 +185,9 @@ export function initScene(): () => void {
   }
   /** Where shape `id` stands on this screen. */
   const layoutOf = (id: string): Layout => {
+    // A project that drifts (no plate, or a phone) drifts across the whole
+    // screen, not squeezed into the plate's corner.
+    if (id.startsWith('work:') && (innerWidth < 992 || !shapes.has(id))) return layoutFor('full', innerWidth);
     const side = sideOf.get(id) ?? 'center';
     const place = side !== 'full' ? placement.get(id) : undefined;
     // Wide screens take the whole placement; phones only its size (the shape
@@ -415,7 +418,7 @@ export function initScene(): () => void {
   document.addEventListener('irl:embed', onEmbed);
   const offPreference = onMotionPreferenceChange((calm) => {
     if (calm && tier !== 'static') useFallback();
-    else if (!calm && tier === 'static' && pickTier() !== 'static') {
+    else if (!calm && tier === 'static' && pickTier() !== 'static' && !document.querySelector('[data-embed][data-loaded]')) {
       // Calm off: back to WebGL, on a canvas that never held a 2D context.
       painter?.dispose();
       painter = null;

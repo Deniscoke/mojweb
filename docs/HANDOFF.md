@@ -50,7 +50,7 @@ API: `src/motion/scene/README.md`, k tomu `src/motion/depth/README.md` (hĺbka, 
   - Denisov portrét (z mapy hustoty jeho fotky, `scripts/build-portrait.mjs`; samotná fotka sa do repa nedáva a originál je mimo neho),
   - 4 symboly Credo (schválené Denisom),
   - geometria plátu aktívneho projektu (len desktop),
-  - sken kasna v Labe,
+  - otáznik v Labe (kasna je od `feat/kinetic-site` preč),
   - voľne plávajúce body medzi sekciami,
   - šípka ku kontaktu.
 - **Čo sa odstránilo:**
@@ -93,8 +93,9 @@ Finálnu kontrolu robil čerstvý recenzent. Jeho 5 dôležitých nálezov je op
 ### Rozhodnutia, ktoré sa nemajú vracať
 - `depth.css` je **inline na homepage**, inde **linknutý** (preload v head, `<link>` na konci body). Merané v QA note 2.
 - „Duch" ďalšieho projektu na prípadových štúdiách je **odstránený** (17 KB SVG).
-- Scénu si vyžiada `Hero.astro` (udalosť `irl:scene` pri prvom vstupe) a importuje ju depth runtime. Druhý dynamický import by vytiahol preload helper Vite do zdieľaného chunku, čo je +0,08 KB na všetkých ostatných stránkach. Merané.
-- CSS scény a vypnutie zrnitosti sú **v štýle homepage**, nie v `global.css`. Aj 60 B navyše v `global.css` posunulo LCP stránky Splatoo z 2,41 na 2,56 s. Merané.
+- Spúšťač pri prvom vstupe aj dynamické importy scény a kinetiky sú **v depth runtime** (`src/motion/depth/index.ts`), jedinom vstupe s lazy importmi. Druhý vstup s dynamickým importom by vytiahol preload helper Vite do zdieľaného chunku, čo je +0,08 KB na všetkých stránkach. Merané.
+- CSS scény a vypnutie zrnitosti **vkladá scéna sama** (`<style>` v `scene.ts`), nie sú v HTML ani v `global.css`. Aj 60 B navyše v `global.css` posunulo LCP stránky Splatoo z 2,41 na 2,56 s. Merané.
+- Ciele kinetiky sú **selektory v `kinetic.ts`**, nie atribúty v HTML. Rovnaký dôvod (bajty HTML a LCP).
 - Načítanie scény pri prvom vstupe (nie po načítaní stránky) je meraná nutnosť. Inak mala homepage výkon 86–94 a TBT 134–377 ms.
 - Stropy rozpočtu v `scripts/check-budget.mjs` (home JS 2,65 KB, ostatné 2,1 KB) majú pri sebe zdôvodnenie. Neposúvaj ich bez merania.
 
@@ -108,7 +109,7 @@ Finálnu kontrolu robil čerstvý recenzent. Jeho 5 dôležitých nálezov je op
    - mŕtve odkazy v `check-budget`/`motion.spec`;
    - na homepage nie je zrnitosť;
    - chýba `console.warn` pri zlyhaní WebGL.
-2. **Sken `kasna`:** potvrdiť, že môže byť na úvode, a dodať **miesto a rok** do popisky. Teraz je tam len „SKEN · REALITYSCAN · 2,6 M BODOV".
+2. ~~Sken `kasna`~~: Denis ho chcel úplne preč (`feat/kinetic-site`). V poznámke Digital Space ostáva len render ako obrázok (obsah).
 3. **Fotky** (cirkus, snowboard, projekty): Denis ich vyberá. Návod je v `public/media/photos/README.md`, register v `src/data/photos.ts` (pri deťoch súhlas a len Tier 0). Hĺbkové mapy (Tier 1, `build-depth-maps.py`) sú **odložené**, kým fotky neprídu.
 4. Z `docs/launch-readiness.md`: doména (napr. `denismitrovic.cz`), IČO a stránka ochrany súkromia, preklady prípadových štúdií ES/SR/TR, celé meno „Jančiho" a Denisova rola v Splatoo, profily pre JSON-LD, záloha `cms/data/payload.db`.
 5. `Michel Rodange monument.ply` na Desktope **nie je Denisov sken** (Artec, CC-BY). **Nepoužívať.**

@@ -79,7 +79,6 @@ export function initKinetic(): () => void {
   const prepared = new Map<HTMLElement, SplitText>();
 
   /** Where a letter waits before it gathers: off its place, turned, unseen. */
-  /** Where a letter waits before it gathers: off its place, turned, unseen. */
   const scatter = () =>
     `translate(${gsap.utils.random(-40, 40, 1)}px, ${gsap.utils.random(-40, 40, 1)}px) rotate(${gsap.utils.random(-12, 12, 1)}deg)`;
   const starts = new WeakMap<Element, string>();
@@ -107,6 +106,15 @@ export function initKinetic(): () => void {
    * tween made the scroll callback recalculate the page's style (~60 ms at
    * 6x); GSAP's part is the split and the decode.
    */
+  /** Back to the original markup at once, letters and all. */
+  const show = (el: HTMLElement) => {
+    const split = prepared.get(el);
+    if (!split) return;
+    prepared.delete(el);
+    split.revert();
+    splits.delete(split);
+  };
+
   const land = (el: HTMLElement) => {
     const split = prepared.get(el);
     if (!split) return;
@@ -130,13 +138,12 @@ export function initKinetic(): () => void {
         { duration: 700, delay: i * 18, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'both' },
       ),
     );
-    Promise.all(flights.map((f) => f.finished)).then(
-      () => {
-        done();
-        gate.end();
-      },
-      () => gate.end(),
-    );
+    // Finished or cancelled, the heading ends as its original markup.
+    const finish = () => {
+      done();
+      gate.end();
+    };
+    Promise.all(flights.map((f) => f.finished)).then(finish, finish);
   };
 
   // Splitting is the costly part: it runs in idle time, one heading per
@@ -150,7 +157,8 @@ export function initKinetic(): () => void {
     if (!el) return;
     cleanups.push(
       idle(() => {
-        if (!landed.has(el)) prepare(el);
+        // Never hide what is already on screen: if it got there first, it stays.
+        if (!landed.has(el) && el.getBoundingClientRect().top >= innerHeight) prepare(el);
         nextSlice();
       }, 600),
     );
@@ -158,15 +166,27 @@ export function initKinetic(): () => void {
   const landed = new WeakSet<HTMLElement>();
 
   if (gatherTargets.length && 'IntersectionObserver' in window) {
+    // Prepared ahead, within 60% of a screen either side. A prepared heading
+    // that leaves that band without landing (a jump: End, an anchor, a
+    // restored scroll) is shown as it is: nothing is ever left hidden.
     const near = new IntersectionObserver(
       (entries) =>
         entries.forEach((e) => {
-          if (!e.isIntersecting) return;
-          near.unobserve(e.target);
-          pending.push(e.target as HTMLElement);
-          if (!slicing) nextSlice();
+          const el = e.target as HTMLElement;
+          if (landed.has(el)) return;
+          if (e.isIntersecting) {
+            if (!prepared.has(el) && !pending.includes(el)) {
+              pending.push(el);
+              if (!slicing) nextSlice();
+            }
+          } else if (prepared.has(el)) {
+            landed.add(el);
+            near.unobserve(el);
+            inView.unobserve(el);
+            show(el);
+          }
         }),
-      { rootMargin: '0px 0px 60% 0px' },
+      { rootMargin: '60% 0px 60% 0px' },
     );
     const inView = new IntersectionObserver(
       (entries) =>
@@ -178,7 +198,9 @@ export function initKinetic(): () => void {
           landed.add(el);
           land(el);
         }),
-      { rootMargin: '0px 0px -10% 0px' },
+      // Any part on screen lands it: a heading resting at the screen's
+      // bottom edge must not wait there, unseen.
+      { rootMargin: '0px' },
     );
     gatherTargets.forEach((el) => {
       near.observe(el);
@@ -192,11 +214,11 @@ export function initKinetic(): () => void {
 
   // ---------------------------------------------------------- decode
   const original = new WeakMap<Element, string>();
-  const decode = (el: HTMLElement, duration = 0.6) => {
+  const decode = (el: HTMLElement, duration = 0.6, onComplete?: () => void) => {
     if (gsap.isTweening(el)) return;
     const text = original.get(el) ?? el.textContent ?? '';
     original.set(el, text);
-    gsap.to(el, { duration, scrambleText: { text, chars: GLYPHS, revealDelay: 0.1, speed: 0.6 } });
+    gsap.to(el, { duration, scrambleText: { text, chars: GLYPHS, revealDelay: 0.1, speed: 0.6 }, onComplete });
   };
 
   const decodeTargets = unseen([...document.querySelectorAll<HTMLElement>(DECODE)].filter(isLeaf));
@@ -216,10 +238,16 @@ export function initKinetic(): () => void {
 
   // ---------------------------------------------------------- hover
   const hoverTargets = [...document.querySelectorAll<HTMLElement>(HOVER)].filter((el) => isLeaf(el) && !off(el));
-  const onEnter = (e: Event) => decode(e.currentTarget as HTMLElement, 0.45);
+  const onEnter = (e: Event) => {
+    const el = e.currentTarget as HTMLElement;
+    if (gsap.isTweening(el)) return;
+    // While the glyphs scramble, the link's name stays its text; after, the
+    // text is the name again (and in-browser translation sees it).
+    const owned = !el.hasAttribute('aria-label');
+    if (owned) el.setAttribute('aria-label', (original.get(el) ?? el.textContent ?? '').trim());
+    decode(el, 0.45, () => owned && el.removeAttribute('aria-label'));
+  };
   hoverTargets.forEach((el) => {
-    // The name stays the text, whatever the glyphs say mid-scramble.
-    if (!el.hasAttribute('aria-label')) el.setAttribute('aria-label', (el.textContent ?? '').trim());
     el.addEventListener('pointerenter', onEnter);
     el.addEventListener('focus', onEnter);
   });

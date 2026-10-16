@@ -64,7 +64,16 @@ export function initDepth(): () => void {
     // The kinetic type (GSAP) follows in the next idle moment, never under
     // reduced motion: evaluating GSAP is one ~25 ms task (150 ms at 6x), so it
     // must not land on top of the input that woke the page.
-    if (!prefersReducedMotion()) idle(() => import('../kinetic/kinetic.ts').then((m) => m.initKinetic(), () => {}), 1500);
+    if (!prefersReducedMotion())
+      idle(
+        () =>
+          import('../kinetic/kinetic.ts').then((m) => {
+            // Reduced motion switched on mid-visit stops it: splits revert.
+            const stop = m.initKinetic();
+            const off = onMotionPreferenceChange((calm) => calm && (stop(), off()));
+          }, () => {}),
+        1500,
+      );
   };
   let cancelIdle = () => {};
 

@@ -91,4 +91,39 @@ test.describe('kinetic type', () => {
     await wake(page);
     await loaded(page);
   });
+
+  test('a prepared heading that is jumped past is shown, never left hidden', async ({ page }) => {
+    await page.goto(PAGES.home);
+    await settle(page);
+    await wake(page);
+    await loaded(page);
+    // Just below the screen: the layer prepares (splits and hides) it.
+    await page.evaluate(() => {
+      const el = document.querySelector('#lab-title')!;
+      window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - innerHeight * 1.2, behavior: 'instant' });
+    });
+    await expect.poll(() => page.locator('#lab-title div').count(), { timeout: 5000 }).toBeGreaterThan(0);
+    // A jump to the end skips its intersecting moment entirely.
+    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+    await expect.poll(() => page.locator('#lab-title div').count(), { timeout: 5000 }).toBe(0);
+  });
+
+  test('a heading resting in the bottom band of the screen lands', async ({ page }) => {
+    await page.goto(PAGES.home);
+    await settle(page);
+    await wake(page);
+    await loaded(page);
+    await page.evaluate(() => {
+      const el = document.querySelector('#lab-title')!;
+      window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - innerHeight * 1.3, behavior: 'instant' });
+    });
+    await expect.poll(() => page.locator('#lab-title div').count(), { timeout: 5000 }).toBeGreaterThan(0);
+    // Bring it to the last 5% of the screen and stop there.
+    await page.evaluate(() => {
+      const el = document.querySelector('#lab-title')!;
+      window.scrollBy({ top: el.getBoundingClientRect().top - innerHeight * 0.96, behavior: 'instant' });
+    });
+    await expect.poll(() => page.locator('#lab-title div').count(), { timeout: 5000 }).toBe(0);
+  });
 });
+
