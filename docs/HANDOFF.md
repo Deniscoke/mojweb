@@ -18,7 +18,8 @@ Všetko tu je overené. Čo tu nie je, si over v kóde a nedomýšľaj si to.
 
 | Vetva | Stav |
 |---|---|
-| `main` | **živý web s „živou scénou“**, merge commit `480fa11` (2026-10-16, Denis schválil náhľad). Nasadené na `mojweb` aj `mojweb2` a overené naživo. |
+| `main` | **živý web s „živou scénou“**: merge `480fa11` a úpravy po Denisovej revízii, merge `f6832ef` (ostrejší portrét, logo DM, bez prepínača Pokojný, bez šípky v kontakte, projekt sa otvára z miesta bodov). Obe schválil Denis a obe sú nasadené a overené naživo. |
+| `feat/scene-polish` | zmergovaná do `main`, dá sa zmazať |
 | `feat/living-scene` | zmergovaná do `main`, dá sa zmazať |
 | `feat/motion-depth` | prvý 3D pokus, Denis ho **neschválil**, nemergovať |
 
