@@ -265,5 +265,31 @@ test.describe('living scene', () => {
     await wake(page);
     await expect(page.locator('canvas.scene')).toHaveCount(1, { timeout: 10_000 });
   });
+
+  test('the scene carries on when the tab comes back', async ({ page }) => {
+    await page.goto(PAGES.home);
+    await settle(page);
+    await wake(page);
+    await expect(page.locator('canvas.scene')).toHaveCount(1, { timeout: 10_000 });
+    await centre(page, '[data-scene="credo"]');
+    // Hidden mid-flight, then visible again: the loop resumes and the shape lands.
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+      document.dispatchEvent(new Event('visibilitychange'));
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await expectState(page, 'credo');
+  });
+
+  test('a window resize re-measures the anchors', async ({ page }) => {
+    await page.goto(PAGES.home);
+    await settle(page);
+    await wake(page);
+    await expect(page.locator('canvas.scene')).toHaveCount(1, { timeout: 10_000 });
+    await page.setViewportSize({ width: 1100, height: 600 });
+    await centre(page, '[data-scene="question"]');
+    await expectState(page, 'question');
+  });
 });
 

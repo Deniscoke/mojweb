@@ -169,7 +169,7 @@ export function initScene(): () => void {
   // ------------------------------------------------------------ anchors
   let anchors: Anchor[] = [];
   /** Per-section placement overrides (`data-scene-x`, `data-scene-scale`), wide screens only. */
-  const placement = new Map<string, { cx?: number; scale?: number }>();
+  const placement = new Map<string, { cx?: number; cy?: number; scale?: number }>();
   const sideOf = new Map<string, Side>();
   const dotOf = new Map<string, number>();
   for (const el of sections) {
@@ -178,13 +178,17 @@ export function initScene(): () => void {
     const cx = parseFloat(el.dataset.sceneX ?? '');
     const sc = parseFloat(el.dataset.sceneScale ?? '');
     const side = el.dataset.sceneSide as Side;
-    placement.set(el.dataset.scene!, { ...(isFinite(cx) && { cx }), ...(isFinite(sc) && { scale: sc }) });
+    const cy = parseFloat(el.dataset.sceneY ?? '');
+    placement.set(el.dataset.scene!, { ...(isFinite(cx) && { cx }), ...(isFinite(cy) && { cy }), ...(isFinite(sc) && { scale: sc }) });
     if (!sideOf.has(el.dataset.scene!)) sideOf.set(el.dataset.scene!, SIDES.includes(side) ? side : 'center');
   }
   /** Where shape `id` stands on this screen. */
   const layoutOf = (id: string): Layout => {
     const side = sideOf.get(id) ?? 'center';
-    const l = { ...layoutFor(side, innerWidth), ...(innerWidth >= 992 && side !== 'full' ? placement.get(id) : undefined) };
+    const place = side !== 'full' ? placement.get(id) : undefined;
+    // Wide screens take the whole placement; phones only its size (the shape
+    // stays centred behind the text there, but never larger than asked).
+    const l = { ...layoutFor(side, innerWidth), ...(innerWidth >= 992 ? place : place?.scale !== undefined ? { scale: Math.min(place.scale * 1.6, 0.9) } : undefined) };
     // A shape never spills past the screen's sides (the drifting field may).
     if (side !== 'full') l.scale = Math.min(l.scale, (innerWidth / innerHeight) * 0.92);
     const dot = dotOf.get(id);
@@ -249,8 +253,12 @@ export function initScene(): () => void {
   };
 
   const useGL = () => {
+    if (disposed || tier === 'static') return;
     ctx = createGL(canvas, { lost: () => useFallback(), restored: () => {} });
-    if (!ctx) return useFallback();
+    if (!ctx) {
+      console.warn('[scene] WebGL2 unavailable or refused; drawing in 2D.');
+      return useFallback();
+    }
     size();
     const mine = ctx;
     new Promise<void>((r) => cancels.push(idle(r)))
@@ -262,7 +270,11 @@ export function initScene(): () => void {
         uploaded = '';
         loop.start();
       },
-      () => useFallback(),
+      (err) => {
+        if (ctx !== mine) return;
+        console.warn('[scene] shader setup failed; drawing in 2D.', err);
+        useFallback();
+      },
     );
   };
 
@@ -340,7 +352,8 @@ export function initScene(): () => void {
       const w = (half[0] * layout.scale * innerHeight) / 2;
       const h = (half[1] * layout.scale * innerHeight) / 2;
       const x = ((layout.cx + 1) / 2) * innerWidth;
-      canvas.dataset.sceneRect = [x - w, innerHeight / 2 - h, 2 * w, 2 * h].map(Math.round).join(',');
+      const y = ((1 - (layout.cy ?? 0)) / 2) * innerHeight;
+      canvas.dataset.sceneRect = [x - w, y - h, 2 * w, 2 * h].map(Math.round).join(',');
     } else delete canvas.dataset.sceneRect;
     // A still painter draws only when what it shows has changed.
     const frame = `${key}@${innerWidth}x${innerHeight}`;
@@ -370,6 +383,20 @@ export function initScene(): () => void {
     loop.start();
   };
   const onHide = () => loop.stop();
+  // createLoop stops in a hidden tab; coming back, points mid-flight carry on.
+  const onVisible = () => {
+    if (!document.hidden) loop.start();
+  };
+  // A phone's URL bar changes the window's height without resizing the body.
+  let resizeTimer = 0;
+  const onResize = () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      measure();
+      size();
+      loop.start();
+    }, 150);
+  };
   const onShow = (e: PageTransitionEvent) => {
     if (!e.persisted) return;
     measure();
@@ -379,6 +406,8 @@ export function initScene(): () => void {
   if (fine) addEventListener('pointermove', onPointer, { passive: true });
   addEventListener('pagehide', onHide);
   addEventListener('pageshow', onShow);
+  document.addEventListener('visibilitychange', onVisible);
+  addEventListener('resize', onResize, { passive: true });
   const offPreference = onMotionPreferenceChange((calm) => {
     if (calm && tier !== 'static') useFallback();
     else if (!calm && tier === 'static' && pickTier() !== 'static') {
@@ -405,6 +434,9 @@ export function initScene(): () => void {
     removeEventListener('pointermove', onPointer);
     removeEventListener('pagehide', onHide);
     removeEventListener('pageshow', onShow);
+    document.removeEventListener('visibilitychange', onVisible);
+    removeEventListener('resize', onResize);
+    clearTimeout(resizeTimer);
     loop.destroy();
     painter?.dispose();
     ctx?.destroy();

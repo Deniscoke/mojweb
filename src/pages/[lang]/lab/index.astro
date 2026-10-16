@@ -15,13 +15,9 @@ import { getExperiments, hasLabDetail } from '~/lib/cms';
  * page; entries that are still only a question stay inline rather than
  * generating a page with nothing on it.
  *
- * DEPTH (motion depth plan §3.14). One thing moves, and only while you
- * scroll: the homepage preview's reading head, a short mark in the lab's cold
- * accent that travels down the list's margin as you read it, like the head
- * of a scanner passing over a notebook. It keeps to the strip between the
- * entry numbers and the titles, so it never crosses a word. The entries
- * themselves stay flat and still. The notes behind them (lab/[slug]) get no
- * motion at all: the least finished pages must not be the most decorated.
+ * MOTION. The living scene draws a question mark beside the title, and the
+ * kinetic layer decodes the entry numbers as they arrive (src/motion/scene,
+ * src/motion/kinetic). The entries themselves stay flat and still.
  */
 export function getStaticPaths() {
   return LOCALES.map((locale) => ({
@@ -116,11 +112,10 @@ const title = `${dict.lab.indexTitle} — ${site.author.name}`;
   }
 
   .lab-page__title {
-    font-size: var(--t-section);
+    font-size: var(--t-display);
   }
 
-  /* The number column and the gap after it are named once, because the
-     entries' grid and the reading head both use them. */
+  /* The number column and the gap after it, named once for the entries' grid. */
   .lab-page__list {
     --entry-gutter: 3rem;
     --entry-gap: var(--s-4);
@@ -130,61 +125,6 @@ const title = `${dict.lab.indexTitle} — ${site.author.name}`;
     margin: 0;
     padding: 0;
     border-block-start: 1px solid var(--c-line-strong);
-  }
-
-  /*
-   * THE READING HEAD. A full-width hairline read as a strike-through across
-   * the titles and questions, so the head is a short index mark that lives
-   * only where nothing is printed: the strip between the three-digit number
-   * and the title, in every locale and at every width. It starts 2.125rem in
-   * (1.25rem before the end of the wide number column), clear of the digits,
-   * which are 2.3em of 0.75-0.81rem mono, so 1.86rem at most, and it stops
-   * 0.75rem short of the title. A 1px rule with a 7px riser across its end,
-   * an index mark pointing at the title, so it reads as an instrument and not
-   * as a stray piece of a row rule.
-   *
-   * A box the width of that strip and the height of the list carries the
-   * mark 3px above its bottom edge and slides from one list-height above to
-   * the list itself, so the rule runs from the list's top rule to its bottom
-   * rule. Only `translate` changes, so the compositor does it; its overhang
-   * is above the list, apart from the riser's last 3px, where it can never
-   * extend the page.
-   *
-   * It is driven by the page's own scroll, start to end, not by the list's
-   * view: at the top of the page the head lies on the top rule, exactly
-   * where the page was drawn; at the end it lies on the bottom rule; and in
-   * between it travels down the screen with the reading, never leaving it
-   * (both rules are on screen at the two ends of the scroll, at any size).
-   *
-   * It exists only where it can move: without scroll timelines, under
-   * reduced motion or under Calm, the list is exactly as it was.
-   */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      :global(:root:not([data-calm])) .lab-page__list::after {
-        content: '';
-        position: absolute;
-        inset-block: 0;
-        inset-inline-start: max(calc(var(--entry-gutter) - 1.25rem), 2.125rem);
-        inline-size: calc(var(--entry-gutter) + var(--entry-gap) - 0.75rem - max(calc(var(--entry-gutter) - 1.25rem), 2.125rem));
-        background:
-          linear-gradient(var(--c-lab), var(--c-lab)) right bottom / 1px 7px no-repeat,
-          linear-gradient(var(--c-lab), var(--c-lab)) left bottom 3px / 100% 1px no-repeat;
-        pointer-events: none;
-        animation: notebook-scan linear both;
-        animation-timeline: scroll(root block);
-        animation-range: normal;
-      }
-    }
-  }
-
-  @keyframes notebook-scan {
-    from {
-      translate: 0 calc(4px - 100%);
-    }
-    to {
-      translate: 0 3px;
-    }
   }
 
   .entry {

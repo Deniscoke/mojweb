@@ -86,6 +86,13 @@ test('blendLayout blends the dot size only when a side sets one', () => {
   assert.equal(blendLayout({ ...a, dot: 0.5 }, a, 0).dot, 0.5);
 });
 
+test('blendLayout eases a vertical offset only when a side sets one', () => {
+  const a = { cx: 0, scale: 1, dim: 0 };
+  assert.equal(blendLayout(a, a, 0.5).cy, undefined);
+  assert.equal(blendLayout({ ...a, cy: 0.4 }, a, 0).cy, 0.4);
+  assert.equal(blendLayout({ ...a, cy: 0.4 }, a, 1).cy, 0);
+});
+
 test('follow finishes the shown morph before switching to the next pair', () => {
   const shown = { from: 'a', to: 'b', t: 0.4, side: 'right' as const };
   const step = follow(shown, { from: 'b', to: 'c', t: 0.1, side: 'right' }, 0.2);
