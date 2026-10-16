@@ -13,7 +13,6 @@ import {
   scrollDrivenAnimations,
   settle,
   textContrast,
-  useStoredCalm,
   untilQuiet,
 } from './support';
 
@@ -105,7 +104,6 @@ test.describe('without JavaScript', () => {
 
 const CALM_MODES = [
   { name: 'prefers-reduced-motion', setup: (page: Page) => page.emulateMedia({ reducedMotion: 'reduce' }) },
-  { name: 'stored data-calm', setup: (page: Page) => useStoredCalm(page) },
 ] as const;
 
 for (const mode of CALM_MODES) {
@@ -116,9 +114,6 @@ for (const mode of CALM_MODES) {
 
     test('homepage: no scroll-driven animation, no loop, no live GL context', async ({ page }) => {
       await page.goto(PAGES.home);
-      if (mode.name === 'stored data-calm') {
-        pending((await readProbe(page)).atBody?.calm === true, 'W1', 'the boot-script read of irl:motion');
-      }
       await settle(page);
 
       expect(await depthAnimationNames(page), 'depth.css must not exist under calm').toEqual([]);
@@ -142,9 +137,6 @@ for (const mode of CALM_MODES) {
 
     test('a project row is a plain link @desktop-only', async ({ page }) => {
       await page.goto(PAGES.home);
-      if (mode.name === 'stored data-calm') {
-        pending((await readProbe(page)).atBody?.calm === true, 'W1', 'the boot-script read of irl:motion');
-      }
       await settle(page);
       const link = page.locator('#work .project__link').first();
       await link.scrollIntoViewIfNeeded();
@@ -155,18 +147,6 @@ for (const mode of CALM_MODES) {
     });
   });
 }
-
-test('calm is applied before first paint and survives reload', async ({ page }) => {
-  await useStoredCalm(page);
-  await page.goto(PAGES.home);
-  pending((await readProbe(page)).atBody?.calm === true, 'W1', 'the boot-script read of irl:motion');
-  await page.reload();
-  expect((await readProbe(page)).atBody?.calm).toBe(true);
-  for (const path of [PAGES.case, PAGES.laby, PAGES.lab]) {
-    await page.goto(path);
-    expect((await readProbe(page)).atBody?.calm, path).toBe(true);
-  }
-});
 
 // ──────────────────────────────────────────────────────────────── idle
 
@@ -227,73 +207,6 @@ test.describe('reading band (rule 4)', () => {
     await settle(page);
     await expect(page.locator('main h1')).toBeVisible();
     expect(await identityOffender(page, 'main h1')).toBeNull();
-  });
-});
-
-// ──────────────────────────────────────────────────────────── toggles
-
-test.describe('calm toggles (§3.10, §3.11)', () => {
-  test('both toggles are real 44 px buttons and reachable by keyboard', async ({ page }, info) => {
-    await page.goto(PAGES.home);
-    const toggles = page.locator('[data-motion-toggle]');
-    pending((await toggles.count()) > 0, 'W5', 'the [data-motion-toggle] buttons');
-    expect(await toggles.count()).toBe(2);
-    for (const toggle of await toggles.all()) {
-      expect(await toggle.evaluate((el) => el.tagName)).toBe('BUTTON');
-      await expect(toggle).toHaveAttribute('aria-pressed', /^(true|false)$/);
-    }
-    const footer = page.locator('footer [data-motion-toggle]');
-    await footer.scrollIntoViewIfNeeded();
-    const box = await footer.boundingBox();
-    expect(box!.width).toBeGreaterThanOrEqual(44);
-    expect(box!.height).toBeGreaterThanOrEqual(44);
-    if (isDesktop(info)) {
-      const nav = page.locator('[data-nav] [data-motion-toggle]');
-      const navBox = await nav.boundingBox();
-      expect(navBox!.width).toBeGreaterThanOrEqual(44);
-      expect(navBox!.height).toBeGreaterThanOrEqual(44);
-    }
-    await footer.focus();
-    await expect(footer).toBeFocused();
-    await page.keyboard.press('Enter');
-    await expect(page.locator('html')).toHaveAttribute('data-calm', '');
-  });
-
-  test('toggling persists across reload and pages, and toggles back', async ({ page }) => {
-    await page.goto(PAGES.home);
-    const footer = page.locator('footer [data-motion-toggle]');
-    pending((await footer.count()) > 0, 'W5', 'the footer [data-motion-toggle]');
-    await settle(page);
-    await footer.click();
-    await expect(page.locator('html')).toHaveAttribute('data-calm', '');
-    for (const toggle of await page.locator('[data-motion-toggle]').all()) {
-      await expect(toggle).toHaveAttribute('aria-pressed', 'true');
-    }
-    expect(await page.evaluate(() => localStorage.getItem('irl:motion'))).toBe('calm');
-
-    await page.reload();
-    expect((await readProbe(page)).atBody?.calm, 'applied before first paint').toBe(true);
-    await page.goto(PAGES.lab);
-    expect((await readProbe(page)).atBody?.calm).toBe(true);
-
-    await page.goto(PAGES.home);
-    await settle(page);
-    await page.locator('footer [data-motion-toggle]').click();
-    await expect(page.locator('html')).not.toHaveAttribute('data-calm', '');
-    await page.reload();
-    expect((await readProbe(page)).atBody?.calm).toBe(false);
-  });
-
-  test('under OS reduce both toggles show pressed and disabled', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(PAGES.home);
-    const toggles = page.locator('[data-motion-toggle]');
-    pending((await toggles.count()) > 0, 'W5', 'the [data-motion-toggle] buttons');
-    await settle(page);
-    for (const toggle of await toggles.all()) {
-      await expect(toggle).toHaveAttribute('aria-pressed', 'true');
-      expect(await toggle.evaluate((el) => (el as HTMLButtonElement).disabled || el.getAttribute('aria-disabled') === 'true')).toBe(true);
-    }
   });
 });
 

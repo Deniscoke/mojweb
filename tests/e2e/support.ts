@@ -192,20 +192,6 @@ export async function untilQuiet(
 }
 
 /**
- * Persisted calm, exactly as the toggle stores it (§5.2). Set in an init
- * script so it is in storage before the boot snippet reads it.
- */
-export async function useStoredCalm(page: Page): Promise<void> {
-  await page.addInitScript(() => {
-    try {
-      localStorage.setItem('irl:motion', 'calm');
-    } catch {
-      // Storage blocked: the test then sees no calm and reports it.
-    }
-  });
-}
-
-/**
  * Loaded, revealed (the `irl:revealed` signal every module waits for), and
  * every time-based transition finished — scroll-driven animations are left
  * alone, they are a function of position, not of time.

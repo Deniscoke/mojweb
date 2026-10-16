@@ -353,8 +353,8 @@ function go(run: Run) {
 
 /**
  * The row's plate where it is on screen right now, if it is shown at all:
- * the keyboard anchor or a phone card. On a desk the plate is hidden (the
- * living scene draws it), so the transition grows from the screen's centre.
+ * the keyboard anchor or a phone card. On a desk the plate is hidden and the
+ * living scene draws it in points; `sourceBox` asks the scene for that.
  */
 export function shownPlate(row: HTMLElement): DOMRect | null {
   const plate = row.querySelector<HTMLElement>('.project__plate');
@@ -365,6 +365,14 @@ export function shownPlate(row: HTMLElement): DOMRect | null {
 
 /** Where the plate is on screen right now, whichever layout is showing it. */
 function sourceBox(row: HTMLElement): Box {
+  // On a desk the living scene draws this row's plate in points and says
+  // where (`data-scene-rect`): the plate grows out of the points.
+  const scene = document.querySelector<HTMLElement>('canvas.scene');
+  const rect = scene?.dataset.sceneState === row.dataset.scene ? scene?.dataset.sceneRect : undefined;
+  if (rect) {
+    const [left, top, width, height] = rect.split(',').map(Number);
+    return { left, top, width, height };
+  }
   const shown = shownPlate(row);
   if (shown) return shown;
   // No visible plate (the hover preview had already faded): grow from the

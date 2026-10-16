@@ -16,7 +16,7 @@ the next. Nothing else on the homepage moves as a layer of its own.
 | `timeline.ts` | Pure choreography: `computeAnchors`, `resolve`, `retarget`, `layoutFor` | `tests/unit/timeline.test.ts` |
 | `points.ts` | Pure, seeded generators: `rng`, `scatter`, `fitCount`, `sampleMask`, `sampleWeighted` | `tests/unit/points.test.ts` |
 | `shapes.ts` | Shapes from text, stroked marks, project plates (geometry) and the scan | `tests/unit/shapes.test.ts` |
-| `glyphs.ts` | The Credo marks (Build / Teach / Move / Explore) and the contact arrow, approved by Denis | — |
+| `glyphs.ts` | The Credo marks (Build / Teach / Move / Explore), approved by Denis | — |
 | `scanData.ts` | Parser for the packed scan files (`scripts/build-scans.mjs`) | `tests/unit/scanData.test.ts` |
 | `morph.ts` | WebGL2 painter: `aFrom`/`aTo` mixed in the vertex shader, one draw call, grain in the fragment shader | GPU e2e |
 | `fallback.ts` | 2D painter with the same `Painter` contract (weak devices, calm, context loss) | e2e |
@@ -36,7 +36,14 @@ Put `data-scene="<shape id>"` on the section, plus `data-scene-side`:
 
 On screens of 62rem and wider you can also set `data-scene-x` (centre, in
 clip space from -1 to 1) and `data-scene-scale`, so the shape sits in empty
-space. Below 62rem every shape is centred and dimmed.
+space. Below 62rem every shape is centred and dimmed. `data-scene-dot` sets
+the point size for that shape at any width (the portrait uses 0.62: finer
+points draw a face).
+
+While a project's plate is the shape, the canvas carries `data-scene-rect`
+(`left,top,width,height` in px): where the plate stands on screen. The plate
+transition (`projects/plateTransition.ts`) grows the project page out of
+exactly that rectangle.
 
 Shape ids:
 
@@ -44,7 +51,7 @@ Shape ids:
   `data-portrait` (`scripts/build-portrait.mjs` builds it from his photo,
   which stays outside the repository). Without the map the points spell the
   h1 instead;
-- `credo` and `arrow`, built from `glyphs.ts`;
+- `credo`, built from `glyphs.ts`;
 - `work:<slug>`, sampled from the `svg[data-visual]` plate in that row
   (desktop only; phones show the cards' own plates and the field drifts);
 - `scan`, from the `data-desktop` / `data-mobile` files on the element;
@@ -78,7 +85,7 @@ The tier is set on `<html data-scene-tier>`. The shape on screen is set on
 - **The loop stops.** It runs while points travel, scroll velocity decays,
   or the pointer moves. Otherwise it stops, and it stops on `pagehide` and
   in hidden tabs. `pageshow` from bfcache re-measures and restarts it.
-- **Calm switches live.** Calm switched on mid-visit drops to the 2D painter
+- **Reduced motion switches live.** The system setting switched on mid-visit drops to the 2D painter
   and releases the GL context.
 - **Contrast.** Shapes sit beside text, or behind it dimmed. The hero
   portrait stands at x 0.66 and scale 0.44, above the readout. A shape

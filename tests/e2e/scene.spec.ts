@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { PAGES, settle, useStoredCalm } from './support';
+import { PAGES, settle } from './support';
 
 /**
  * THE LIVING SCENE (docs/superpowers/specs/2026-10-16-living-scene-design.md)
@@ -71,8 +71,8 @@ test.describe('living scene', () => {
     await expect(page.locator('canvas.scene')).toHaveCount(0);
   });
 
-  test('calm mode creates no WebGL context', async ({ page }) => {
-    await useStoredCalm(page);
+  test('reduced motion creates no WebGL context', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(PAGES.home);
     await settle(page);
     await wake(page);
@@ -82,10 +82,12 @@ test.describe('living scene', () => {
     await expectState(page, 'portrait');
   });
 
-  test('toggling calm at runtime switches to static', async ({ page }) => {
+  test('reduced motion switched on at runtime goes static', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
-    await page.locator('footer [data-motion-toggle]').click();
+    await wake(page);
+    await expect(page.locator('canvas.scene')).toHaveCount(1, { timeout: 10_000 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'static');
     await centre(page, '[data-scene="credo"]');
     await expectState(page, 'credo');
@@ -108,7 +110,7 @@ test.describe('living scene', () => {
   test('old layers are gone from home', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
-    for (const sel of ['.hero__floor', '.hero__ground', '.hero__rules', '.hero__scan', 'canvas.cursor-field', '[data-preview-on]', '.contact__stroke']) {
+    for (const sel of ['.hero__floor', '.hero__ground', '.hero__rules', '.hero__scan', 'canvas.cursor-field', '[data-preview-on]', '.contact__stroke', '[data-motion-toggle]']) {
       await expect(page.locator(sel), sel).toHaveCount(0);
     }
     expect(await page.evaluate(() => getComputedStyle(document.body, '::after').content)).toBe('none');
@@ -128,7 +130,7 @@ test.describe('living scene', () => {
   });
 
   test('the 2D tier does not redraw while the shape holds', async ({ page }) => {
-    await useStoredCalm(page);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.addInitScript(() => {
       const proto = CanvasRenderingContext2D.prototype;
       const fill = proto.fillRect;
@@ -173,18 +175,53 @@ test.describe('living scene', () => {
       .toBeGreaterThanOrEqual(before + rows);
   });
 
-  test('turning calm off brings the WebGL scene back @gpu', async ({ page }) => {
+  test('reduced motion switched off brings the WebGL scene back @gpu', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
     await wake(page);
     await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'desktop', { timeout: 10_000 });
-    const toggle = page.locator('footer [data-motion-toggle]');
-    await toggle.click();
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'static');
-    await toggle.click();
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
     await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'desktop', { timeout: 10_000 });
     await centre(page, '[data-scene="credo"]');
     await expectState(page, 'credo');
   });
-});
 
+  test('a project opens from where its points stand @desktop-only', async ({ page }) => {
+    await page.goto(PAGES.home);
+    await settle(page);
+    await wake(page);
+    const row = page.locator('[data-scene^="work:"]').nth(2);
+    const id = await row.getAttribute('data-scene');
+    await centre(page, `[data-scene="${id}"]`);
+    await expectState(page, id!);
+    await expect(page.locator('canvas.scene')).toHaveAttribute('data-scene-rect', /\d/, { timeout: 10_000 });
+    const [left, top, width, height] = (await page.locator('canvas.scene').getAttribute('data-scene-rect'))!.split(',').map(Number);
+    // The overlay's plate, measured the moment it is inserted, before it grows.
+    await page.evaluate(() => {
+      new MutationObserver((records, mo) => {
+        for (const r of records)
+          for (const n of r.addedNodes)
+            if (n instanceof HTMLElement && n.classList.contains('pt')) {
+              // Freeze the flight at its first frame and measure the plate there.
+              n.getAnimations({ subtree: true }).forEach((an) => {
+                an.pause();
+                an.currentTime = 0;
+              });
+              const stage = n.querySelector('.pt__stage') as HTMLElement | null;
+              const b = (stage ?? n).getBoundingClientRect();
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (window as any).__start = [b.left + b.width / 2, b.top + b.height / 2];
+              mo.disconnect();
+            }
+      }).observe(document.body, { childList: true });
+    });
+    await row.locator('a').click();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const start = await page.evaluate(() => (window as any).__start as [number, number] | undefined);
+    expect(start, 'the plate overlay was inserted').toBeTruthy();
+    expect(Math.abs(start![0] - (left + width / 2))).toBeLessThan(24);
+    expect(Math.abs(start![1] - (top + height / 2))).toBeLessThan(24);
+  });
+});

@@ -326,6 +326,12 @@ const featuredProjects = await getFeaturedProjects(lang);
       rotate: 0deg;
     }
 
+    /* While the living scene runs it draws this plate in points: a second,
+       flat copy beside them would only repeat it. */
+    :global(html[data-scene-tier]) .project:has(:focus-visible) .project__plate {
+      opacity: 0;
+    }
+
     .project__link:hover .project__title {
       color: oklch(0.82 0.15 var(--project-hue));
     }

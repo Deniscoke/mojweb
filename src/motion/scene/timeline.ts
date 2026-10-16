@@ -41,6 +41,8 @@ export interface Layout {
   scale: number;
   /** How much to fade the points so text over them stays readable (0 … 1). */
   dim: number;
+  /** Point size as a share of the default (finer points draw finer detail). */
+  dot?: number;
 }
 
 /** Below this width the text runs full width, so shapes sit behind it, dimmed. */
@@ -120,7 +122,9 @@ export function layoutFor(side: Side, viewportW: number): Layout {
 export function blendLayout(a: Layout, b: Layout, t: number): Layout {
   const e = t * t * (3 - 2 * t);
   const mix = (x: number, y: number) => x * (1 - e) + y * e;
-  return { cx: mix(a.cx, b.cx), scale: mix(a.scale, b.scale), dim: mix(a.dim, b.dim) };
+  const l: Layout = { cx: mix(a.cx, b.cx), scale: mix(a.scale, b.scale), dim: mix(a.dim, b.dim) };
+  if (a.dot !== undefined || b.dot !== undefined) l.dot = mix(a.dot ?? 1, b.dot ?? 1);
+  return l;
 }
 
 /**

@@ -94,9 +94,8 @@ test('the living scene stops drawing when input stops, and releases on calm @gpu
   expect((await readProbe(page)).raf - before, 'zero rAF 2 s after input stops').toBe(0);
   expect((await readProbe(page)).glLive).toBeLessThanOrEqual(1);
 
-  const toggle = page.locator('footer [data-motion-toggle]');
-  pending((await toggle.count()) > 0, 'W5', 'the footer [data-motion-toggle]');
-  await toggle.click();
+  // Reduced motion switched on in the system releases the GL context.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.waitForTimeout(500);
   expect((await readProbe(page)).glLive, 'calm releases the context').toBe(0);
   await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'static');

@@ -190,30 +190,12 @@ box, so a pointer near a receding edge cannot flicker in and out. An eased
 settled, everything is removed and the loop stops. Focus is ignored, and so is
 anything inside `[data-loaded]` (an iframe never sits in a 3D context).
 
-### `motionPreference.ts` — `initMotionToggles(): () => void`
+### No Calm toggle (since 2026-10-16)
 
-Wires every `[data-motion-toggle]`. Markup contract (components own the words,
-in all six locales):
-
-```html
-<button type="button" data-motion-toggle aria-pressed="false"
-        data-label-system="Calm (system setting)">
-  <span data-motion-label>Calm motion</span>
-</button>
-<span data-motion-hint hidden>Takes full effect on the next page</span>
-```
-
-- Pressed means calm. A press toggles `html[data-calm]`, stores
-  `irl:motion = 'calm'` (or removes it) inside try/catch, and dispatches
-  `irl:motionchange`. All toggles on the page stay in agreement.
-- Under the OS setting: `aria-pressed="true"`, `aria-disabled="true"` (not
-  `disabled`, so it stays focusable and explicable), and the
-  `[data-motion-label]` text swaps to `data-label-system`. It swaps back if the
-  setting lifts.
-- After a press on this page, every `[data-motion-hint]` is un-hidden: live
-  modules have already obeyed, the older ones (reveals, transitions) obey from
-  the next page.
-- 44 px targets and focus styles are the component's job.
+The site's own Calm toggles (`motionPreference.ts`, `[data-motion-toggle]`)
+were removed at Denis's request. Reduced motion is the operating system's
+setting alone. `html[data-calm]` is no longer set by anything; the CSS and
+`prefersReducedMotion()` still honour it, harmlessly.
 
 ### `DepthRuntime.astro` and `BaseLayout.astro`
 

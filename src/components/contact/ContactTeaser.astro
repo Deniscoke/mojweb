@@ -17,8 +17,8 @@ const dict = useTranslations(lang);
  * plausible-looking address that bounces, and a CTA with no destination is
  * worse than no CTA.
  *
- * The page closes on the living scene: its points gather into an arrow
- * toward the CTA (`data-scene="arrow"`, src/motion/scene). The line-drawing
+ * The page closes on the living scene drifting out (`data-scene="drift"`,
+ * src/motion/scene): nothing is drawn over the text and the CTA. The line-drawing
  * stroke that used to close the page is gone — one moving system, not two.
  *
  * DEPTH (docs/motion-depth-plan.md §3.9): the landing. The title arrives
@@ -30,7 +30,7 @@ const phone = site.contact.phone;
 const links = site.contact.links.filter((link) => Boolean(link.href));
 ---
 
-<section class="section section--lg contact" id="contact" data-scene="arrow" data-scene-side="center" data-scene-x="-0.15" data-scene-scale="0.18" aria-labelledby="contact-title">
+<section class="section section--lg contact" id="contact" data-scene="drift" data-scene-side="full" aria-labelledby="contact-title">
   <div class="wrap contact__inner">
     <p class="mono section__label" data-reveal>
       <span class="section__index">06</span>
