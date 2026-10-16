@@ -10,6 +10,9 @@
 import { fitCount, rng, sampleMask, scatter } from './points.ts';
 import { scanPositions } from './scanData.ts';
 
+/** Most points ever sampled from one plate's geometry. */
+const SAMPLES = 1500;
+
 export type Raster = (
   draw: (ctx: CanvasRenderingContext2D, w: number, h: number) => void,
   w?: number,
@@ -92,14 +95,17 @@ export function svgShape(svg: SVGSVGElement, n: number, seed: number): Float32Ar
   const total = lengths.reduce((a, b) => a + b, 0);
   if (total <= 0) return scatter(n, seed);
 
+  // getPointAtLength walks the path on every call: sample at most SAMPLES
+  // points and let fitCount repeat them up to n.
+  const m0 = Math.min(n, SAMPLES);
   const r = rng(seed);
   const long = Math.max(W, H);
-  const out = new Float32Array(n * 3);
+  const out = new Float32Array(m0 * 3);
   let k = 0;
   els.forEach((el, e) => {
     const m = toSvg(el, svg);
-    const count = e === els.length - 1 ? n - k : Math.round((lengths[e] / total) * n);
-    for (let i = 0; i < count && k < n; i++, k++) {
+    const count = e === els.length - 1 ? m0 - k : Math.round((lengths[e] / total) * m0);
+    for (let i = 0; i < count && k < m0; i++, k++) {
       const p = el.getPointAtLength(r() * lengths[e]);
       // By hand: Chrome's legacy SVGPoint.matrixTransform refuses a DOMMatrix.
       const x = m ? m.a * p.x + m.c * p.y + m.e : p.x;

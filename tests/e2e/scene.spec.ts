@@ -97,5 +97,17 @@ test.describe('living scene', () => {
     }
     expect(await page.evaluate(() => getComputedStyle(document.body, '::after').content)).toBe('none');
   });
+
+  test('scene anchors exist in every language', async ({ page }) => {
+    await page.goto('/en/');
+    await settle(page);
+    const ids = await page.locator('[data-scene]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.scene));
+    for (const lang of ['sk', 'sr', 'tr']) {
+      await page.goto(`/${lang}/`);
+      await settle(page);
+      expect(await page.locator('[data-scene]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.scene)), lang).toEqual(ids);
+      await expectState(page, 'name');
+    }
+  });
 });
 

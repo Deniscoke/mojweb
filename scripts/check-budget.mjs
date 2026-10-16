@@ -78,6 +78,11 @@ const KB = 1024;
  * Measured both placements on 2026-10-17 — scheduled from the Hero chunk:
  * home +2.79 KB, others +2.08; from the runtime: home +2.56, others +2.02.
  * The runtime is cheaper everywhere; the 0.1 is the price of that sharing.
+ *
+ * Living scene (2026-10-16): the hero scan, the cursor field, the hero
+ * parallax and the Work cursor preview left the homepage, and the scene is
+ * scheduled from the same runtime in their place. Home measured +1.33 KB, so
+ * the 2.65 cap stands untouched (the spec allowed up to 3.0).
  */
 const PAGE_CAPS = {
   home: { css: 5, js: 2.65 },
@@ -98,13 +103,18 @@ const PAGE_CAPS = {
  */
 const LAZY_CHUNKS = [
   { id: 'depth/tilt', match: /^tilt\./, cap: 1.3 },
-  { id: 'ambient/mount', match: /^mount\./, cap: 1.3 },
-  { id: 'ambient/gl + pointScan', match: /^(?:pointScan|gl)\./, cap: 4.5 },
+  // The living scene (docs/superpowers/specs/2026-10-16-living-scene-design.md):
+  // runtime, morph, shapes and the shared gl.ts; measured 6.4 KB at landing.
+  { id: 'scene', match: /^(?:scene|morph|shapes|points|timeline|scanData|glyphs|gl)\./, cap: 9 },
+  { id: 'scene/fallback', match: /^fallback\./, cap: 1.5 },
   { id: 'media/depthPhoto', match: /^depthPhoto\./, cap: 2.0 },
 ];
 
-/** The sum of the §5.4 table: initial 2.0 + 1.3 + 1.3 + 4.5 + 2.0. */
-const TOTAL_NEW_JS_CAP = 11.1;
+/**
+ * Initial 2.0 + tilt 1.3 + depthPhoto 2.0 + scene 9 + fallback 1.5. The scan
+ * engine's mount 1.3 and gl + pointScan 4.5 left with the hero scan.
+ */
+const TOTAL_NEW_JS_CAP = 15.8;
 
 /** Raw KB, §5.3. */
 const SCAN_CAPS = [
@@ -881,7 +891,7 @@ async function selfTest() {
     ['budget-js', { '_astro/big.js': `export const b="${noise(4000)}";`, '_astro/home.js': `import"./big.js";import("./later.js");` }],
     ['chunk-cap', { '_astro/tilt.AbC123.js': `export const t="${noise(2600)}";`, '_astro/home.js': `import("./tilt.AbC123.js");` }],
     ['lazy-on-initial', { '_astro/tilt.AbC123.js': `export const t=1;`, '_astro/home.js': `import"./tilt.AbC123.js";` }],
-    ['total-js', { '_astro/unreferenced.js': `export const u="${noise(16000)}";` }],
+    ['total-js', { '_astro/unreferenced.js': `export const u="${noise(24000)}";` }],
     ['scan-bin', { 'assets/scans/kasna-0a1b2c-desktop.bin': randomBytes(80 * KB) }],
     ['depth-css', {}, { depthCss: join(work, 'depth-big.css') }],
     ['owner', home({ body: homeBody('<p data-reveal data-depth="rise">x</p>') })],

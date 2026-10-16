@@ -7,8 +7,7 @@
  *   32  u32  flags (bit 0: progressive order)
  *   36  int16×3 per point, normalised to the bounds, then one luminance byte per point
  *
- * Shared by the scan engine (`ambient/pointScan.ts`) and the living scene.
- * Import-free so `npm run test:unit` can load it.
+ * Read by the living scene. Import-free so `npm run test:unit` can load it.
  */
 
 const MAGIC = 0x31534d44; // "DMS1", little-endian

@@ -16,7 +16,7 @@ import { canAffordGL, createLoop, fontsReady, hasFinePointer, idle, onMotionPref
 import { ARROW, CREDO } from './glyphs.ts';
 import { createMorph, type MorphUniforms } from './morph.ts';
 import { scatter } from './points.ts';
-import { pathsShape, scanShape, svgShape, textShape } from './shapes.ts';
+import { pathsShape, rasterize, scanShape, svgShape, textShape, type Raster } from './shapes.ts';
 import { computeAnchors, layoutFor, resolve, retarget, type Anchor, type Pose, type SceneEntry, type Side } from './timeline.ts';
 
 export type Tier = 'desktop' | 'mobile' | 'static';
@@ -29,6 +29,8 @@ export interface Painter {
 }
 
 const COUNT = { desktop: 16000, mobile: 4000, static: 4000 } as const;
+/** Raster detail for text and marks: fewer points need fewer pixels. */
+const DETAIL = { desktop: 1, mobile: 0.5, static: 0.5 } as const;
 const ARRIVAL_MS = 1800;
 const FLIGHT_MS = 900;
 const EASE_MS = 120;
@@ -55,6 +57,8 @@ export function initScene(): () => void {
   canvas.setAttribute('aria-hidden', 'true');
   document.body.prepend(canvas);
 
+  let disposed = false;
+
   // ------------------------------------------------------------ shapes
   const fallbackShape = scatter(n, 1);
   const shapes = new Map<string, Float32Array>([['scatter', fallbackShape]]);
@@ -71,23 +75,44 @@ export function initScene(): () => void {
   const shape = (id: string) =>
     (innerWidth < 992 && id.startsWith('work:') ? drift : shapes.get(id)) ?? fallbackShape;
 
+  const detail = DETAIL[tier];
+  const raster: Raster = (draw, w = 512, h = 256) => rasterize(draw, Math.round(w * detail), Math.round(h * detail));
+
   const cancels: Array<() => void> = [];
-  cancels.push(
-    idle(() => {
-      put('credo', pathsShape(Object.values(CREDO), n, 3));
-      put('arrow', pathsShape([ARROW], n, 4));
-      sections.forEach((el, i) => {
-        const id = el.dataset.scene!;
-        const svg = el.querySelector<SVGSVGElement>('svg[data-visual]');
-        if (!id.startsWith('work:') || !svg) return;
+  /**
+   * One shape per idle slice, never all of them in one task: on a throttled
+   * phone a single slice is a few ms, the whole set at once was a long task.
+   * Phones skip the project plates (they show the cards' own).
+   */
+  const queue: Array<() => void> = [
+    () => put('credo', pathsShape(Object.values(CREDO), n, 3, raster)),
+    () => put('arrow', pathsShape([ARROW], n, 4, raster)),
+  ];
+  if (innerWidth >= 992) {
+    sections.forEach((el, i) => {
+      const id = el.dataset.scene!;
+      const svg = el.querySelector<SVGSVGElement>('svg[data-visual]');
+      if (!id.startsWith('work:') || !svg) return;
+      queue.push(() => {
         try {
           put(id, svgShape(svg, n, 10 + i));
         } catch {
           /* An unreadable plate keeps the scatter; the other shapes still build. */
         }
       });
-    }),
-  );
+    });
+  }
+  let cancelSlice = () => {};
+  const nextSlice = () => {
+    const job = queue.shift();
+    if (!job || disposed) return;
+    cancelSlice = idle(() => {
+      job();
+      nextSlice();
+    });
+  };
+  nextSlice();
+  cancels.push(() => cancelSlice());
   const h1 = document.querySelector<HTMLElement>('h1');
   if (h1) {
     const timeout = new Promise<void>((r) => setTimeout(r, FONT_TIMEOUT_MS));
@@ -95,7 +120,7 @@ export function initScene(): () => void {
       if (disposed) return;
       const words = (h1.textContent ?? '').trim().split(/\s+/).join('\n');
       const font = getComputedStyle(h1);
-      put('name', textShape(words, `${font.fontWeight} 120px ${font.fontFamily}`, n, 5));
+      put('name', textShape(words, `${font.fontWeight} ${Math.round(120 * detail)}px ${font.fontFamily}`, n, 5, raster));
     });
   }
   const lab = sections.find((el) => el.dataset.scene === 'scan');
@@ -152,7 +177,6 @@ export function initScene(): () => void {
   // ------------------------------------------------------------ painter
   let painter: Painter | null = null;
   let ctx: GL | null = null;
-  let disposed = false;
   const scale = () => (fine ? renderScale() : Math.min(renderScale(), 1.5));
   const size = () => {
     const s = scale();
@@ -190,7 +214,9 @@ export function initScene(): () => void {
     if (!ctx) return useFallback();
     size();
     const mine = ctx;
-    createMorph(mine, n).then(
+    new Promise<void>((r) => cancels.push(idle(r)))
+      .then(() => createMorph(mine, n))
+      .then(
       (m) => {
         if (disposed || ctx !== mine) return m.dispose();
         painter = m;
@@ -202,8 +228,10 @@ export function initScene(): () => void {
   };
 
   size();
+  // Context creation and shader compile each get an idle slice of their own:
+  // together with the chunk's own evaluation they were one long task.
   if (tier === 'static') useFallback();
-  else useGL();
+  else cancels.push(idle(() => !disposed && useGL()));
 
   // ------------------------------------------------------------ the loop
   const started = performance.now();
@@ -219,11 +247,12 @@ export function initScene(): () => void {
 
   const loop = createLoop((dt, now) => {
     const target = resolve(anchors, window.scrollY);
-    const calm = prefersReducedMotion();
+    // Calm, and the 2D fallback (weak devices): the shape simply is the
+    // section's, at once. One frame per change, no travel, no breathing.
+    const still = prefersReducedMotion() || tier === 'static';
     const k = 1 - Math.exp(-dt / EASE_MS);
 
-    if (calm) {
-      // Calm: the shape simply is the section's, at once. One frame per change.
+    if (still) {
       mode = 'scroll';
       shown = target;
     } else if (mode === 'arrival') {
@@ -251,7 +280,7 @@ export function initScene(): () => void {
     }
 
     const y = window.scrollY;
-    velocity = calm ? 0 : velocity + (Math.min(Math.abs(y - lastY) / innerHeight / 0.05, 1) - velocity) * k;
+    velocity = still ? 0 : velocity + (Math.min(Math.abs(y - lastY) / innerHeight / 0.05, 1) - velocity) * k;
     lastY = y;
     if (now - lastPointer > 500) pointer[2] += (0 - pointer[2]) * k;
 
@@ -271,8 +300,8 @@ export function initScene(): () => void {
     painter?.draw({
       ...layout,
       progress: shown.t,
-      time: calm ? 0 : (now - started) / 1000,
-      velocity: calm ? 0 : velocity,
+      time: still ? 0 : (now - started) / 1000,
+      velocity: still ? 0 : velocity,
       pointer,
       color: ink,
       size: (fine ? 1.6 : 1.8) * scale(),

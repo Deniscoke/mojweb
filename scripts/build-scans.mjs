@@ -18,7 +18,7 @@
  * vertex colours (or its diffuse texture, sampled at the vertex UV); with
  * neither, a constant is written and the scan is honest monochrome geometry.
  *
- * FILE FORMAT (little-endian), read by pointScan.ts with typed-array views
+ * FILE FORMAT (little-endian), read by src/motion/scene/scanData.ts with typed-array views
  * and no parse step:
  *
  *   0   char[4]    "DMS1"

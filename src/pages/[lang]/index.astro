@@ -61,3 +61,11 @@ const dict = useTranslations(code);
   playEnterReveal(cover);
   initScrollReveal();
 </script>
+
+<style is:global>
+  /* The living scene draws its own grain in the shader: no second blend
+     layer over it. Homepage only; every other page keeps the grain plate. */
+  body::after {
+    content: none;
+  }
+</style>
