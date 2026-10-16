@@ -107,7 +107,7 @@ export function retarget(shown: Pose, target: Pose): Pose {
 
 export function layoutFor(side: Side, viewportW: number): Layout {
   if (side === 'full') return { cx: 0, scale: 1, dim: 0.6 };
-  if (viewportW < NARROW_PX) return { cx: 0, scale: 0.9, dim: 0.35 };
+  if (viewportW < NARROW_PX) return { cx: 0, scale: 0.9, dim: 0.5 };
   if (side === 'center') return { cx: 0, scale: 0.6, dim: 0.35 };
   return { cx: side === 'left' ? -0.5 : 0.5, scale: 0.45, dim: 0 };
 }

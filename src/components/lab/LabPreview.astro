@@ -68,16 +68,17 @@ const scan =
       <div class="section__intro">
         <h2 id="lab-title">{dict.lab.title}</h2>
         <p class="lead">{dict.lab.lead}</p>
+        {
+          /* What the points become here, and where the capture comes from.
+             Under the lead, clear of the scan standing on the right. */
+          scan && (
+            <a class="mono lab__scan-cap" href={localePath(lang, scan.href)}>
+              {scanCaption(scan, lang)}
+              <span aria-hidden="true">→</span>
+            </a>
+          )
+        }
       </div>
-      {
-        /* What the points become here, and where the capture comes from. */
-        scan && (
-          <a class="mono lab__scan-cap" href={localePath(lang, scan.href)}>
-            {scanCaption(scan, lang)}
-            <span aria-hidden="true">→</span>
-          </a>
-        )
-      }
     </header>
 
     <ol class="lab__list" role="list">
@@ -188,9 +189,8 @@ const scan =
   }
 
   .lab__scan-cap {
-    grid-column: 1 / -1;
-    justify-self: end;
     display: inline-flex;
+    margin-block-start: var(--s-3);
     align-items: center;
     gap: var(--s-2);
     min-block-size: 44px;
