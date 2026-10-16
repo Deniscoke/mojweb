@@ -22,7 +22,8 @@ Všetko tu je overené. Čo tu nie je, si over v kóde a nedomýšľaj si to.
 | `feat/motion-depth` | prvý 3D upgrade (`b6f1fa8`). Denis ho **neschválil**: drobné úpravy, sken v úvode pôsobil mimo, priveľa vrstiev cez seba. **Nemergovať.** |
 | `feat/living-scene` | **nová verzia z `feat/motion-depth`: „živá scéna“**. Hotová, otestovaná, pushnutá. |
 
-**Vercel náhľad** vetvy `feat/living-scene` (chránený prihlásením do Vercelu, Denisov účet): pozri sekciu 3.
+**Vercel náhľad** vetvy `feat/living-scene` (chránený prihlásením do Vercelu, Denisov účet):
+https://mojweb2-3t0y28qus-denis-mitrovics-projects.vercel.app/sk/ (commit `eedc4b5`)
 
 **ČAKÁ SA NA DENISA:** pozrie si náhľad `feat/living-scene` a povie OK, alebo čo zmeniť.
 Po jeho OK: `git checkout main && git merge --no-ff feat/living-scene && git push`, potom over živý web.
@@ -62,16 +63,17 @@ npx astro check            # 0 errors
 npm run build              # 152 pages
 npm run budget             # rozpočet JS/CSS + lint pravidiel
 npm run budget:self-test
-npm run test:unit                  # 19 unit testov (node --test)
-E2E_STRICT=1 npx playwright test   # 155 testov (systémový Chrome)
+npm run test:unit                  # 23 unit testov (node --test)
+E2E_STRICT=1 npx playwright test   # 158 testov (systémový Chrome)
 npm run test:e2e:gpu               # 4 testy na skutočnej GPU (otvorí okno)
 npm run lhci               # Lighthouse mobile, medián 3 behov
 ```
 Posledné výsledky (`feat/living-scene`):
-- unit 19/19, e2e 154/155, GPU 4/4;
+- unit 23/23, e2e 158/158, GPU 6/6;
 - Lighthouse: homepage výkon 96, TBT 0, LCP 2,56 s (= pôvodný stav), ostatné stránky 96–99, a11y 100, CLS 0.
 
 Jeden snapshot (`strata: keyboard`) raz zlyhal na orezanom výreze a potom prešiel 10/10.
+Finálnu kontrolu robil čerstvý recenzent. Jeho 5 dôležitých nálezov je opravených a drobné nálezy sú zapísané v pláne ako odložené.
 `/en/laby/` TBT občas ukáže ~60 ms. Je to známy šum na hranici FCP, pôvodná verzia ho má tiež (QA note 1). Nie je to regresia.
 
 ### Rozhodnutia, ktoré sa nemajú vracať
