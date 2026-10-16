@@ -74,3 +74,38 @@ export function sampleMask(alpha: Uint8ClampedArray, w: number, h: number, n: nu
   }
   return out;
 }
+
+/**
+ * n points spread over a w × h map in proportion to each pixel's weight
+ * (0 … 255): a photo's density map becomes a portrait made of points.
+ * Normalised like `sampleMask`; an all-zero map gives the scatter.
+ */
+export function sampleWeighted(weights: Uint8ClampedArray, w: number, h: number, n: number, seed: number): Float32Array {
+  const cdf = new Float64Array(w * h);
+  let sum = 0;
+  for (let i = 0; i < w * h; i++) cdf[i] = sum += weights[i];
+  if (sum === 0) return scatter(n, seed);
+
+  const r = rng(seed);
+  const long = Math.max(w, h);
+  const sx = w / long;
+  const sy = h / long;
+  const out = new Float32Array(n * 3);
+  for (let k = 0; k < n; k++) {
+    // The first pixel whose running total passes a uniform draw.
+    const target = r() * sum;
+    let lo = 0;
+    let hi = w * h - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (cdf[mid] > target) hi = mid;
+      else lo = mid + 1;
+    }
+    const px = (lo % w) + r();
+    const py = Math.floor(lo / w) + r();
+    out[k * 3] = ((px / w) * 2 - 1) * sx;
+    out[k * 3 + 1] = (1 - (py / h) * 2) * sy;
+    out[k * 3 + 2] = (r() * 2 - 1) * 0.05;
+  }
+  return out;
+}

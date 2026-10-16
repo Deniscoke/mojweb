@@ -16,7 +16,7 @@ import { canAffordGL, createLoop, fontsReady, hasFinePointer, idle, onMotionPref
 import { ARROW, CREDO } from './glyphs.ts';
 import { createMorph, type MorphUniforms } from './morph.ts';
 import { scatter } from './points.ts';
-import { pathsShape, rasterize, scanShape, svgShape, textShape, type Raster } from './shapes.ts';
+import { imageShape, pathsShape, rasterize, scanShape, svgShape, textShape, type Raster } from './shapes.ts';
 import { blendLayout, computeAnchors, follow, layoutFor, resolve, type Anchor, type Layout, type Pose, type SceneEntry, type Side } from './timeline.ts';
 
 export type Tier = 'desktop' | 'mobile' | 'static';
@@ -124,16 +124,29 @@ export function initScene(): () => void {
   };
   nextSlice();
   queuePlates();
-  const h1 = document.querySelector<HTMLElement>('h1');
-  if (h1) {
+  // The hero's portrait: Denis, drawn by the points from a density map of
+  // his photo (`data-portrait`). If the map cannot load, the points spell
+  // the name from the h1 instead.
+  const nameShape = () => {
+    const h1 = document.querySelector<HTMLElement>('h1');
+    if (!h1) return;
     const timeout = new Promise<void>((r) => setTimeout(r, FONT_TIMEOUT_MS));
     Promise.race([fontsReady(), timeout]).then(() => {
       if (disposed) return;
       const words = (h1.textContent ?? '').trim().split(/\s+/).join('\n');
       const font = getComputedStyle(h1);
-      put('name', textShape(words, `${font.fontWeight} ${Math.round(120 * detail)}px ${font.fontFamily}`, n, 5, raster));
+      put('portrait', textShape(words, `${font.fontWeight} ${Math.round(120 * detail)}px ${font.fontFamily}`, n, 5, raster));
     });
-  }
+  };
+  const portraitUrl = sections.find((el) => el.dataset.scene === 'portrait')?.dataset.portrait;
+  if (portraitUrl) {
+    const img = new Image();
+    img.src = portraitUrl;
+    img
+      .decode()
+      .then(() => !disposed && put('portrait', imageShape(img, img.naturalWidth, img.naturalHeight, n, 5, raster)))
+      .catch(nameShape);
+  } else nameShape();
   const lab = sections.find((el) => el.dataset.scene === 'scan');
   const scanUrl = lab?.dataset[fine ? 'desktop' : 'mobile'];
   if (lab && scanUrl && 'IntersectionObserver' in window) {
@@ -260,7 +273,7 @@ export function initScene(): () => void {
   const started = performance.now();
   let mode: 'arrival' | 'flight' | 'scroll' = prefersReducedMotion() ? 'scroll' : 'arrival';
   let modeStart = started;
-  let shown: Pose = { from: 'scatter', to: 'name', t: 0, side: 'right' };
+  let shown: Pose = { from: 'scatter', to: 'portrait', t: 0, side: 'right' };
   let uploaded = '';
   let drawn = '';
   let lastY = window.scrollY;

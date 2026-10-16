@@ -35,11 +35,11 @@ test.describe('living scene', () => {
     await expect(page.locator('html')).toHaveAttribute('data-scene-tier', /^(desktop|mobile|static)$/);
   });
 
-  test('the name arrives first', async ({ page }) => {
+  test('the portrait arrives first', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
     await wake(page);
-    await expectState(page, 'name');
+    await expectState(page, 'portrait');
   });
 
   test('scrolling to Lab sets state scan', async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe('living scene', () => {
     await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'static');
     // A canvas that ever held a WebGL context cannot give a 2D one.
     expect(await page.evaluate(() => document.querySelector<HTMLCanvasElement>('canvas.scene')!.getContext('2d') !== null)).toBe(true);
-    await expectState(page, 'name');
+    await expectState(page, 'portrait');
   });
 
   test('toggling calm at runtime switches to static', async ({ page }) => {
@@ -123,7 +123,7 @@ test.describe('living scene', () => {
       await settle(page);
       await wake(page);
       expect(await page.locator('[data-scene]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.scene)), lang).toEqual(ids);
-      await expectState(page, 'name');
+      await expectState(page, 'portrait');
     }
   });
 

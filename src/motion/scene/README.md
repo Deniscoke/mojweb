@@ -14,7 +14,7 @@ the next. Nothing else on the homepage moves as a layer of its own.
 | --- | --- | --- |
 | `scene.ts` | Runtime: tiers, canvas, shape queue, anchors, the one loop, input | e2e `tests/e2e/scene.spec.ts` |
 | `timeline.ts` | Pure choreography: `computeAnchors`, `resolve`, `retarget`, `layoutFor` | `tests/unit/timeline.test.ts` |
-| `points.ts` | Pure, seeded generators: `rng`, `scatter`, `fitCount`, `sampleMask` | `tests/unit/points.test.ts` |
+| `points.ts` | Pure, seeded generators: `rng`, `scatter`, `fitCount`, `sampleMask`, `sampleWeighted` | `tests/unit/points.test.ts` |
 | `shapes.ts` | Shapes from text, stroked marks, project plates (geometry) and the scan | `tests/unit/shapes.test.ts` |
 | `glyphs.ts` | The Credo marks (Build / Teach / Move / Explore) and the contact arrow, approved by Denis | — |
 | `scanData.ts` | Parser for the packed scan files (`scripts/build-scans.mjs`) | `tests/unit/scanData.test.ts` |
@@ -40,7 +40,11 @@ space. Below 62rem every shape is centred and dimmed.
 
 Shape ids:
 
-- `name`, `credo` and `arrow`, built from the h1 and `glyphs.ts`;
+- `portrait`, Denis's face, from the density map on the element's
+  `data-portrait` (`scripts/build-portrait.mjs` builds it from his photo,
+  which stays outside the repository). Without the map the points spell the
+  h1 instead;
+- `credo` and `arrow`, built from `glyphs.ts`;
 - `work:<slug>`, sampled from the `svg[data-visual]` plate in that row
   (desktop only; phones show the cards' own plates and the field drifts);
 - `scan`, from the `data-desktop` / `data-mobile` files on the element;
@@ -76,8 +80,8 @@ The tier is set on `<html data-scene-tier>`. The shape on screen is set on
   in hidden tabs. `pageshow` from bfcache re-measures and restarts it.
 - **Calm switches live.** Calm switched on mid-visit drops to the 2D painter
   and releases the GL context.
-- **Contrast.** Shapes sit beside text, or behind it dimmed. The hero name
-  stands at x 0.62 and scale 0.34. Closer in, it cut the statement's
-  contrast below AA.
+- **Contrast.** Shapes sit beside text, or behind it dimmed. The hero
+  portrait stands at x 0.66 and scale 0.44, above the readout. A shape
+  closer in cut the statement's contrast below AA.
 - **Budget** (`scripts/check-budget.mjs`): the scene chunk is ≤ 9 KB gz
-  (6.7 at landing) and the fallback ≤ 1.5 KB.
+  (7.0 at landing) and the fallback ≤ 1.5 KB.

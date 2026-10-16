@@ -1,4 +1,6 @@
 ---
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import Readout from '~/components/ui/Readout.astro';
 import { site } from '~/config/site';
 import { getExperiments, getProjects } from '~/lib/cms';
@@ -20,6 +22,20 @@ const [projects, experiments] = await Promise.all([
 const [firstName, ...rest] = site.author.name.split(' ');
 const lastName = rest.join(' ');
 
+/**
+ * Denis's portrait for the living scene: a density map of his photo, made by
+ * scripts/build-portrait.mjs (the photo itself is never shipped). The points
+ * gather into it while the hero is on screen; without one they spell the name.
+ */
+const portraitFile = (() => {
+  try {
+    return readdirSync(join(process.cwd(), 'public/assets/portrait')).find((f) => /^portrait-[\w]+\.png$/.test(f));
+  } catch {
+    return undefined;
+  }
+})();
+const portrait = portraitFile && `/assets/portrait/${portraitFile}`;
+
 const readout = [
   { key: 'Locale', value: locale.label, accent: true },
   { key: 'Projects', value: String(projects.length).padStart(2, '0') },
@@ -28,7 +44,16 @@ const readout = [
 ];
 ---
 
-<section class="hero" id="hero" data-hero data-scene="name" data-scene-side="right" data-scene-x="0.62" data-scene-scale="0.34">
+<section
+  class="hero"
+  id="hero"
+  data-hero
+  data-scene="portrait"
+  data-scene-side="right"
+  data-scene-x="0.66"
+  data-scene-scale="0.44"
+  data-portrait={portrait}
+>
   <div class="wrap hero__inner grid12">
     <p class="mono hero__role" data-reveal>{site.author.role}</p>
 

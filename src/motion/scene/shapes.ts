@@ -7,7 +7,7 @@
  * sampled from their own geometry instead: their colours are CSS custom
  * properties, which an isolated SVG image would not resolve.
  */
-import { fitCount, rng, sampleMask, scatter } from './points.ts';
+import { fitCount, rng, sampleMask, sampleWeighted, scatter } from './points.ts';
 import { scanPositions } from './scanData.ts';
 
 /** Most points ever sampled from one plate's geometry. */
@@ -126,6 +126,22 @@ function toSvg(el: SVGGraphicsElement, svg: SVGSVGElement): DOMMatrix | null {
     if (t) m = m ? t.matrix.multiply(m) : DOMMatrix.fromMatrix(t.matrix);
   }
   return m;
+}
+
+/**
+ * A portrait from a density map (scripts/build-portrait.mjs): white, with
+ * how densely points gather as alpha. Points follow the alpha.
+ */
+export function imageShape(
+  img: CanvasImageSource,
+  w: number,
+  h: number,
+  n: number,
+  seed: number,
+  raster: Raster = rasterize,
+): Float32Array {
+  const { alpha, w: rw, h: rh } = raster((ctx, cw, ch) => ctx.drawImage(img, 0, 0, cw, ch), w, h);
+  return sampleWeighted(alpha, rw, rh, n, seed);
 }
 
 /** The scan at exactly n points; a file that fails to parse gives the scatter. */

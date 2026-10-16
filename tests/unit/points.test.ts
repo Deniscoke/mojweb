@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fitCount, rng, sampleMask, scatter } from '../../src/motion/scene/points.ts';
+import { fitCount, rng, sampleMask, sampleWeighted, scatter } from '../../src/motion/scene/points.ts';
 
 test('rng is deterministic', () => {
   const a = rng(7);
@@ -47,4 +47,20 @@ test('sampleMask only picks opaque pixels', () => {
 test('sampleMask on empty mask returns scatter', () => {
   const out = sampleMask(new Uint8ClampedArray(100), 10, 10, 30, 4);
   assert.deepEqual(out, scatter(30, 4));
+});
+
+test('sampleWeighted follows the weights', () => {
+  // Two opaque pixels side by side, one three times as heavy as the other.
+  const w = 2;
+  const h = 1;
+  const weights = new Uint8ClampedArray([255, 85]);
+  const out = sampleWeighted(weights, w, h, 4000, 3);
+  assert.equal(out.length, 12000);
+  let left = 0;
+  for (let i = 0; i < 4000; i++) if (out[i * 3] < 0) left++;
+  assert.ok(Math.abs(left / 4000 - 0.75) < 0.03, `left share ${left / 4000}`);
+});
+
+test('sampleWeighted on an empty map returns scatter', () => {
+  assert.deepEqual(sampleWeighted(new Uint8ClampedArray(20), 5, 4, 30, 6), scatter(30, 6));
 });

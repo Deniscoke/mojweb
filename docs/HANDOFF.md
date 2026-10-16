@@ -36,7 +36,7 @@ Plán s rozhodnutiami „as built“: `docs/superpowers/plans/2026-10-16-living-
 API: `src/motion/scene/README.md`, k tomu `src/motion/depth/README.md` (hĺbka, pokojný režim).
 
 - **Jedna scéna namiesto koláže.** Celá homepage má za obsahom jeden kanvas s poľom bodov. Body sa pri scrolle presúvajú do tvaru sekcie, ktorá je v strede obrazovky:
-  - meno,
+  - Denisov portrét (z mapy hustoty jeho fotky, `scripts/build-portrait.mjs`; samotná fotka sa do repa nedáva a originál je mimo neho),
   - 4 symboly Credo (schválené Denisom),
   - geometria plátu aktívneho projektu (len desktop),
   - sken kasna v Labe,
