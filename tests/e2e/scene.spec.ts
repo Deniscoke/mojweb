@@ -126,5 +126,65 @@ test.describe('living scene', () => {
       await expectState(page, 'name');
     }
   });
+
+  test('the 2D tier does not redraw while the shape holds', async ({ page }) => {
+    await useStoredCalm(page);
+    await page.addInitScript(() => {
+      const proto = CanvasRenderingContext2D.prototype;
+      const fill = proto.fillRect;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).__rects = 0;
+      proto.fillRect = function (...args: Parameters<typeof fill>) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any).__rects++;
+        return fill.apply(this, args);
+      };
+    });
+    await page.goto(PAGES.home);
+    await settle(page);
+    await wake(page);
+    await centre(page, '[data-scene="credo"]');
+    await expectState(page, 'credo');
+    await page.waitForTimeout(600);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await page.evaluate(() => ((window as any).__rects = 0));
+    for (let i = 0; i < 5; i++) {
+      await page.mouse.wheel(0, 8);
+      await page.waitForTimeout(80);
+    }
+    await expectState(page, 'credo');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(await page.evaluate(() => (window as any).__rects)).toBe(0);
+  });
+
+  test('plates are built once a narrow window grows wide @desktop-only', async ({ page }) => {
+    await page.setViewportSize({ width: 900, height: 900 });
+    await page.goto(PAGES.home);
+    await settle(page);
+    await wake(page);
+    await expect(page.locator('canvas.scene')).toHaveCount(1, { timeout: 10_000 });
+    await page.waitForTimeout(2500);
+    const before = Number(await page.locator('canvas.scene').getAttribute('data-scene-shapes'));
+    const rows = await page.locator('[data-scene^="work:"]').count();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await centre(page, '[data-scene^="work:"]');
+    await expect
+      .poll(async () => Number(await page.locator('canvas.scene').getAttribute('data-scene-shapes')), { timeout: 10_000 })
+      .toBeGreaterThanOrEqual(before + rows);
+  });
+
+  test('turning calm off brings the WebGL scene back @gpu', async ({ page }) => {
+    await page.goto(PAGES.home);
+    await settle(page);
+    await wake(page);
+    await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'desktop', { timeout: 10_000 });
+    const toggle = page.locator('footer [data-motion-toggle]');
+    await toggle.click();
+    await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'static');
+    await toggle.click();
+    await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'desktop', { timeout: 10_000 });
+    await centre(page, '[data-scene="credo"]');
+    await expectState(page, 'credo');
+  });
 });
 

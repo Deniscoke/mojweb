@@ -17,7 +17,7 @@ import { ARROW, CREDO } from './glyphs.ts';
 import { createMorph, type MorphUniforms } from './morph.ts';
 import { scatter } from './points.ts';
 import { pathsShape, rasterize, scanShape, svgShape, textShape, type Raster } from './shapes.ts';
-import { computeAnchors, layoutFor, resolve, retarget, type Anchor, type Pose, type SceneEntry, type Side } from './timeline.ts';
+import { blendLayout, computeAnchors, follow, layoutFor, resolve, type Anchor, type Layout, type Pose, type SceneEntry, type Side } from './timeline.ts';
 
 export type Tier = 'desktop' | 'mobile' | 'static';
 
@@ -88,12 +88,32 @@ export function initScene(): () => void {
     () => put('credo', pathsShape(Object.values(CREDO), n, 3, raster)),
     () => put('arrow', pathsShape([ARROW], n, 4, raster)),
   ];
-  if (innerWidth >= 992) {
+  let cancelSlice = () => {};
+  let slicing = false;
+  const nextSlice = () => {
+    const job = queue.shift();
+    slicing = !!job && !disposed;
+    if (!job || !slicing) return;
+    cancelSlice = idle(() => {
+      job();
+      nextSlice();
+    });
+  };
+  const enqueue = (job: () => void) => {
+    queue.push(job);
+    if (!slicing) nextSlice();
+  };
+  cancels.push(() => cancelSlice());
+  /** Plates are wide-screen shapes: queued the first time the window is wide, at load or later. */
+  let platesQueued = false;
+  const queuePlates = () => {
+    if (platesQueued || innerWidth < 992) return;
+    platesQueued = true;
     sections.forEach((el, i) => {
       const id = el.dataset.scene!;
       const svg = el.querySelector<SVGSVGElement>('svg[data-visual]');
       if (!id.startsWith('work:') || !svg) return;
-      queue.push(() => {
+      enqueue(() => {
         try {
           put(id, svgShape(svg, n, 10 + i));
         } catch {
@@ -101,18 +121,9 @@ export function initScene(): () => void {
         }
       });
     });
-  }
-  let cancelSlice = () => {};
-  const nextSlice = () => {
-    const job = queue.shift();
-    if (!job || disposed) return;
-    cancelSlice = idle(() => {
-      job();
-      nextSlice();
-    });
   };
   nextSlice();
-  cancels.push(() => cancelSlice());
+  queuePlates();
   const h1 = document.querySelector<HTMLElement>('h1');
   if (h1) {
     const timeout = new Promise<void>((r) => setTimeout(r, FONT_TIMEOUT_MS));
@@ -147,11 +158,22 @@ export function initScene(): () => void {
   let anchors: Anchor[] = [];
   /** Per-section placement overrides (`data-scene-x`, `data-scene-scale`), wide screens only. */
   const placement = new Map<string, { cx?: number; scale?: number }>();
+  const sideOf = new Map<string, Side>();
   for (const el of sections) {
     const cx = parseFloat(el.dataset.sceneX ?? '');
     const sc = parseFloat(el.dataset.sceneScale ?? '');
+    const side = el.dataset.sceneSide as Side;
     placement.set(el.dataset.scene!, { ...(isFinite(cx) && { cx }), ...(isFinite(sc) && { scale: sc }) });
+    if (!sideOf.has(el.dataset.scene!)) sideOf.set(el.dataset.scene!, SIDES.includes(side) ? side : 'center');
   }
+  /** Where shape `id` stands on this screen. */
+  const layoutOf = (id: string): Layout => {
+    const side = sideOf.get(id) ?? 'center';
+    const l = { ...layoutFor(side, innerWidth), ...(innerWidth >= 992 && side !== 'full' ? placement.get(id) : undefined) };
+    // A shape never spills past the screen's sides (the drifting field may).
+    if (side !== 'full') l.scale = Math.min(l.scale, (innerWidth / innerHeight) * 0.92);
+    return l;
+  };
   const measure = () => {
     const y = window.scrollY;
     const entries: SceneEntry[] = sections.map((el) => {
@@ -168,6 +190,7 @@ export function initScene(): () => void {
     measureTimer = window.setTimeout(() => {
       measure();
       size();
+      queuePlates();
       loop.start();
     }, 150);
   });
@@ -201,7 +224,7 @@ export function initScene(): () => void {
       .then(({ createFallback }) => {
         if (disposed || painter) return;
         painter = createFallback(canvas);
-        uploaded = '';
+        uploaded = drawn = '';
         loop.start();
       })
       .catch(() => {
@@ -239,6 +262,7 @@ export function initScene(): () => void {
   let modeStart = started;
   let shown: Pose = { from: 'scatter', to: 'name', t: 0, side: 'right' };
   let uploaded = '';
+  let drawn = '';
   let lastY = window.scrollY;
   let velocity = 0;
   const pointer: [number, number, number] = [0, 0, 0];
@@ -253,8 +277,10 @@ export function initScene(): () => void {
     const k = 1 - Math.exp(-dt / EASE_MS);
 
     if (still) {
+      // One shape at a time: the section's, switched at the midpoint.
       mode = 'scroll';
-      shown = target;
+      const id = target.t >= 0.5 ? target.to : target.from;
+      shown = { from: id, to: id, t: 0, side: target.side };
     } else if (mode === 'arrival') {
       const t = Math.min((now - modeStart) / ARRIVAL_MS, 1);
       shown = { from: 'scatter', to: target.from, t, side: target.side };
@@ -265,18 +291,13 @@ export function initScene(): () => void {
         mode = 'scroll';
         shown = { from: shown.to, to: shown.to, t: 0, side: shown.side };
       }
-    } else if (shown.from !== target.from || shown.to !== target.to) {
-      const next = retarget(shown, target);
-      if (next === target) {
-        const t = target.from === shown.to ? 0 : target.to === shown.from ? 1 : shown.t;
-        shown = { ...target, t };
-      } else {
-        shown = next;
+    } else {
+      const step = follow(shown, target, k);
+      shown = step.pose;
+      if (step.flight) {
         mode = 'flight';
         modeStart = now;
       }
-    } else {
-      shown = { ...target, t: shown.t + (target.t - shown.t) * k };
     }
 
     const y = window.scrollY;
@@ -290,13 +311,14 @@ export function initScene(): () => void {
       uploaded = key;
     }
     canvas.dataset.sceneState = shown.t >= 0.5 ? shown.to : shown.from;
+    canvas.dataset.sceneShapes = String(shapes.size);
 
-    const layout = {
-      ...layoutFor(shown.side, innerWidth),
-      ...(innerWidth >= 992 && shown.side !== 'full' ? placement.get(shown.t >= 0.5 ? shown.to : shown.from) : undefined),
-    };
-    // A shape never spills past the screen's sides (the drifting field may).
-    if (shown.side !== 'full') layout.scale = Math.min(layout.scale, (innerWidth / innerHeight) * 0.92);
+    // The arrival starts from the scatter, which stands where its target does.
+    const layout = blendLayout(layoutOf(shown.from === 'scatter' ? shown.to : shown.from), layoutOf(shown.to), shown.t);
+    // A still painter draws only when what it shows has changed.
+    const frame = `${key}@${innerWidth}x${innerHeight}`;
+    if (still && frame === drawn) return false;
+    drawn = still && painter ? frame : '';
     painter?.draw({
       ...layout,
       progress: shown.t,
@@ -307,7 +329,7 @@ export function initScene(): () => void {
       size: (fine ? 1.6 : 1.8) * scale(),
     });
 
-    const settled = mode === 'scroll' && Math.abs(target.t - shown.t) < 0.001 && velocity < 0.001 && pointer[2] < 0.001;
+    const settled = mode === 'scroll' && shown.from === target.from && shown.to === target.to && Math.abs(target.t - shown.t) < 0.001 && velocity < 0.001 && pointer[2] < 0.001;
     // A live painter breathes; keep a slow heartbeat only while points travel.
     return !settled;
   });
@@ -332,6 +354,17 @@ export function initScene(): () => void {
   addEventListener('pageshow', onShow);
   const offPreference = onMotionPreferenceChange((calm) => {
     if (calm && tier !== 'static') useFallback();
+    else if (!calm && tier === 'static' && pickTier() !== 'static') {
+      // Calm off: back to WebGL, on a canvas that never held a 2D context.
+      painter?.dispose();
+      painter = null;
+      const fresh = canvas.cloneNode() as HTMLCanvasElement;
+      canvas.replaceWith(fresh);
+      canvas = fresh;
+      tier = pickTier();
+      root.dataset.sceneTier = tier;
+      useGL();
+    }
     loop.start();
   });
   loop.start();

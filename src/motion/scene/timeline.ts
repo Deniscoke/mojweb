@@ -111,3 +111,38 @@ export function layoutFor(side: Side, viewportW: number): Layout {
   if (side === 'center') return { cx: 0, scale: 0.6, dim: 0.35 };
   return { cx: side === 'left' ? -0.5 : 0.5, scale: 0.45, dim: 0 };
 }
+
+/**
+ * The placement of the cloud between two shapes, eased the way the points'
+ * mean progress is (smoothstep). Placement moves with the points across the
+ * whole transition instead of switching at the midpoint.
+ */
+export function blendLayout(a: Layout, b: Layout, t: number): Layout {
+  const e = t * t * (3 - 2 * t);
+  const mix = (x: number, y: number) => x * (1 - e) + y * e;
+  return { cx: mix(a.cx, b.cx), scale: mix(a.scale, b.scale), dim: mix(a.dim, b.dim) };
+}
+
+/**
+ * One frame of the renderer following the scroll. Within a pair, `t` eases
+ * toward the scroll's. Moving on to the neighbouring pair, the morph on
+ * screen is finished first (or unwound, going back), so a fast scroll never
+ * snaps the unfinished part of a travel. Anything further is a flight
+ * (`retarget`), timed by the caller.
+ */
+export function follow(shown: Pose, target: Pose, k: number): { pose: Pose; flight: boolean } {
+  if (shown.from === target.from && shown.to === target.to) {
+    return { pose: { ...target, t: shown.t + (target.t - shown.t) * k }, flight: false };
+  }
+  if (target.from === shown.to) {
+    return shown.t < 0.999
+      ? { pose: { ...shown, t: shown.t + (1 - shown.t) * k }, flight: false }
+      : { pose: { ...target, t: 0 }, flight: false };
+  }
+  if (target.to === shown.from) {
+    return shown.t > 0.001
+      ? { pose: { ...shown, t: shown.t - shown.t * k }, flight: false }
+      : { pose: { ...target, t: 1 }, flight: false };
+  }
+  return { pose: retarget(shown, target), flight: true };
+}

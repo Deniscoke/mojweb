@@ -80,4 +80,4 @@ The tier is set on `<html data-scene-tier>`. The shape on screen is set on
   stands at x 0.62 and scale 0.34. Closer in, it cut the statement's
   contrast below AA.
 - **Budget** (`scripts/check-budget.mjs`): the scene chunk is ≤ 9 KB gz
-  (6.4 at landing) and the fallback ≤ 1.5 KB.
+  (6.7 at landing) and the fallback ≤ 1.5 KB.
