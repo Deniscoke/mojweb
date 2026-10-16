@@ -20,7 +20,7 @@ Všetko tu je overené. Čo tu nie je, si over v kóde a nedomýšľaj si to.
 |---|---|
 | `main` | **živý web s „živou scénou“**: merge `480fa11` a úpravy po Denisovej revízii, merge `f6832ef` (ostrejší portrét, logo DM, bez prepínača Pokojný, bez šípky v kontakte, projekt sa otvára z miesta bodov). Obe schválil Denis a obe sú nasadené a overené naživo. |
 | `feat/scene-polish` | zmergovaná do `main`, dá sa zmazať |
-| `feat/kinetic-site` | **kasna úplne preč, živá scéna na všetkých stránkach, kinetická typografia (GSAP)**. Hotová a otestovaná, čaká sa na Denisov súhlas s náhľadom. |
+| `feat/kinetic-site` | **zmergovaná do `main`** (merge `2727b03`, 2026-10-16, Denis schválil náhľad): kasna úplne preč, živá scéna na všetkých stránkach, kinetická typografia (GSAP). Nasadené a overené naživo. Dá sa zmazať. |
 | `feat/living-scene` | zmergovaná do `main`, dá sa zmazať |
 | `feat/motion-depth` | prvý 3D pokus, Denis ho **neschválil**, nemergovať |
 
