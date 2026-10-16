@@ -130,3 +130,25 @@
   - `docs/HANDOFF.md`.
 - [ ] Finálna kontrola čerstvým recenzentom, opravy Critical/Important.
 - [ ] Push vetvy, náhľad Vercel, screenshoty (desktop + mobil, všetky typy stránok).
+
+---
+
+## As built: rulings
+
+1. **Targets by selector, not attributes.** Kinetic targets are chosen by selectors in `kinetic.ts`, not by `data-kinetic` attributes in components.
+   - Why: no page carries more HTML. On the case studies a few dozen bytes cost LCP a round trip.
+   - Opt-out: `data-kinetic="off"`.
+   - The lint rule from the spec is therefore unnecessary.
+2. **No plate for the next project.** The case study ends in drift: that plate's SVG is not in the DOM, and adding it would grow the HTML.
+3. **Scene CSS and grain-off are injected by the scene**, not placed in `global.css`. Same LCP reason.
+4. **New `data-scene-y`** (vertical placement). It was needed to keep shapes clear of the titles and readouts on the case study, `/laby` and notes. On phones a section's `data-scene-scale` is kept as a cap.
+5. **The gather flight is Web Animations, not a GSAP tween.**
+   - Why: a GSAP `fromTo` started in the scroll callback forced a page-wide style recalculation, 50 to 150 ms at 6×.
+   - GSAP keeps SplitText (the split) and ScrambleText (decode, hover).
+   - No blur: transform and opacity only.
+6. **Evaluating GSAP is the one accepted long task:** about 25 ms, about 150 ms at 6×. It is idle-scheduled after the first input. The GPU long-task test exempts only that evaluation entry.
+7. **GSAP `autoSleep: 20`.** The ticker would otherwise run rAF for about 2 s after the last tween, which breaks the "nothing moves once the page is still" test.
+8. **`<main>` gets `overflow-x: clip` while kinetic runs.** Flying letters widened the page by 1 px at 360 px.
+9. **A loaded embed hands the GPU back.** The scene goes 2D (`irl:embed`). The Splatoo test requires no live GL context after click-to-load.
+10. **Plate snapshots regenerated.** The grain is off while the scene runs, which changed 10 edge pixels.
+

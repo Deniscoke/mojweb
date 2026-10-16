@@ -20,10 +20,23 @@ Všetko tu je overené. Čo tu nie je, si over v kóde a nedomýšľaj si to.
 |---|---|
 | `main` | **živý web s „živou scénou“**: merge `480fa11` a úpravy po Denisovej revízii, merge `f6832ef` (ostrejší portrét, logo DM, bez prepínača Pokojný, bez šípky v kontakte, projekt sa otvára z miesta bodov). Obe schválil Denis a obe sú nasadené a overené naživo. |
 | `feat/scene-polish` | zmergovaná do `main`, dá sa zmazať |
+| `feat/kinetic-site` | **kasna úplne preč, živá scéna na všetkých stránkach, kinetická typografia (GSAP)**. Hotová a otestovaná, čaká sa na Denisov súhlas s náhľadom. |
 | `feat/living-scene` | zmergovaná do `main`, dá sa zmazať |
 | `feat/motion-depth` | prvý 3D pokus, Denis ho **neschválil**, nemergovať |
 
 Živý web: https://mojweb2.vercel.app/sk/ (scéna sa spustí pri prvom pohybe myši, dotyku alebo scrolle).
+
+**Na vetve `feat/kinetic-site`** (spec `docs/superpowers/specs/2026-10-16-kinetic-site-design.md`, plán s rozhodnutiami `docs/superpowers/plans/2026-10-16-kinetic-site.md`, API `src/motion/kinetic/README.md`):
+- **Kasna** je preč z kódu, dát aj testov. V Labe body kreslia otáznik.
+- **Každá podstránka má scénu:**
+  - projekt: plát pod tabuľkou;
+  - `/laby`: symboly Credo;
+  - `/lab` a poznámky: otáznik;
+  - lab: body vo svojej farbe.
+- **GSAP:**
+  - nadpisy sa skladajú z písmen;
+  - čísla a popisky sa dekódujú;
+  - menu sa dekóduje pri prejdení myšou.
 
 **Ďalšie kroky:** drobnosti z finálnej kontroly (pozri sekciu 4 a kartu „Doladiť drobnosti živej scény“). Prípadne slabšie body portrétu na mobile.
 
