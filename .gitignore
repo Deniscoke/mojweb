@@ -28,3 +28,4 @@ docs/web-portfolio-selection.md
 
 # Agent worktrees (local only)
 .claude/worktrees/
+.superpowers/

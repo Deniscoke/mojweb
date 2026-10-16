@@ -19,7 +19,8 @@
     "budget:self-test": "node scripts/check-budget.mjs --self-test",
     "test:e2e": "playwright test",
     "test:e2e:gpu": "playwright test --project=gpu",
-    "lhci": "node scripts/check-lighthouse.mjs"
+    "lhci": "node scripts/check-lighthouse.mjs",
+    "test:unit": "node --test \"tests/unit/*.test.ts\""
   },
   "dependencies": {
     "astro": "^5.14.1"
