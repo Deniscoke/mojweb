@@ -1,4 +1,4 @@
-# HANDOFF — stav projektu (2026-10-16)
+# HANDOFF — stav projektu (2026-10-16, živá scéna)
 
 Tento súbor je odovzdávka pre novú konverzáciu. **Čítaj ho celý, než niečo urobíš.**
 Všetko tu je overené. Čo tu nie je, si over v kóde a nedomýšľaj si to.
@@ -19,27 +19,42 @@ Všetko tu je overené. Čo tu nie je, si over v kóde a nedomýšľaj si to.
 | Vetva | Stav |
 |---|---|
 | `main` | živý web, commit `9c7ade7`. **Nemenený.** |
-| `feat/motion-depth` | 3D a pohybový upgrade, **hotový, otestovaný a pushnutý**, HEAD `b6f1fa8` |
+| `feat/motion-depth` | prvý 3D upgrade (`b6f1fa8`). Denis ho **neschválil**: drobné úpravy, sken v úvode pôsobil mimo, priveľa vrstiev cez seba. **Nemergovať.** |
+| `feat/living-scene` | **nová verzia z `feat/motion-depth`: „živá scéna“**. Hotová, otestovaná, pushnutá. |
 
-**Vercel náhľad** vetvy `feat/motion-depth` (chránený prihlásením do Vercelu, Denisov účet):
-https://mojweb2-1iyf531w2-denis-mitrovics-projects.vercel.app/sk/
+**Vercel náhľad** vetvy `feat/living-scene` (chránený prihlásením do Vercelu, Denisov účet): pozri sekciu 3.
 
-**ČAKÁ SA NA DENISA:** pozrie si náhľad a povie OK, alebo čo zmeniť.
-Po jeho OK: `git checkout main && git merge --no-ff feat/motion-depth && git push`, potom over živý web.
+**ČAKÁ SA NA DENISA:** pozrie si náhľad `feat/living-scene` a povie OK, alebo čo zmeniť.
+Po jeho OK: `git checkout main && git merge --no-ff feat/living-scene && git push`, potom over živý web.
 **Nemerguj do `main` bez jeho výslovného súhlasu.**
 
-## 3. Čo je na `feat/motion-depth` (3D upgrade)
+## 3. Čo je na `feat/living-scene`
 
-Plán: `docs/motion-depth-plan.md` (začína sekciou „As built", ktorá opisuje, v čom sa skutočnosť líši od plánu).
-QA záznam a zdokumentované kompromisy: `docs/motion-depth-qa.md`.
-API: `src/motion/depth/README.md` (hĺbka, pokojný režim, pravidlá pre kompozítor) a `src/motion/ambient/README.md` (WebGL engine skenu).
+Spec: `docs/superpowers/specs/2026-10-16-living-scene-design.md`.
+Plán s rozhodnutiami „as built“: `docs/superpowers/plans/2026-10-16-living-scene.md`.
+API: `src/motion/scene/README.md`, k tomu `src/motion/depth/README.md` (hĺbka, pokojný režim).
 
-- **Úvod, desktop:** skutočný point-cloud sken pavilónu (`kasna.ply`, Denisov RealityScan, už zverejnený ako doklad v Digital Space) stojí vpravo od mena. Pri scrollovaní sa otočí o 120° a mriežka sa sklopí do svietiacej podlahy (`.hero__floor`).
-- **Úvod, mobil:** „scéna" pod úvodom so statickou perspektívnou zemou (`.hero__ground`). Sken stojí na nej a otáča sa o 90°.
-- **Vybraná práca:** na desktope od 80rem je „pás". Projekt v strede obrazovky pri scrollovaní ukáže svoj vrstvený plát. Náhľad za kurzorom sa vyvolá až skutočným pohybom myši. Na mobile sú karty diorámy.
-- **Ostatné sekcie:** jemná hĺbka (CSS scroll timelines), päta zrkadlí čiary z úvodu, Lab má značku v medzere pred nadpisom (nie čiaru cez text).
-- **Prepínač „Pokojný/Calm":** v menu aj v päte, uložený v `localStorage irl:motion = calm`. Platí od prvého vykreslenia a obnoví sa aj z bfcache.
-- **Bezpečnosť** (už je aj na `main`): CSP integrácia `integrations/csp.mjs` (hash inline skriptov), `vercel.json` hlavičky, 404 stránka, ikony a manifest.
+- **Jedna scéna namiesto koláže.** Celá homepage má za obsahom jeden kanvas s poľom bodov. Body sa pri scrolle presúvajú do tvaru sekcie, ktorá je v strede obrazovky:
+  - meno,
+  - 4 symboly Credo (schválené Denisom),
+  - geometria plátu aktívneho projektu (len desktop),
+  - sken kasna v Labe,
+  - voľne plávajúce body medzi sekciami,
+  - šípka ku kontaktu.
+- **Čo sa odstránilo:**
+  - z úvodu mriežky, podlaha, zem a sken;
+  - paralaxa a kurzorové pole na homepage;
+  - náhľad projektu za kurzorom, „pás“ a diorámy;
+  - čítacia hlava v Labe a čiara v kontakte;
+  - engine skenu (`ambient/mount.ts`, `pointScan.ts`, `tools/scan-harness`).
+
+  Popiska skenu je teraz v hlavičke Labu.
+- **Načítanie pri prvom vstupe.** Scéna sa načíta pri prvom pohybe myši, dotyku, scrolle alebo klávese. Bez vstupu sa nič nehýbe. Lighthouse preto vidí homepage ako pred zmenou.
+- **Tiery:**
+  - desktop: WebGL, 16 000 bodov, kurzor body odtláča;
+  - mobil: WebGL, 4 000 bodov;
+  - statický: 2D, jeden snímok na zmenu sekcie. Platí pre pokojný režim, slabé zariadenia a stratu GL kontextu.
+- **Prepínač „Pokojný/Calm“, bezpečnosť a CSP** sa nemenili. Calm prepína scénu za behu.
 
 ### Brány kvality (všetky musia prejsť pred mergom)
 ```
@@ -47,16 +62,24 @@ npx astro check            # 0 errors
 npm run build              # 152 pages
 npm run budget             # rozpočet JS/CSS + lint pravidiel
 npm run budget:self-test
-E2E_STRICT=1 npx playwright test   # 150 passed (systémový Chrome)
+npm run test:unit                  # 19 unit testov (node --test)
+E2E_STRICT=1 npx playwright test   # 155 testov (systémový Chrome)
+npm run test:e2e:gpu               # 4 testy na skutočnej GPU (otvorí okno)
 npm run lhci               # Lighthouse mobile, medián 3 behov
 ```
-Posledné výsledky: e2e 150/150, Lighthouse výkon 96–99, a11y 100, CLS 0, homepage LCP 2,56 s (= pôvodný stav).
+Posledné výsledky (`feat/living-scene`):
+- unit 19/19, e2e 154/155, GPU 4/4;
+- Lighthouse: homepage výkon 96, TBT 0, LCP 2,56 s (= pôvodný stav), ostatné stránky 96–99, a11y 100, CLS 0.
+
+Jeden snapshot (`strata: keyboard`) raz zlyhal na orezanom výreze a potom prešiel 10/10.
 `/en/laby/` TBT občas ukáže ~60 ms. Je to známy šum na hranici FCP, pôvodná verzia ho má tiež (QA note 1). Nie je to regresia.
 
 ### Rozhodnutia, ktoré sa nemajú vracať
 - `depth.css` je **inline na homepage**, inde **linknutý** (preload v head, `<link>` na konci body). Merané v QA note 2.
 - „Duch" ďalšieho projektu na prípadových štúdiách je **odstránený** (17 KB SVG).
-- Načítanie skenu je naplánované v zdieľanom depth runtime (`src/motion/depth/index.ts`), nie v `Hero.astro`. Merané, je to lacnejšie.
+- Scénu si vyžiada `Hero.astro` (udalosť `irl:scene` pri prvom vstupe) a importuje ju depth runtime. Druhý dynamický import by vytiahol preload helper Vite do zdieľaného chunku, čo je +0,08 KB na všetkých ostatných stránkach. Merané.
+- CSS scény a vypnutie zrnitosti sú **v štýle homepage**, nie v `global.css`. Aj 60 B navyše v `global.css` posunulo LCP stránky Splatoo z 2,41 na 2,56 s. Merané.
+- Načítanie scény pri prvom vstupe (nie po načítaní stránky) je meraná nutnosť. Inak mala homepage výkon 86–94 a TBT 134–377 ms.
 - Stropy rozpočtu v `scripts/check-budget.mjs` (home JS 2,65 KB, ostatné 2,1 KB) majú pri sebe zdôvodnenie. Neposúvaj ich bez merania.
 
 ## 4. Otvorené veci pre Denisa
@@ -88,5 +111,5 @@ Posledné výsledky: e2e 150/150, Lighthouse výkon 96–99, a11y 100, CLS 0, ho
 
 ## 7. Prvý krok v novej konverzácii
 
-1. `cd C:\Users\Admin\mojweb && git status && git log --oneline -3` (očakávaj vetvu `feat/motion-depth`, `b6f1fa8` alebo novšiu).
-2. Opýtaj sa Denisa, či si pozrel náhľad a čo na to hovorí.
+1. `cd C:\Users\Admin\mojweb && git status && git log --oneline -3` (očakávaj vetvu `feat/living-scene`).
+2. Opýtaj sa Denisa, či si pozrel náhľad `feat/living-scene` a čo na to hovorí.
