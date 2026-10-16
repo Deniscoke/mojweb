@@ -1,0 +1,192 @@
+/**
+ * THE KINETIC LAYER
+ * =================
+ * Type that moves the way the living scene's points do. Loaded with the
+ * scene on the visitor's first input (src/motion/depth/index.ts), never on
+ * the load path, never under reduced motion.
+ *
+ *   gather   a heading coming into view splits into letters, scattered,
+ *            and they fly together into the word (GSAP SplitText);
+ *   decode   a mono label or number coming into view resolves out of
+ *            scrambled glyphs, like a readout (GSAP ScrambleText);
+ *   hover    navigation links decode again under the pointer or focus.
+ *
+ * Targets are chosen here by selector, not marked up in each component, so
+ * no page carries a byte more HTML for it (on the case studies a few dozen
+ * bytes cost LCP a round trip). `data-kinetic="off"` opts an element out.
+ *
+ * Rules (spec §4): what the visitor has already seen is never hidden or
+ * replayed; one gather plays at a time; every split is reverted to the
+ * original DOM when it lands; scrambles always end on the original text.
+ */
+import { gsap } from 'gsap';
+import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
+import { SplitText } from 'gsap/SplitText';
+import { hasFinePointer, prefersReducedMotion } from '../utils/env';
+import { createGate, seen } from './pick.ts';
+
+gsap.registerPlugin(SplitText, ScrambleTextPlugin);
+
+const GATHER = 'main h2:not(.mono):not(.entry__title), main .project__title, .project-page__next-title';
+const DECODE = [
+  '.section__index',
+  '.project__index',
+  '.what__index',
+  '.about__step-num',
+  '.lab__num',
+  '.entry__num',
+  '.entry__tag',
+  '.lab__tag',
+  '.readout__value',
+  '.block__label',
+  '.project-page__section-label',
+  '.project-page__evidence-label',
+  '.note__section-label',
+].join(', ');
+const HOVER = '.nav__link, .footer__top';
+const GLYPHS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ#/·';
+
+/** Only plain text can be scrambled: markup inside would be flattened. */
+const isLeaf = (el: Element) => el.children.length === 0 && (el.textContent ?? '').trim().length > 0;
+const off = (el: Element) => el.closest('[data-kinetic="off"]') !== null;
+
+export function initKinetic(): () => void {
+  if (prefersReducedMotion()) return () => {};
+  const fine = hasFinePointer();
+  const gate = createGate();
+  const cleanups: Array<() => void> = [];
+  const splits = new Set<SplitText>();
+
+  const unseen = <T extends Element>(els: T[]) => {
+    const flags = seen(
+      els.map((el) => el.getBoundingClientRect()),
+      innerHeight,
+    );
+    return els.filter((el, i) => !flags[i] && !off(el));
+  };
+
+  // ---------------------------------------------------------- gather
+  const gatherTargets = unseen([...document.querySelectorAll<HTMLElement>(GATHER)]);
+  const prepared = new Map<HTMLElement, SplitText>();
+
+  /** Below the fold, before it shows: split, and scatter the letters. */
+  const prepare = (el: HTMLElement) => {
+    if (prepared.has(el)) return;
+    // Its own reveal (or its header's) is done off screen, so only the
+    // letters move when it arrives.
+    el.closest('[data-reveal]')?.classList.add('is-revealed');
+    const split = SplitText.create(el, { type: 'words,chars', aria: 'auto' });
+    splits.add(split);
+    prepared.set(el, split);
+    gsap.set(split.chars, {
+      opacity: 0,
+      x: () => gsap.utils.random(-40, 40),
+      y: () => gsap.utils.random(-40, 40),
+      rotate: () => gsap.utils.random(-12, 12),
+      filter: fine ? 'blur(4px)' : 'none',
+    });
+  };
+
+  const land = (el: HTMLElement) => {
+    const split = prepared.get(el);
+    if (!split) return;
+    prepared.delete(el);
+    const done = () => {
+      split.revert();
+      splits.delete(split);
+    };
+    if (!gate.tryStart()) {
+      // Another heading is gathering: this one is simply there.
+      gsap.set(split.chars, { clearProps: 'all' });
+      done();
+      return;
+    }
+    gsap.to(split.chars, {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      rotate: 0,
+      filter: 'blur(0px)',
+      duration: 0.7,
+      ease: 'expo.out',
+      stagger: 0.018,
+      onComplete: () => {
+        done();
+        gate.end();
+      },
+    });
+  };
+
+  if (gatherTargets.length && 'IntersectionObserver' in window) {
+    const near = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && prepare(e.target as HTMLElement)),
+      { rootMargin: '0px 0px 30% 0px' },
+    );
+    const inView = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          const el = e.target as HTMLElement;
+          near.unobserve(el);
+          inView.unobserve(el);
+          prepare(el);
+          land(el);
+        }),
+      { rootMargin: '0px 0px -10% 0px' },
+    );
+    gatherTargets.forEach((el) => {
+      near.observe(el);
+      inView.observe(el);
+    });
+    cleanups.push(() => {
+      near.disconnect();
+      inView.disconnect();
+    });
+  }
+
+  // ---------------------------------------------------------- decode
+  const original = new WeakMap<Element, string>();
+  const decode = (el: HTMLElement, duration = 0.6) => {
+    if (gsap.isTweening(el)) return;
+    const text = original.get(el) ?? el.textContent ?? '';
+    original.set(el, text);
+    gsap.to(el, { duration, scrambleText: { text, chars: GLYPHS, revealDelay: 0.1, speed: 0.6 } });
+  };
+
+  const decodeTargets = unseen([...document.querySelectorAll<HTMLElement>(DECODE)].filter(isLeaf));
+  if (decodeTargets.length && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          io.unobserve(e.target);
+          decode(e.target as HTMLElement);
+        }),
+      { rootMargin: '0px 0px -10% 0px' },
+    );
+    decodeTargets.forEach((el) => io.observe(el));
+    cleanups.push(() => io.disconnect());
+  }
+
+  // ---------------------------------------------------------- hover
+  const hoverTargets = [...document.querySelectorAll<HTMLElement>(HOVER)].filter((el) => isLeaf(el) && !off(el));
+  const onEnter = (e: Event) => decode(e.currentTarget as HTMLElement, 0.45);
+  hoverTargets.forEach((el) => {
+    // The name stays the text, whatever the glyphs say mid-scramble.
+    if (!el.hasAttribute('aria-label')) el.setAttribute('aria-label', (el.textContent ?? '').trim());
+    el.addEventListener('pointerenter', onEnter);
+    el.addEventListener('focus', onEnter);
+  });
+  cleanups.push(() =>
+    hoverTargets.forEach((el) => {
+      el.removeEventListener('pointerenter', onEnter);
+      el.removeEventListener('focus', onEnter);
+    }),
+  );
+
+  return () => {
+    cleanups.forEach((c) => c());
+    splits.forEach((s) => s.revert());
+    splits.clear();
+  };
+}

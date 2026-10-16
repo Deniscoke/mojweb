@@ -106,14 +106,18 @@ const LAZY_CHUNKS = [
   // runtime, morph, shapes and the shared gl.ts; measured 6.4 KB at landing.
   { id: 'scene', match: /^(?:scene|morph|shapes|points|timeline|glyphs|gl)\./, cap: 9 },
   { id: 'scene/fallback', match: /^fallback\./, cap: 1.5 },
+  // The kinetic type (docs/superpowers/specs/2026-10-16-kinetic-site-design.md):
+  // GSAP core + SplitText + ScrambleText + our module, after the first input.
+  // Measured 35.2 KB at landing.
+  { id: 'kinetic', match: /^kinetic\./, cap: 40 },
   { id: 'media/depthPhoto', match: /^depthPhoto\./, cap: 2.0 },
 ];
 
 /**
- * Initial 2.0 + tilt 1.3 + depthPhoto 2.0 + scene 9 + fallback 1.5. The scan
- * engine's mount 1.3 and gl + pointScan 4.5 left with the hero scan.
+ * Initial 2.0 + tilt 1.3 + depthPhoto 2.0 + scene 9 + fallback 1.5 + kinetic 40.
+ * (The scan engine's mount and gl + pointScan left with the hero scan.)
  */
-const TOTAL_NEW_JS_CAP = 15.8;
+const TOTAL_NEW_JS_CAP = 55.8;
 
 const DEPTH_CSS = 'src/styles/depth.css';
 const DEPTH_CSS_CAP = 2.5;
@@ -863,7 +867,7 @@ async function selfTest() {
     ['budget-js', { '_astro/big.js': `export const b="${noise(4000)}";`, '_astro/home.js': `import"./big.js";import("./later.js");` }],
     ['chunk-cap', { '_astro/tilt.AbC123.js': `export const t="${noise(2600)}";`, '_astro/home.js': `import("./tilt.AbC123.js");` }],
     ['lazy-on-initial', { '_astro/tilt.AbC123.js': `export const t=1;`, '_astro/home.js': `import"./tilt.AbC123.js";` }],
-    ['total-js', { '_astro/unreferenced.js': `export const u="${noise(24000)}";` }],
+    ['total-js', { '_astro/unreferenced.js': `export const u="${noise(80000)}";` }],
     ['depth-css', {}, { depthCss: join(work, 'depth-big.css') }],
     ['owner', home({ body: homeBody('<p data-reveal data-depth="rise">x</p>') })],
     ['owner', home({ body: homeBody('<div data-tilt data-magnetic>x</div>') })],

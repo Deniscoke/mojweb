@@ -61,6 +61,8 @@ export function initDepth(): () => void {
   const wake = () => {
     INPUTS.forEach((t) => removeEventListener(t, wake));
     import('../scene/scene.ts').then((m) => m.initScene(), () => {});
+    // The kinetic type (GSAP) comes with it, and never under reduced motion.
+    if (!prefersReducedMotion()) import('../kinetic/kinetic.ts').then((m) => m.initKinetic(), () => {});
   };
   let cancelIdle = () => {};
 
