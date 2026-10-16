@@ -43,6 +43,8 @@ export interface Layout {
   dim: number;
   /** Point size as a share of the default (finer points draw finer detail). */
   dot?: number;
+  /** Vertical centre in clip space (-1 … 1, up), when not the screen's middle. */
+  cy?: number;
 }
 
 /** Below this width the text runs full width, so shapes sit behind it, dimmed. */
@@ -124,6 +126,7 @@ export function blendLayout(a: Layout, b: Layout, t: number): Layout {
   const mix = (x: number, y: number) => x * (1 - e) + y * e;
   const l: Layout = { cx: mix(a.cx, b.cx), scale: mix(a.scale, b.scale), dim: mix(a.dim, b.dim) };
   if (a.dot !== undefined || b.dot !== undefined) l.dot = mix(a.dot ?? 1, b.dot ?? 1);
+  if (a.cy !== undefined || b.cy !== undefined) l.cy = mix(a.cy ?? 0, b.cy ?? 0);
   return l;
 }
 

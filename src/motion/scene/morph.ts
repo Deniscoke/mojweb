@@ -24,6 +24,8 @@ export interface MorphUniforms {
   cx: number;
   scale: number;
   dim: number;
+  /** Vertical centre in clip space; 0 = the screen's middle. */
+  cy?: number;
   /** Ink colour, 0 … 1. */
   color: [number, number, number];
   /** Point size in device px. */
@@ -39,7 +41,7 @@ export interface Morph {
 /**
  * U[0] progress, time, velocity, size
  * U[1] pointer x, y, active, aspect
- * U[2] cx, scale, dim, —
+ * U[2] cx, scale, dim, cy
  * U[3] colour rgb, —
  */
 const VERTEX = `#version 300 es
@@ -55,7 +57,7 @@ vec3 p=mix(F,T,lt);
 float fl=sin(lt*3.14159)*(.12+.5*U[0].z);
 p.xy+=fl*vec2(sin(S*91.+t*.6),cos(S*57.+t*.5));
 p.xy+=.006*vec2(sin(t*.4+S*12.),cos(t*.3+S*7.));
-vec2 c=vec2(U[2].x*asp,0.)+p.xy*U[2].y;
+vec2 c=vec2(U[2].x*asp,U[2].w)+p.xy*U[2].y;
 vec2 d=c-vec2(U[1].x*asp,U[1].y);
 c+=U[1].z*normalize(d+1e-5)*.08*smoothstep(.18,0.,length(d));
 gl_Position=vec4(c.x/asp,c.y,0.,1.);
@@ -112,7 +114,7 @@ export async function createMorph(ctx: GL, n: number): Promise<Morph> {
     },
     draw(u) {
       const aspect = ctx.canvas.width / Math.max(ctx.canvas.height, 1);
-      U.set([u.progress, u.time, u.velocity, u.size, ...u.pointer, aspect, u.cx, u.scale, u.dim, 0, ...u.color, 0]);
+      U.set([u.progress, u.time, u.velocity, u.size, ...u.pointer, aspect, u.cx, u.scale, u.dim, u.cy ?? 0, ...u.color, 0]);
       gl.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(program);

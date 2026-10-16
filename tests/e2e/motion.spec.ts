@@ -72,7 +72,6 @@ test.describe('without JavaScript', () => {
       await page.goto(path);
       expect(await page.evaluate(() => document.documentElement.classList.contains('js'))).toBe(false);
       expect(await page.locator('canvas').count()).toBe(0);
-      await expect(page.locator('.hero__scan-cap')).toBeHidden();
 
       // Every visible piece of text and every image paints at full opacity.
       // Effective opacity multiplies down the tree, so a faded wrapper counts.
@@ -213,7 +212,7 @@ test.describe('reading band (rule 4)', () => {
 // ─────────────────────────────────────────────────────── loading rules
 
 test.describe('what loads where (§5.2, §5.3)', () => {
-  test('touch never requests the tilt module or a desktop scan file @mobile-only', async ({ page }) => {
+  test('touch never requests the tilt module @mobile-only', async ({ page }) => {
     const requested: string[] = [];
     page.on('request', (r) => requested.push(new URL(r.url()).pathname));
     await page.goto(PAGES.home);
@@ -221,7 +220,6 @@ test.describe('what loads where (§5.2, §5.3)', () => {
     await page.mouse.wheel(0, 600);
     await page.waitForTimeout(3500);
     expect(requested.filter((p) => /\/_astro\/tilt\./.test(p))).toEqual([]);
-    expect(requested.filter((p) => /\/assets\/scans\/.*-desktop\.bin$/.test(p))).toEqual([]);
   });
 
   test('a fine pointer gets the tilt module after idle @desktop-only', async ({ page }) => {

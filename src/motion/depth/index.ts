@@ -22,6 +22,8 @@ import { hasFinePointer, idle, onMotionPreferenceChange, prefersReducedMotion } 
 
 /** If a page never announces its reveal, depth still starts, but never under a raised cover. */
 const REVEAL_FALLBACK_MS = 4000;
+/** Any of these is a visitor's first input. */
+const INPUTS = ['pointermove', 'pointerdown', 'wheel', 'touchstart', 'keydown', 'scroll'];
 const IDLE_TIMEOUT_MS = 2000;
 
 /** Calls `run` once the page has revealed itself. Returns a cancel function. */
@@ -51,12 +53,28 @@ export function initDepth(): () => void {
   let disposed = false;
   let loading = false;
   let teardownTilt: (() => void) | null = null;
-  // The living scene's chunk. The homepage's hero asks for it with
-  // `irl:scene` on the visitor's first input (see Hero.astro); it lives here
-  // because this is the one entry with lazy imports, so Vite's preload
-  // helper stays inside this chunk instead of becoming one more request on
-  // every page. Calm and the page's lifetime are the scene's own business.
-  document.addEventListener('irl:scene', () => import('../scene/scene.ts').then((m) => m.initScene(), () => {}), { once: true });
+  // The living scene arrives with the visitor's first input after the
+  // reveal (a mouse move, a touch, a scroll, a key), never on load: nothing
+  // moves on its own, and none of it is on the load path LCP and TBT are
+  // measured on. The imports live here because this is the one entry with
+  // lazy imports, so Vite's preload helper stays inside this chunk.
+  const wake = () => {
+    INPUTS.forEach((t) => removeEventListener(t, wake));
+    import('../scene/scene.ts').then((m) => m.initScene(), () => {});
+    // The kinetic type (GSAP) follows in the next idle moment, never under
+    // reduced motion: evaluating GSAP is one ~25 ms task (150 ms at 6x), so it
+    // must not land on top of the input that woke the page.
+    if (!prefersReducedMotion())
+      idle(
+        () =>
+          import('../kinetic/kinetic.ts').then((m) => {
+            // Reduced motion switched on mid-visit stops it: splits revert.
+            const stop = m.initKinetic();
+            const off = onMotionPreferenceChange((calm) => calm && (stop(), off()));
+          }, () => {}),
+        1500,
+      );
+  };
   let cancelIdle = () => {};
 
   const wantsTilt = () =>
@@ -93,6 +111,7 @@ export function initDepth(): () => void {
   const press = document.querySelector('.press') !== null;
 
   const cancelReveal = afterReveal(() => {
+    if (document.querySelector('[data-scene]')) INPUTS.forEach((t) => addEventListener(t, wake, { passive: true }));
     cancelIdle = idle(() => {
       booted = true;
       if (press) document.addEventListener('touchstart', noop, { passive: true });

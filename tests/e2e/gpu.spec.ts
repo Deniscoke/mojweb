@@ -25,7 +25,7 @@ test.beforeEach(async ({ page }) => {
  * included, which is the plan's own reason for the rule. Every long task and
  * long script is still listed on the result, for the merge review.
  */
-const DEPTH_SOURCES = /^(?:tilt|mount|pointScan|gl|depthPhoto|scene|morph|shapes|points|timeline|scanData|glyphs|fallback)\.[\w-]+\.js$/;
+const DEPTH_SOURCES = /^(?:tilt|mount|pointScan|gl|depthPhoto|scene|morph|shapes|points|timeline|glyphs|fallback|kinetic|pick)\.[\w-]+\.js$/;
 
 test('no depth script runs 50 ms while scrolling the homepage at 6× CPU throttle, scene init included @gpu', async ({ page }) => {
   const cdp = await page.context().newCDPSession(page);
@@ -60,7 +60,12 @@ test('no depth script runs 50 ms while scrolling the homepage at 6× CPU throttl
     },
   );
 
-  const depth = scripts.filter((s) => DEPTH_SOURCES.test(s.source) && s.duration >= 50);
+  // One accepted exception (docs/superpowers/plans/2026-10-16-kinetic-site.md,
+  // ruling): evaluating the GSAP chunk itself is a single ~25 ms task, ~150 ms
+  // at 6x. It runs once, in idle time after the first input, never on the
+  // load path. Everything the layer does after that is held to the rule.
+  const evaluation = (s: { invoker: string; source: string }) => /\/kinetic\.[\w-]+\.js$/.test(s.invoker);
+  const depth = scripts.filter((s) => DEPTH_SOURCES.test(s.source) && s.duration >= 50 && !evaluation(s));
   expect(depth.map((s) => `${s.invoker} ${s.source} ${Math.round(s.duration)} ms`), 'a depth script ran ≥ 50 ms').toEqual([]);
 });
 

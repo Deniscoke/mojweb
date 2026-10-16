@@ -1,6 +1,6 @@
 /**
  * The scene's drawn marks, as SVG path data in a 100 × 100 box, stroked.
- * Credo: Build / Teach / Move / Explore.
+ * Credo: Build / Teach / Move / Explore. Lab: the question mark.
  */
 export const CREDO = {
   /** Three bricks, laid. */
@@ -13,3 +13,5 @@ export const CREDO = {
   explore: 'M50 14a36 36 0 1 0 .01 0zM50 28l9 22-9 22-9-22z',
 } as const;
 
+/** "Open questions": the hook and its dot, drawn as two strokes. */
+export const QUESTION = 'M30 34c0-14 10-22 20-22s20 8 20 20c0 12-12 15-18 22-3 4-2 9-2 14M50 84v4';

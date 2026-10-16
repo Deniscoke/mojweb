@@ -13,10 +13,10 @@
  */
 import { createGL, type GL } from '../ambient/gl';
 import { canAffordGL, createLoop, fontsReady, hasFinePointer, idle, onMotionPreferenceChange, prefersReducedMotion, renderScale } from '../utils/env';
-import { CREDO } from './glyphs.ts';
+import { CREDO, QUESTION } from './glyphs.ts';
 import { createMorph, type MorphUniforms } from './morph.ts';
 import { scatter } from './points.ts';
-import { imageShape, pathsShape, rasterize, scanShape, svgShape, textShape, type Raster } from './shapes.ts';
+import { imageShape, pathsShape, rasterize, svgShape, textShape, type Raster } from './shapes.ts';
 import { blendLayout, computeAnchors, follow, layoutFor, resolve, type Anchor, type Layout, type Pose, type SceneEntry, type Side } from './timeline.ts';
 
 export type Tier = 'desktop' | 'mobile' | 'static';
@@ -47,10 +47,20 @@ export function initScene(): () => void {
   const sections = [...document.querySelectorAll<HTMLElement>('[data-scene]')];
   if (sections.length === 0) return () => {};
 
-  let tier = pickTier();
+  // A loaded embed (a 3D site in an iframe) keeps the GPU: the scene draws in 2D.
+  let tier: Tier = document.querySelector('[data-embed][data-loaded]') ? 'static' : pickTier();
   const n = COUNT[tier];
   const fine = tier === 'desktop';
   root.dataset.sceneTier = tier;
+
+  // The canvas style and the grain switch-off arrive with the scene, so no
+  // page carries their bytes in its HTML (on the case studies a few dozen
+  // bytes cost LCP a round trip). style-src allows inline styles.
+  const style = document.createElement('style');
+  style.textContent =
+    '.scene{position:fixed;inset:0;inline-size:100%;block-size:100%;z-index:-1;pointer-events:none}' +
+    'html[data-scene-tier] body::after{content:none}';
+  document.head.append(style);
 
   let canvas = document.createElement('canvas');
   canvas.className = 'scene';
@@ -72,8 +82,9 @@ export function initScene(): () => void {
     loop.start();
   };
   // On a phone the project cards show their own plates; the scene drifts behind them.
+  // A project without a plate (a photo or an embed leads its page) drifts.
   const shape = (id: string) =>
-    (innerWidth < 992 && id.startsWith('work:') ? drift : shapes.get(id)) ?? fallbackShape;
+    (id.startsWith('work:') && (innerWidth < 992 || !shapes.has(id)) ? drift : shapes.get(id)) ?? fallbackShape;
 
   const detail = DETAIL[tier];
   const raster: Raster = (draw, w = 512, h = 256) => rasterize(draw, Math.round(w * detail), Math.round(h * detail));
@@ -86,6 +97,7 @@ export function initScene(): () => void {
    */
   const queue: Array<() => void> = [
     () => put('credo', pathsShape(Object.values(CREDO), n, 3, raster)),
+    () => put('question', pathsShape([QUESTION], n, 4, raster)),
   ];
   let cancelSlice = () => {};
   let slicing = false;
@@ -112,7 +124,10 @@ export function initScene(): () => void {
     platesQueued = true;
     sections.forEach((el, i) => {
       const id = el.dataset.scene!;
-      const svg = el.querySelector<SVGSVGElement>('svg[data-visual]');
+      // `data-scene-source`: the plate lives in another element (the case
+      // study's head draws the plate shown below it).
+      const host = el.dataset.sceneSource ? document.querySelector(el.dataset.sceneSource) : el;
+      const svg = host?.querySelector<SVGSVGElement>('svg[data-visual]');
       if (!id.startsWith('work:') || !svg) return;
       const box = svg.viewBox.baseVal;
       const long = Math.max(box.width, box.height) || 1;
@@ -151,30 +166,11 @@ export function initScene(): () => void {
       .then(() => !disposed && put('portrait', imageShape(img, img.naturalWidth, img.naturalHeight, n, 5, raster)))
       .catch(nameShape);
   } else nameShape();
-  const lab = sections.find((el) => el.dataset.scene === 'scan');
-  const scanUrl = lab?.dataset[fine ? 'desktop' : 'mobile'];
-  if (lab && scanUrl && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((e) => e.isIntersecting)) return;
-        io.disconnect();
-        fetch(scanUrl, { priority: 'low' } as RequestInit)
-          .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(r.status)))
-          .then((buf) => !disposed && put('scan', scanShape(buf, n, 6)))
-          .catch(() => {
-            /* No scan: the Lab keeps the scatter. */
-          });
-      },
-      { rootMargin: '200% 0px' },
-    );
-    io.observe(lab);
-    cancels.push(() => io.disconnect());
-  }
 
   // ------------------------------------------------------------ anchors
   let anchors: Anchor[] = [];
   /** Per-section placement overrides (`data-scene-x`, `data-scene-scale`), wide screens only. */
-  const placement = new Map<string, { cx?: number; scale?: number }>();
+  const placement = new Map<string, { cx?: number; cy?: number; scale?: number }>();
   const sideOf = new Map<string, Side>();
   const dotOf = new Map<string, number>();
   for (const el of sections) {
@@ -183,13 +179,20 @@ export function initScene(): () => void {
     const cx = parseFloat(el.dataset.sceneX ?? '');
     const sc = parseFloat(el.dataset.sceneScale ?? '');
     const side = el.dataset.sceneSide as Side;
-    placement.set(el.dataset.scene!, { ...(isFinite(cx) && { cx }), ...(isFinite(sc) && { scale: sc }) });
+    const cy = parseFloat(el.dataset.sceneY ?? '');
+    placement.set(el.dataset.scene!, { ...(isFinite(cx) && { cx }), ...(isFinite(cy) && { cy }), ...(isFinite(sc) && { scale: sc }) });
     if (!sideOf.has(el.dataset.scene!)) sideOf.set(el.dataset.scene!, SIDES.includes(side) ? side : 'center');
   }
   /** Where shape `id` stands on this screen. */
   const layoutOf = (id: string): Layout => {
+    // A project that drifts (no plate, or a phone) drifts across the whole
+    // screen, not squeezed into the plate's corner.
+    if (id.startsWith('work:') && (innerWidth < 992 || !shapes.has(id))) return layoutFor('full', innerWidth);
     const side = sideOf.get(id) ?? 'center';
-    const l = { ...layoutFor(side, innerWidth), ...(innerWidth >= 992 && side !== 'full' ? placement.get(id) : undefined) };
+    const place = side !== 'full' ? placement.get(id) : undefined;
+    // Wide screens take the whole placement; phones only its size (the shape
+    // stays centred behind the text there, but never larger than asked).
+    const l = { ...layoutFor(side, innerWidth), ...(innerWidth >= 992 ? place : place?.scale !== undefined ? { scale: Math.min(place.scale * 1.6, 0.9) } : undefined) };
     // A shape never spills past the screen's sides (the drifting field may).
     if (side !== 'full') l.scale = Math.min(l.scale, (innerWidth / innerHeight) * 0.92);
     const dot = dotOf.get(id);
@@ -254,8 +257,12 @@ export function initScene(): () => void {
   };
 
   const useGL = () => {
+    if (disposed || tier === 'static') return;
     ctx = createGL(canvas, { lost: () => useFallback(), restored: () => {} });
-    if (!ctx) return useFallback();
+    if (!ctx) {
+      console.warn('[scene] WebGL2 unavailable or refused; drawing in 2D.');
+      return useFallback();
+    }
     size();
     const mine = ctx;
     new Promise<void>((r) => cancels.push(idle(r)))
@@ -267,7 +274,11 @@ export function initScene(): () => void {
         uploaded = '';
         loop.start();
       },
-      () => useFallback(),
+      (err) => {
+        if (ctx !== mine) return;
+        console.warn('[scene] shader setup failed; drawing in 2D.', err);
+        useFallback();
+      },
     );
   };
 
@@ -288,7 +299,8 @@ export function initScene(): () => void {
   let velocity = 0;
   const pointer: [number, number, number] = [0, 0, 0];
   let lastPointer = 0;
-  const ink = parseColor(getComputedStyle(document.body).color);
+  // `--scene-ink` lets a page tint its points (a lab in its own colour).
+  const ink = parseColor(getComputedStyle(sections[0]).getPropertyValue('--scene-ink').trim() || getComputedStyle(document.body).color);
 
   const loop = createLoop((dt, now) => {
     const target = resolve(anchors, window.scrollY);
@@ -344,7 +356,8 @@ export function initScene(): () => void {
       const w = (half[0] * layout.scale * innerHeight) / 2;
       const h = (half[1] * layout.scale * innerHeight) / 2;
       const x = ((layout.cx + 1) / 2) * innerWidth;
-      canvas.dataset.sceneRect = [x - w, innerHeight / 2 - h, 2 * w, 2 * h].map(Math.round).join(',');
+      const y = ((1 - (layout.cy ?? 0)) / 2) * innerHeight;
+      canvas.dataset.sceneRect = [x - w, y - h, 2 * w, 2 * h].map(Math.round).join(',');
     } else delete canvas.dataset.sceneRect;
     // A still painter draws only when what it shows has changed.
     const frame = `${key}@${innerWidth}x${innerHeight}`;
@@ -374,6 +387,20 @@ export function initScene(): () => void {
     loop.start();
   };
   const onHide = () => loop.stop();
+  // createLoop stops in a hidden tab; coming back, points mid-flight carry on.
+  const onVisible = () => {
+    if (!document.hidden) loop.start();
+  };
+  // A phone's URL bar changes the window's height without resizing the body.
+  let resizeTimer = 0;
+  const onResize = () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      measure();
+      size();
+      loop.start();
+    }, 150);
+  };
   const onShow = (e: PageTransitionEvent) => {
     if (!e.persisted) return;
     measure();
@@ -383,9 +410,15 @@ export function initScene(): () => void {
   if (fine) addEventListener('pointermove', onPointer, { passive: true });
   addEventListener('pagehide', onHide);
   addEventListener('pageshow', onShow);
+  document.addEventListener('visibilitychange', onVisible);
+  addEventListener('resize', onResize, { passive: true });
+  // A loaded embed (Splatoo's 3D viewer) gets the GPU to itself: the scene
+  // goes on in 2D.
+  const onEmbed = () => tier !== 'static' && useFallback();
+  document.addEventListener('irl:embed', onEmbed);
   const offPreference = onMotionPreferenceChange((calm) => {
     if (calm && tier !== 'static') useFallback();
-    else if (!calm && tier === 'static' && pickTier() !== 'static') {
+    else if (!calm && tier === 'static' && pickTier() !== 'static' && !document.querySelector('[data-embed][data-loaded]')) {
       // Calm off: back to WebGL, on a canvas that never held a 2D context.
       painter?.dispose();
       painter = null;
@@ -409,16 +442,23 @@ export function initScene(): () => void {
     removeEventListener('pointermove', onPointer);
     removeEventListener('pagehide', onHide);
     removeEventListener('pageshow', onShow);
+    document.removeEventListener('visibilitychange', onVisible);
+    removeEventListener('resize', onResize);
+    document.removeEventListener('irl:embed', onEmbed);
+    clearTimeout(resizeTimer);
     loop.destroy();
     painter?.dispose();
     ctx?.destroy();
     canvas.remove();
+    style.remove();
     delete root.dataset.sceneTier;
   };
 }
 
-/** `rgb(r, g, b)` / `rgba(...)` → 0 … 1 channels; bone white if unparseable. */
-function parseColor(css: string): [number, number, number] {
+/** `#rrggbb` or `rgb(r, g, b)` / `rgba(...)` → 0 … 1 channels; bone white if unparseable. */
+export function parseColor(css: string): [number, number, number] {
+  const hex = css.match(/^#([0-9a-f]{6})$/i);
+  if (hex) return [0, 2, 4].map((i) => parseInt(hex[1].slice(i, i + 2), 16) / 255) as [number, number, number];
   const m = css.match(/\d+(\.\d+)?/g);
   if (!m || m.length < 3) return [0.91, 0.89, 0.85];
   return [Number(m[0]) / 255, Number(m[1]) / 255, Number(m[2]) / 255];

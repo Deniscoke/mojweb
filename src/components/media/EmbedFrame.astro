@@ -40,9 +40,7 @@ const dict = useTranslations(lang);
  * scene is someone else's application and never sits in a 3D context. The
  * tilt module ignores anything inside `[data-loaded]` too.
  *
- * There is no point-cloud poster here: that needs an approved `poster:<slug>`
- * scan in src/data/scans.ts, and none exists. Without one, the plate is the
- * poster, and there is no GL context on this page to release.
+ * The plate is the poster, and there is no GL context on this page to release.
  */
 const pick = (text: Record<'en' | 'cs' | 'sk', string> | undefined) =>
   text ? ((text as Record<string, string>)[lang] ?? text.en) : undefined;
@@ -208,6 +206,8 @@ const host = new URL(embed.src).host;
         const poster = figure?.querySelector<HTMLElement>('[data-embed-poster]');
         if (!figure || !poster) return;
         figure.dataset.loaded = '';
+        // The living scene steps down to 2D: the GPU belongs to the embed now.
+        document.dispatchEvent(new Event('irl:embed'));
 
         const frame = document.createElement('iframe');
         frame.src = button.dataset.src ?? '';

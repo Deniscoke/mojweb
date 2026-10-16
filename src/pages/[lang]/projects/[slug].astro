@@ -157,7 +157,15 @@ const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
         {dict.project.backToWork}
       </a>
 
-      <header class="project-page__head grid12">
+      <header
+        class="project-page__head grid12"
+        data-scene={`work:${project.slug}`}
+        data-scene-side="right"
+        data-scene-x="0.62"
+        data-scene-y="-0.3"
+        data-scene-scale="0.26"
+        data-scene-source=".project-page__plate"
+      >
         <p class="mono project-page__index">
           <span class="section__index">{String(index).padStart(2, '0')}</span>
           {t(project.category, code)}
@@ -215,7 +223,7 @@ const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
 
       {
         detail?.question && (
-          <section class="project-page__question grid12" data-reveal aria-label="Driving question">
+          <section class="project-page__question grid12" data-reveal aria-label="Driving question" data-scene="drift" data-scene-side="full">
             <p class="project-page__question-text is-say">
               {t(detail.question, untranslated ? 'en' : code)}
             </p>
@@ -298,7 +306,7 @@ const hasOgCard = existsSync(join(process.cwd(), 'public', ogCard));
 
       {
         showNext && (
-          <a class="project-page__next" href={localePath(code, `projects/${next.slug}`)}>
+          <a class="project-page__next" href={localePath(code, `projects/${next.slug}`)} data-scene="drift" data-scene-side="full">
             <span class="mono project-page__next-label">{dict.project.next}</span>
             <span class="project-page__next-approach" data-depth="approach">
               <span class="project-page__next-title is-name">{t(next.title, code)}</span>

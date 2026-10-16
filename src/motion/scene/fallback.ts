@@ -21,7 +21,7 @@ export function createFallback(canvas: HTMLCanvasElement): Painter {
     c.globalAlpha = alpha * 0.6 * (1 - u.dim);
     for (let i = 0; i < pts.length; i += 3) {
       const x = (u.cx * asp + pts[i] * u.scale) / asp;
-      const y = pts[i + 1] * u.scale;
+      const y = (u.cy ?? 0) + pts[i + 1] * u.scale;
       c.fillRect(((x + 1) / 2) * w, ((1 - y) / 2) * h, s, s);
     }
   };

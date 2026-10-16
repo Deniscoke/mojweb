@@ -107,10 +107,10 @@ const contactTitle = copy.detail.contactTitle.replace('{lab}', lab.name);
   <main
     id="main"
     class="lab"
-    style={`--lab-accent:${lab.world.accent}; --lab-second:${lab.world.second}`}
+    style={`--lab-accent:${lab.world.accent}; --lab-second:${lab.world.second}; --scene-ink:${lab.world.accent}`}
   >
     <!-- ================================================================ HERO -->
-    <section class="lab-hero" id="hero">
+    <section class="lab-hero" id="hero" data-scene="drift" data-scene-side="full">
       <div class="wrap lab-hero__inner grid12">
         <p class="mono lab-hero__crumbs" data-reveal>
           <a class="link hit" href={localePath(code, 'laby')}>{copy.detail.crumbs}</a>
