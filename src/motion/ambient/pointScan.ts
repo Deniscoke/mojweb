@@ -1,5 +1,6 @@
 import { clamp, createLoop, hasFinePointer, renderScale } from '../utils/env';
 import { createGL, type GL } from './gl';
+import { parseScanHeader } from '../scene/scanData';
 
 /**
  * POINT SCAN — a real capture, drawn as light
@@ -113,8 +114,7 @@ const SWEEP_MS = 1800;
 const FADE_MS = 900;
 const DISTANCE = 4.5; // camera distance in object radii: gentle perspective
 const EASE_MS = 90; // time constant of every eased value
-const MAGIC = 0x31534d44; // "DMS1", little-endian
-const HEADER = 36;
+const HEADER = 36; // scene/scanData.ts owns the format; the body starts here
 
 // ------------------------------------------------------------- shaders
 
@@ -552,18 +552,16 @@ export function mount(host: HTMLElement, opts: ScanOptions): ScanEngine {
   const loaded = fetch(url, { priority: 'low', signal: abort.signal } as RequestInit)
     .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(r.status)))
     .then((buf) => {
-      const dv = new DataView(buf);
-      count = buf.byteLength >= HEADER && dv.getUint32(0, true) === MAGIC ? dv.getUint32(4, true) : -1;
-      if (count < 0 || buf.byteLength < HEADER + count * 7) throw 0;
-      const f = (at: number) => dv.getFloat32(at, true);
-      const lo = [f(8), f(12), f(16)];
-      const hi = [f(20), f(24), f(28)];
+      const header = parseScanHeader(buf);
+      if (!header) throw 0;
+      const { lo, hi } = header;
+      count = header.count;
       // Normalise to the object's horizontal radius, so every scan arrives
       // at the same size and the anchor alone decides how big it is drawn.
       const inv = 1 / Math.max(-lo[0], hi[0], -lo[2], hi[2], 1e-6);
       U.set([...lo.map((v, i) => ((v + hi[i]) / 2) * inv), Math.max(hi[1] * inv, 1e-3)], 0);
       U.set(lo.map((v, i) => ((hi[i] - v) / 2) * inv), 4);
-      progressive = (dv.getUint32(32, true) & 1) === 1;
+      progressive = header.progressive;
       drawCount = count;
       return buf;
     });
