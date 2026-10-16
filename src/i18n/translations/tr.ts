@@ -169,4 +169,10 @@ export const tr: Dictionary = {
     languageLabel: 'Dili değiştir',
     workingTranslation: 'Bu çeviri bir taslaktır.',
   },
+  motion: {
+    calm: 'Sakin hareket',
+    calmShort: 'Sakin',
+    calmSystem: 'Sakin (sistem ayarı)',
+    nextPage: 'Bir sonraki sayfada tamamen geçerli olur.',
+  },
 };

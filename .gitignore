@@ -25,3 +25,7 @@ artifacts/
 # Kept on disk, never published.
 docs/web-projects-review.md
 docs/web-portfolio-selection.md
+
+# Agent worktrees (local only)
+.claude/worktrees/
+.superpowers/

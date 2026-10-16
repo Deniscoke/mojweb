@@ -169,4 +169,10 @@ export const es: Dictionary = {
     languageLabel: 'Cambiar idioma',
     workingTranslation: 'Esta traducción es un borrador de trabajo.',
   },
+  motion: {
+    calm: 'Movimiento en calma',
+    calmShort: 'Calma',
+    calmSystem: 'Calma (ajuste del sistema)',
+    nextPage: 'Se aplica del todo en la siguiente página.',
+  },
 };

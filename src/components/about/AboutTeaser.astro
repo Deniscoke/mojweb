@@ -1,4 +1,6 @@
 ---
+import DepthPhoto from '~/components/media/DepthPhoto.astro';
+import { photosFor } from '~/data/photos';
 import { useTranslations } from '~/i18n';
 
 interface Props {
@@ -16,11 +18,24 @@ const dict = useTranslations(lang);
  * (education → experimentation → technology → products), shown untranslated
  * on every locale and describing a story the text no longer tells; it now
  * comes from the dictionary like every other visible word.
+ *
+ * DEPTH (docs/motion-depth-plan.md §3.7). Reading progress through the
+ * section *is* the arc: a hairline under the strip fills from the first area
+ * to the last as you read down. It is bone, not signal orange, and it exists
+ * only where it can move; under Calm the strip is exactly today's.
+ *
+ * PHOTOGRAPHS. Denis's own frames (circus, snowboard) go in the registry in
+ * src/data/photos.ts under `about`. Until there is one, `DepthPhoto` renders
+ * nothing and this section is today's layout to the pixel. With one, it
+ * stands beside the pull quote on a desktop (columns 8–12, 4:5) and runs full
+ * bleed between the quote and the prose on a phone. The quote and the prose
+ * stay flat either way.
  */
 const arc = dict.about.arc;
+const hasPhotos = photosFor('about', lang).length > 0;
 ---
 
-<section class="section section--lg about" id="about" aria-labelledby="about-title">
+<section class="section section--lg about" id="about" data-scene="drift" data-scene-side="full" aria-labelledby="about-title">
   <div class="wrap">
     <header class="section__head grid12" data-reveal>
       <p class="mono section__label">
@@ -32,21 +47,26 @@ const arc = dict.about.arc;
       </div>
     </header>
 
-    <ol class="about__arc" role="list" data-reveal>
-      {
-        arc.map((step, i) => (
-          <li class="about__step">
-            <span class="mono about__step-num">{String(i + 1).padStart(2, '0')}</span>
-            <span class="mono about__step-name">{step}</span>
-          </li>
-        ))
-      }
-    </ol>
+    <div class="about__track">
+      <ol class="about__arc" role="list" data-reveal>
+        {
+          arc.map((step, i) => (
+            <li class="about__step">
+              <span class="mono about__step-num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="mono about__step-name">{step}</span>
+            </li>
+          ))
+        }
+      </ol>
+      <span class="about__progress" aria-hidden="true"></span>
+    </div>
 
-    <div class="about__body grid12">
+    <div class:list={['about__body', 'grid12', { 'about__body--photo': hasPhotos }]}>
       <blockquote class="about__pull is-say" data-reveal>
         <p>{dict.about.pull}</p>
       </blockquote>
+
+      <DepthPhoto placement="about" lang={lang} bleed class="about__photo" />
 
       <div class="about__prose" data-reveal style="--reveal-delay:120ms">
         {dict.about.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
@@ -56,11 +76,18 @@ const arc = dict.about.arc;
 </section>
 
 <style>
+  /* The strip and its progress hairline. The margin that used to sit under
+     the strip sits under this wrapper, so the layout is unchanged. */
+  .about__track {
+    position: relative;
+    margin-block-end: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
   .about__arc {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--s-4) var(--col-gap);
-    margin: 0 0 clamp(2.5rem, 6vw, 4.5rem);
+    margin: 0;
     padding: 0;
   }
 
@@ -80,6 +107,11 @@ const arc = dict.about.arc;
     letter-spacing: var(--tr-mono);
   }
 
+  /* Absent at rest: today's strip has no such line. */
+  .about__progress {
+    display: none;
+  }
+
   .about__body {
     row-gap: clamp(2rem, 5vw, 3rem);
   }
@@ -90,6 +122,10 @@ const arc = dict.about.arc;
     font-size: var(--t-display);
     max-inline-size: 20ch;
     text-wrap: balance;
+  }
+
+  .about__body :global(.about__photo) {
+    grid-column: 1 / -1;
   }
 
   .about__prose {
@@ -115,6 +151,70 @@ const arc = dict.about.arc;
 
     .about__prose {
       grid-column: 8 / span 5;
+    }
+
+    /*
+     * With a photograph the right-hand column belongs to it, beside the
+     * quote, and the prose moves under the quote on the left: the quote and
+     * the prose still read top to bottom, the picture runs alongside both.
+     */
+    .about__body--photo .about__pull {
+      grid-row: 1;
+    }
+
+    .about__body--photo :global(.about__photo) {
+      grid-column: 8 / span 5;
+      grid-row: 1 / span 2;
+    }
+
+    .about__body--photo .about__prose {
+      grid-column: 1 / span 6;
+      grid-row: 2;
+    }
+  }
+
+  /* ---------------------------------------------------- reading progress */
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      :global(:root:not([data-calm])) .about {
+        view-timeline: --about;
+      }
+
+      /* The track: a faint rule a little under the strip, inside the margin
+         that was already there. */
+      :global(:root:not([data-calm])) .about__progress {
+        display: block;
+        position: absolute;
+        inset-inline: 0;
+        inset-block-start: calc(100% + var(--s-4));
+        block-size: 1px;
+        background-color: var(--c-line);
+        pointer-events: none;
+      }
+
+      /* The fill: bone, drawn from the first area to the last as the section
+         is read, from `cover 10%` to `cover 70%`. One composited layer. */
+      :global(:root:not([data-calm])) .about__progress::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-color: var(--c-bone-dim);
+        transform-origin: left center;
+        animation: about-progress linear both;
+        animation-timeline: --about;
+        animation-range: cover 10% cover 70%;
+      }
+    }
+  }
+
+  @keyframes about-progress {
+    from {
+      scale: 0 1;
+    }
+
+    to {
+      scale: 1 1;
     }
   }
 </style>

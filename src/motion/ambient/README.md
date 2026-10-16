@@ -1,34 +1,53 @@
-# `motion/ambient/` — reserved
+# `motion/ambient/` — the GL wrapper
 
-Nothing ships here in v0.1, and that is a decision rather than an omission.
+`gl.ts` is the smallest wrapper that keeps one WebGL2 context honest:
 
-The page texture is a single static SVG grain plate painted by CSS
-(`styles/global.css`, `body::after`). It is rasterised once and never
-animated, which buys the "there is something alive here" feeling for zero
-frames per second.
+- a context that refuses to exist on software or blocklisted GPUs
+  (`failIfMajorPerformanceCaveat`);
+- shader linking that never stalls the main thread on a status query;
+- `snapshotTo2D()`, to leave a still image behind;
+- a `destroy()` that really gives the context back.
 
-A WebGL or canvas ambient layer (`shaderHero`, `ambientBackground`) belongs
-here when it earns its place. Any module added to this folder must satisfy
-the same contract, because these are the effects that quietly ruin a site:
+`liveContexts()` counts what is still held; the e2e harness reads it.
 
-```ts
-export interface AmbientModule {
-  /** Must return a no-op teardown if the environment cannot support it. */
-  mount(host: HTMLElement): () => void;
-}
+Its one user is the living scene (`src/motion/scene/`, see its README). The
+hero scan engine that used to live here (`mount.ts`, `pointScan.ts`, the
+`tools/scan-harness/` page) was removed on 2026-10-16, when Denis's scan
+moved into the scene's Lab shape; it is in git at `b6f1fa8` if a poster
+viewer is ever wanted again.
+
+The page texture on every other page is still the static SVG grain plate
+in `styles/global.css` (`body::after`). The homepage turns it off: the
+scene draws its grain in its own fragment shader.
+
+## Scan files
+
+`public/assets/scans/<id>-<hash>-{desktop,mobile}.bin`, little-endian:
+
+| Offset | Type | Field |
+| --- | --- | --- |
+| 0 | `char[4]` | `DMS1` |
+| 4 | `uint32` | point count |
+| 8 | `float32×3` | bounds min (m, Y up, centred on x/z, base at y = 0) |
+| 20 | `float32×3` | bounds max |
+| 32 | `uint32` | flags: bit 0 = first ⌈n/2⌉ points are an even subsample; bit 1 = luminance measured |
+| 36 | `int16×3×n` | positions, normalised to the bounds |
+| … | `uint8×n` | luminance |
+
+`src/motion/scene/scanData.ts` reads it (unit-tested in
+`tests/unit/scanData.test.ts`). Budgets are raw bytes:
+desktop ≤ 70 000, mobile ≤ 28 000.
+
+To rebuild (Denis's machine; the 148 MB source is never committed):
+
+```sh
+node scripts/build-scans.mjs                      # kasna.ply → files + scans.ts block
+node scripts/build-scans.mjs --preview scan.png   # also a quick orthographic check image
 ```
 
-Non-negotiables for anything in this folder:
-
-1. **Feature-detect, then fall back.** No WebGL context, no `OffscreenCanvas`,
-   no module. The page must look deliberate without it, not broken.
-2. **Respect `prefers-reduced-motion`.** Render one static frame or nothing.
-3. **Pause when invisible.** Use `whileVisible()` from `../utils/env`, which
-   also stops on `visibilitychange`.
-4. **Cap the pixel ratio.** Use `renderScale()` — never `devicePixelRatio`
-   raw. A 3× phone screen will render 9× the pixels and thermally throttle.
-5. **Clean up completely.** Cancel the loop, remove listeners, and call
-   `loseContext()` on the WebGL context. Browsers allow a small, finite number
-   of live contexts per page.
-6. **Skip it on small or low-power devices** unless it is the mobile
-   interpretation of the effect rather than the desktop one shrunk down.
+Every shipped point is one of the capture's own vertices, picked one per
+voxel by a fixed hash. Nothing is averaged or generated. A source whose PLY
+header does not say RealityScan needs `--own-capture`, which is Denis
+confirming he captured it. `Michel Rodange monument.ply` in the same folder
+is an **Artec Group export under CC-BY 3.0**, not his capture, so it is not
+evidence under rule 1.

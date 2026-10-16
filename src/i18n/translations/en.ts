@@ -168,4 +168,10 @@ export const en: Dictionary = {
     languageLabel: 'Change language',
     workingTranslation: 'This translation is a working draft.',
   },
+  motion: {
+    calm: 'Calm motion',
+    calmShort: 'Calm',
+    calmSystem: 'Calm (system setting)',
+    nextPage: 'Takes full effect on the next page.',
+  },
 };

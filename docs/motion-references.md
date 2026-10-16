@@ -280,3 +280,19 @@ shader, raymarching or generative-visual note. Then the effect stops being
 decoration and becomes the artefact, and the rules already written down for it
 (lazy-load, capability gate, bounded DPR, pause when hidden, reduced-motion
 fallback, readable without it) apply as stated.
+
+## After the living scene (2026-10-16)
+
+The homepage now has a single moving system, the living scene
+(`src/motion/scene/`). The following homepage uses of these references
+were removed with it:
+
+- the contact stroke (reference 07);
+- the Work cursor preview and its band;
+- the hero floor;
+- the Lab reading head.
+
+Reference 07 lives on in the project plates' own line drawing, and the
+scene samples those plates' geometry. Reference 04 (the gooey morph) lives
+on at the language gate. Reference 06's DPR clamp is the scene's
+`renderScale()`. None of the scene's code is taken from a pen.

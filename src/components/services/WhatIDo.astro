@@ -7,9 +7,17 @@ interface Props {
 
 const { lang } = Astro.props;
 const dict = useTranslations(lang);
+
+/**
+ * DEPTH (docs/motion-depth-plan.md §3.5). Two planes, and only decoration
+ * moves between them. Each item's top rule draws itself in as the item
+ * arrives, and the mono numeral sits on a farther plane, sliding a little
+ * slower than the row (at most 1.8vh either way, less on a phone). Titles and
+ * body copy never move and never fade. Under Calm this is today's list.
+ */
 ---
 
-<section class="section section--sm what" id="what" aria-labelledby="what-title">
+<section class="section section--sm what" id="what" data-scene="drift" data-scene-side="full" aria-labelledby="what-title">
   <div class="wrap">
     <header class="section__head grid12" data-reveal>
       <p class="mono section__label">
@@ -25,8 +33,10 @@ const dict = useTranslations(lang);
     <ol class="what__list" role="list">
       {
         dict.services.items.map((item, index) => (
-          <li class="what__item" data-reveal style={`--reveal-delay:${index * 80}ms`}>
-            <span class="mono what__index">{String(index + 1).padStart(2, '0')}</span>
+          <li class="what__item" data-reveal data-scrub="rule" style={`--reveal-delay:${index * 80}ms`}>
+            <span class="mono what__index" data-depth="drift">
+              {String(index + 1).padStart(2, '0')}
+            </span>
             <h3 class="what__title">{item.title}</h3>
             <p class="what__body">{item.body}</p>
           </li>
@@ -45,20 +55,32 @@ const dict = useTranslations(lang);
     counter-reset: none;
   }
 
+  /*
+   * The top rule is the scrubbed hairline (styles/depth.css). It lives on the
+   * item's own `::before`, so it shares no property with the reveal, which
+   * owns the item's transform and opacity. The border stays as transparent
+   * space, so the layout is exactly today's, and the hairline sits on it.
+   */
   .what__item {
     display: grid;
     grid-template-columns: 3rem minmax(0, 1fr);
     gap: var(--s-3) var(--s-4);
     padding-block: var(--s-6);
-    border-block-start: 1px solid var(--c-line);
+    border-block-start: 1px solid transparent;
     align-items: start;
+  }
+
+  .what__item::before {
+    inset-block-start: -1px;
   }
 
   .what__item:last-child {
     border-block-end: 1px solid var(--c-line);
   }
 
+  /* The far plane. Decorative only, and a block, so the drift has a box. */
   .what__index {
+    --drift: -0.6;
     color: var(--c-bone-faint);
     padding-block-start: 0.45em;
   }

@@ -168,4 +168,10 @@ export const cs: Dictionary = {
     languageLabel: 'Změnit jazyk',
     workingTranslation: 'Tento překlad je pracovní verze.',
   },
+  motion: {
+    calm: 'Klidný pohyb',
+    calmShort: 'Klidný',
+    calmSystem: 'Klidný (podle systému)',
+    nextPage: 'Naplno se projeví na další stránce.',
+  },
 };

@@ -51,6 +51,23 @@ const readout = [
   { key: copy.readout.formatsKey, value: copy.readout.formatsValue },
   { key: copy.readout.yearKey, value: SCHOOL_YEAR },
 ];
+
+/**
+ * DEPTH (motion depth plan §3.13). A teacher reads this page to decide, so
+ * depth goes only where it can't get in the way:
+ *
+ *   lab cards   small layered objects. With a mouse the card leans (≤ 6°),
+ *               its plate's accent sheet lifts off in the lab's colour, and
+ *               the lab's glyph floats forward with it; the words stay on the
+ *               card. On a phone each plate comes apart as it crosses the
+ *               screen (the Selected Work diorama) and the card presses under
+ *               a thumb.
+ *   formats     the rules between rows draw themselves open as they arrive.
+ *   group       "6–10" sits on a nearer plane and slides a little faster.
+ *
+ * Calm, reduced motion and browsers without scroll timelines get this page
+ * exactly as it was.
+ */
 ---
 
 <BaseLayout
@@ -132,12 +149,12 @@ const readout = [
                 data-draw-group
                 style={`--reveal-delay:${index * 70}ms; --lab-accent:${lab.world.accent}; --lab-second:${lab.world.second}`}
               >
-                <a class="lab-card__link" href={localePath(code, `laby/${lab.slug}`)}>
+                <a class="lab-card__link press" href={localePath(code, `laby/${lab.slug}`)} data-tilt>
                   <div class="lab-card__plate">
-                    <ProjectVisual visual={lab.visual} hue={0} seed={`lab-${lab.slug}`} accent={lab.world.accent} />
+                    <ProjectVisual visual={lab.visual} hue={0} seed={`lab-${lab.slug}`} accent={lab.world.accent} diorama />
                   </div>
                   <p class="mono lab-card__name">
-                    <span class="lab-card__glyph" aria-hidden="true">{lab.glyph}</span>
+                    <span class="lab-card__glyph" aria-hidden="true" data-lift>{lab.glyph}</span>
                     {lab.name}
                   </p>
                   <h3 class="lab-card__q">{copy.labs[lab.slug].question}</h3>
@@ -168,17 +185,17 @@ const readout = [
         </header>
 
         <div class="labs-formats__layout grid12">
-          <ol class="formats" role="list">
+          <ol class="formats" role="list" data-scrub="rule">
             {
               copy.formats.items.map((format, index) => (
-                <li class="formats__row" data-reveal style={`--reveal-delay:${index * 60}ms`}>
+                <li class="formats__row" data-reveal data-scrub="rule" style={`--reveal-delay:${index * 60}ms`}>
                   <span class="mono formats__dur">{format.duration}</span>
                   <h3 class="formats__name">{format.name}</h3>
                   <p class="formats__body">{format.body}</p>
                 </li>
               ))
             }
-            <li class="formats__row formats__row--online" data-reveal style="--reveal-delay:320ms">
+            <li class="formats__row formats__row--online" data-reveal data-scrub="rule" style="--reveal-delay:320ms">
               <span class="mono formats__dur">{copy.formats.anywhere}</span>
               <h3 class="formats__name">{copy.formats.onlineName}</h3>
               <p class="formats__body">{copy.formats.onlineBody}</p>
@@ -187,7 +204,7 @@ const readout = [
 
           <aside class="group" data-reveal style="--reveal-delay:120ms" aria-labelledby="group-title">
             <p class="mono group__label" id="group-title">{copy.group.label}</p>
-            <p class="group__figure is-name">
+            <p class="group__figure is-name" data-depth="drift">
               6–10 <span class="group__max">{copy.group.max}</span>
             </p>
             <p class="group__title">{copy.group.title}</p>
@@ -430,10 +447,11 @@ const readout = [
     block-size: 100%;
   }
 
+  /* No clip at rest: the plate's SVG crops itself, and a clip here would
+     flatten the lift on a tilting card. The phone diorama adds one below. */
   .lab-card__plate {
     aspect-ratio: 16 / 10;
     max-inline-size: 100%;
-    overflow: hidden;
     border-block-end: 2px solid var(--lab-accent);
     margin-block-end: var(--s-2);
   }
@@ -473,6 +491,76 @@ const readout = [
   .lab-card__link:hover .lab-card__q,
   .lab-card__link:focus-visible .lab-card__q {
     color: var(--lab-accent);
+  }
+
+  /*
+   * THE CARD AS A LAYERED OBJECT (mouse). The link is the tilt stage; while
+   * it leans, the plate frame and the name line pass its 3D context on, so
+   * the two lifts inside them — the plate's accent sheet and the glyph —
+   * float toward the viewer. The question, summary and "more" stay on the
+   * card's own plane. Settled, `data-tilting` is gone and all of this is too.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(:root:not([data-calm])) .lab-card__link[data-tilting] .lab-card__plate,
+    :global(:root:not([data-calm])) .lab-card__link[data-tilting] .lab-card__name {
+      transform-style: preserve-3d;
+    }
+  }
+
+  /*
+   * THE DIORAMA (phones, and anything without a fine pointer). Selected
+   * Work's card vocabulary from ProjectVisual, on this card's own `--card`
+   * timeline: the plate rises into its frame from a 1.06 window crop, its
+   * accent sheet closes into register on arrival and lifts 12px off on the
+   * way out. Everything finishes by `entry 25vh` and restarts at `exit 0`,
+   * so a card being read is one flat print, exactly the plate at rest.
+   * The frame clips here, and only here: the window needs its edges.
+   * The plate is printed `diorama`, so the sheets switch by compositor
+   * opacity steps (lift and shade), never by main-thread style work.
+   */
+  @supports (animation-timeline: view()) {
+    @media not all and (min-width: 48rem) and (hover: hover) and (pointer: fine) {
+      @media (prefers-reduced-motion: no-preference) {
+        :global(:root:not([data-calm])) .lab-card {
+          view-timeline: --card block;
+        }
+
+        :global(:root:not([data-calm])) .lab-card__plate {
+          overflow: hidden;
+          animation: lab-plate-rise linear backwards;
+          animation-timeline: --card;
+          animation-range: entry 0 entry 25vh;
+        }
+
+        :global(:root:not([data-calm])) .lab-card__plate :global(.plate-stage) {
+          animation: plate-window linear backwards;
+          animation-timeline: --card;
+          animation-range: entry 0 entry 25vh;
+        }
+
+        /* Whole-timeline keyframes (ProjectVisual): no range to give. */
+        :global(:root:not([data-calm])) .lab-card__plate :global(.plate__lift) {
+          animation:
+            plate-lift linear,
+            plate-sheet step-start;
+          animation-timeline: --card;
+        }
+
+        :global(:root:not([data-calm])) .lab-card__plate :global(.plate__shade) {
+          animation: plate-sheet step-start;
+          animation-timeline: --card;
+        }
+      }
+    }
+  }
+
+  @keyframes lab-plate-rise {
+    from {
+      translate: 0 1.5rem;
+    }
+    to {
+      translate: 0 0;
+    }
   }
 
   @media (min-width: 48rem) {
@@ -515,12 +603,23 @@ const readout = [
     align-items: start;
   }
 
+  /*
+   * The rules are scrubbed hairlines (`data-scrub="rule"`, depth.css): each
+   * draws itself open from the left as its row arrives, and is simply drawn
+   * wherever there is no scroll timeline. The borders they replace stay, in
+   * transparent, so the layout keeps its exact pixel; the hairline lies over
+   * the list's top border and each row's bottom border.
+   */
   .formats {
     grid-column: 1 / -1;
     display: grid;
     margin: 0;
     padding: 0;
-    border-block-start: 1px solid var(--c-line);
+    border-block-start: 1px solid transparent;
+  }
+
+  .formats::before {
+    inset-block-start: -1px;
   }
 
   .formats__row {
@@ -528,8 +627,12 @@ const readout = [
     grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
     gap: var(--s-2) var(--s-4);
     padding-block: var(--s-5);
-    border-block-end: 1px solid var(--c-line);
+    border-block-end: 1px solid transparent;
     align-items: baseline;
+  }
+
+  .formats__row::before {
+    inset-block: auto -1px;
   }
 
   .formats__dur {
@@ -566,7 +669,9 @@ const readout = [
     color: var(--c-bone-faint);
   }
 
+  /* A nearer plane: slides a little faster than the panel it sits in. */
   .group__figure {
+    --drift: 0.5;
     font-size: var(--t-project);
     font-variant-numeric: tabular-nums;
   }

@@ -1,6 +1,9 @@
 ---
 import { getExperiments } from '~/lib/cms';
 import { localePath, t, useTranslations } from '~/i18n';
+import { getScan, scanCaption } from '~/data/scans';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 interface Props {
   lang: string;
@@ -11,6 +14,17 @@ const dict = useTranslations(lang);
 const experiments = await getExperiments(lang);
 
 /**
+ * The living scene turns into Denis's scan while this section is centred
+ * (src/motion/scene). The scan keeps its `hero` approval record; it only
+ * moved down the page. Both files must be in this build, or there is no scan.
+ */
+const approved = getScan('hero');
+const scan =
+  approved && [approved.files.desktop, approved.files.mobile].every((url) => existsSync(join(process.cwd(), 'public', url)))
+    ? approved
+    : undefined;
+
+/**
  * THE LAB — a notebook, not a second project grid.
  *
  * v0.2 leans into the index/log register: three-digit entry numbers, a state
@@ -19,14 +33,34 @@ const experiments = await getExperiments(lang);
  * another room in the same building rather than another building. The only
  * thing it does differently is the cold accent, which appears nowhere else.
  *
+ * DEPTH (docs/motion-depth-plan.md §3.6): the notebook under an instrument.
+ * A short lab-green reading head travels down the list's margin as you
+ * scroll, and since the list moves up while the head moves down, it hangs
+ * close to the middle of the screen. It lives in the empty strip between the
+ * entry numbers and the questions, so it points at the line being read and
+ * never crosses a letter. On a desktop each entry number lights up in the
+ * cold accent as its entry crosses that middle. The ink surface stays opaque
+ * and nothing turns over. Under Calm this is today's notebook.
+ *
  * This is a preview. The full list, with each question and note, lives at
  * /[lang]/lab/ and the entries that have a written log link on from there.
  */
 ---
 
-<section class="section lab" id="lab" aria-labelledby="lab-title">
+<section
+  class="section lab"
+  id="lab"
+  aria-labelledby="lab-title"
+>
   <div class="wrap">
-    <header class="section__head grid12" data-reveal>
+    <header
+      class="section__head grid12"
+      data-reveal
+      data-scene="scan"
+      data-scene-side="right"
+      data-desktop={scan?.files.desktop}
+      data-mobile={scan?.files.mobile}
+    >
       <p class="mono section__label">
         <span class="section__index">03</span>
         {dict.lab.label}
@@ -34,6 +68,16 @@ const experiments = await getExperiments(lang);
       <div class="section__intro">
         <h2 id="lab-title">{dict.lab.title}</h2>
         <p class="lead">{dict.lab.lead}</p>
+        {
+          /* What the points become here, and where the capture comes from.
+             Under the lead, clear of the scan standing on the right. */
+          scan && (
+            <a class="mono lab__scan-cap" href={localePath(lang, scan.href)}>
+              {scanCaption(scan, lang)}
+              <span aria-hidden="true">→</span>
+            </a>
+          )
+        }
       </div>
     </header>
 
@@ -61,11 +105,19 @@ const experiments = await getExperiments(lang);
 
 <style>
   .lab {
-    background-color: var(--c-ink);
+    /* Translucent: the living scene shows through the raised panel. */
+    background-color: color-mix(in srgb, var(--c-ink) 45%, transparent);
     border-block: 1px solid var(--c-line);
   }
 
+  /*
+   * The index gutter is named once here, because the reading head below is
+   * placed inside it: the number column and the gap after it.
+   */
   .lab__list {
+    --lab-gutter: 2.75rem;
+    --lab-gap: var(--s-4);
+
     display: grid;
     margin: 0;
     padding: 0;
@@ -73,8 +125,8 @@ const experiments = await getExperiments(lang);
 
   .lab__item {
     display: grid;
-    grid-template-columns: 2.75rem minmax(0, 1fr);
-    gap: var(--s-2) var(--s-4);
+    grid-template-columns: var(--lab-gutter) minmax(0, 1fr);
+    gap: var(--s-2) var(--lab-gap);
     padding-block: var(--s-5);
     border-block-start: 1px solid var(--c-line-strong);
     align-items: baseline;
@@ -115,9 +167,14 @@ const experiments = await getExperiments(lang);
   }
 
   @media (min-width: 48rem) {
+    .lab__list {
+      --lab-gutter: 3.5rem;
+      --lab-gap: var(--s-5);
+    }
+
     .lab__item {
-      grid-template-columns: 3.5rem minmax(0, 1fr) 10rem 9rem;
-      gap: var(--s-5);
+      grid-template-columns: var(--lab-gutter) minmax(0, 1fr) 10rem 9rem;
+      gap: var(--lab-gap);
       align-items: baseline;
     }
 
@@ -128,6 +185,51 @@ const experiments = await getExperiments(lang);
     .lab__state {
       grid-column: 4;
       text-align: end;
+    }
+  }
+
+  .lab__scan-cap {
+    display: inline-flex;
+    margin-block-start: var(--s-3);
+    align-items: center;
+    gap: var(--s-2);
+    min-block-size: 44px;
+    color: var(--c-bone-faint);
+    transition: color var(--d-fast) var(--e-out);
+  }
+
+  .lab__scan-cap:hover,
+  .lab__scan-cap:focus-visible {
+    color: var(--c-bone);
+  }
+
+  /* ------------------------------------------------------- the instrument */
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /*
+       * The reading. On a desktop each entry number waits in faint bone and
+       * takes the cold accent as it crosses the middle of the screen, which is
+       * where the reading head hangs. A colour, on a three-digit label: a small
+       * paint, not a layer. Phones keep today's numbers.
+       */
+      @media (min-width: 48rem) {
+        :global(:root:not([data-calm])) .lab__num {
+          animation: lab-num-read linear both;
+          animation-timeline: view();
+          animation-range: cover 44% cover 50%;
+        }
+      }
+    }
+  }
+
+  @keyframes lab-num-read {
+    from {
+      color: var(--c-bone-faint);
+    }
+
+    to {
+      color: var(--c-lab);
     }
   }
 </style>

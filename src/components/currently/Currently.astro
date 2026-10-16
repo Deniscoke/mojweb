@@ -11,9 +11,15 @@ const dict = useTranslations(lang);
 
 const { items: currently, updatedLabel: currentlyUpdated } = await getCurrently(lang);
 const year = currentlyUpdated.slice(0, 4);
+
+/**
+ * DEPTH (docs/motion-depth-plan.md §3.8). Intentionally the quietest section
+ * on the page: each row's rule draws itself in as the row arrives, and that
+ * is all. No pulse, nothing that moves on its own. Under Calm, today.
+ */
 ---
 
-<section class="section currently" id="currently" aria-labelledby="currently-title">
+<section class="section currently" id="currently" data-scene="drift" data-scene-side="full" aria-labelledby="currently-title">
   <div class="wrap">
     <header class="currently__head" data-reveal>
       <h2 id="currently-title" class="currently__now is-name">
@@ -28,7 +34,7 @@ const year = currentlyUpdated.slice(0, 4);
     <dl class="currently__list">
       {
         currently.map((item, index) => (
-          <div class="currently__row" data-reveal style={`--reveal-delay:${index * 60}ms`}>
+          <div class="currently__row" data-reveal data-scrub="rule" style={`--reveal-delay:${index * 60}ms`}>
             <dt class="mono currently__label">{dict.currently.kinds[item.kind]}</dt>
             <dd class="currently__value">
               {item.href ? (
@@ -73,11 +79,22 @@ const year = currentlyUpdated.slice(0, 4);
     display: grid;
   }
 
+  /*
+   * The top rule is the scrubbed hairline (styles/depth.css), on the row's
+   * own ::before, so it shares nothing with the reveal (transform, opacity).
+   * The border stays as transparent space and the hairline sits on it, so
+   * the layout is exactly today's. (A <dl> row may hold only dt and dd, which
+   * is why the rule is not an element of its own.)
+   */
   .currently__row {
     display: grid;
     gap: var(--s-2);
     padding-block: var(--s-5);
-    border-block-start: 1px solid var(--c-line);
+    border-block-start: 1px solid transparent;
+  }
+
+  .currently__row::before {
+    inset-block-start: -1px;
   }
 
   .currently__row:last-child {

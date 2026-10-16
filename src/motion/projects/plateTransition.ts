@@ -68,7 +68,7 @@ function coverBox(target: Box): Box {
 }
 
 function num(el: Element, name: string): number {
-  return Number.parseFloat(el.getAttribute(name) ?? '0') || 0;
+  return +(el.getAttribute(name) ?? 0) || 0;
 }
 
 /** Accent shapes are the only ones not painted in the bone tints. */
@@ -351,16 +351,22 @@ function go(run: Run) {
   window.location.assign(run.href);
 }
 
+/**
+ * The row's plate where it is on screen right now, if it is shown at all:
+ * the keyboard anchor or a phone card. On a desk the plate is hidden (the
+ * living scene draws it), so the transition grows from the screen's centre.
+ */
+export function shownPlate(row: HTMLElement): DOMRect | null {
+  const plate = row.querySelector<HTMLElement>('.project__plate');
+  if (!plate || +getComputedStyle(plate).opacity <= 0.05) return null;
+  const rect = plate.getBoundingClientRect();
+  return rect.width > 8 && rect.height > 8 ? rect : null;
+}
+
 /** Where the plate is on screen right now, whichever layout is showing it. */
 function sourceBox(row: HTMLElement): Box {
-  const plate = row.querySelector<HTMLElement>('.project__plate');
-  if (plate) {
-    const rect = plate.getBoundingClientRect();
-    const shown = Number.parseFloat(getComputedStyle(plate).opacity) > 0.05;
-    if (shown && rect.width > 8 && rect.height > 8) {
-      return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
-    }
-  }
+  const shown = shownPlate(row);
+  if (shown) return shown;
   // No visible plate (the hover preview had already faded): grow from the
   // right end of the row, where the anchored plate would sit.
   const r = row.getBoundingClientRect();

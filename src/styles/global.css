@@ -2,6 +2,8 @@
 @import './reset.css';
 @import './typography.css';
 @import './motion.css';
+/* depth.css is not imported here: BaseLayout links it at the end of <body>
+   so it stays out of every page's inline CSS (see the note there). */
 
 /**
  * GLOBAL LAYOUT + CHROME
@@ -22,7 +24,8 @@ body::after {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: 200;
+  /* Below the transition cover (100) and the gate (90); see scene grain below. */
+  z-index: 85;
   pointer-events: none;
   opacity: 0.26;
   mix-blend-mode: overlay;

@@ -2,6 +2,10 @@
 import { site } from '~/config/site';
 import { ENTER_FLAG_SNIPPET } from '~/i18n/memory';
 import { LOCALES, getLocale } from '~/i18n/locales';
+import DepthRuntime from '~/motion/depth/DepthRuntime.astro';
+import depthCss from '~/styles/depth.css?url';
+import depthCssInline from '~/styles/depth.css?inline';
+import { CALM_ATTRIBUTE, MOTION_STORAGE_KEY } from '~/motion/utils/env';
 import '~/styles/global.css';
 
 interface Props {
@@ -27,6 +31,15 @@ interface Props {
    * which is served at every address that does not exist.
    */
   noindex?: boolean;
+  /**
+   * How the depth stylesheet reaches the page. 'linked' (default): fetched
+   * early, applied at the end of <body>, cached across pages. 'inline': in
+   * the head — for the homepage, whose HTML spans two TCP windows anyway, so
+   * the extra request would only cost it. (Not prefetched from there either:
+   * any extra request before LCP costs the homepage a simulated round trip in
+   * Lighthouse/PSI, measured 2.56 -> 2.71 s, even at idle priority.)
+   */
+  depthCss?: 'linked' | 'inline';
 }
 
 const {
@@ -40,6 +53,7 @@ const {
   ogImage: ogImagePath = site.ogImage,
   ogImageAlt = `${site.author.name} — ${site.tagline}`,
   noindex = false,
+  depthCss: depthMode = 'linked',
 } = Astro.props;
 
 const htmlLangAttr = htmlLang ?? (variant === 'gate' ? 'en' : getLocale(lang).htmlLang);
@@ -79,12 +93,21 @@ const OG_LOCALES: Record<string, string> = {
 };
 
 /**
+ * Calm is read before first paint, so a visitor who chose it never sees one
+ * frame of the full-motion page. It runs on every page, the gate included:
+ * a returning calm visitor arrives at the gate first, and its greeting morph
+ * already asks `prefersReducedMotion()`, which honours the attribute.
+ */
+const CALM_SNIPPET = `try{if(localStorage.getItem('${MOTION_STORAGE_KEY}')==='calm')document.documentElement.setAttribute('${CALM_ATTRIBUTE}','')}catch(e){}`;
+
+/**
  * One inline script, before first paint, doing only what must happen before
  * first paint: mark that JS is available (the CSS motion layer is gated on
- * it) and raise the entering flag so the transition panels are already opaque
- * when the browser paints. Everything else is deferred module script.
+ * it), apply Calm, and raise the entering flag so the transition panels are
+ * already opaque when the browser paints. Everything else is deferred module
+ * script. (integrations/csp.mjs hashes whatever this ends up being.)
  */
-const bootScript = `document.documentElement.classList.add('js');${
+const bootScript = `document.documentElement.classList.add('js');${CALM_SNIPPET}${
   variant === 'site' ? ENTER_FLAG_SNIPPET : ''
 }`;
 ---
@@ -156,6 +179,16 @@ const bootScript = `document.documentElement.classList.add('js');${
       crossorigin
     />
 
+    <!--
+      The depth stylesheet is applied at the end of <body> (see there), but
+      fetched from here: on a page whose HTML spans two TCP windows the link
+      at the end only arrives with the second one, and the reveal waits for
+      that stylesheet, so discovering it late cost the homepage a round trip
+      of LCP. A preload starts it in the first window and blocks nothing.
+    -->
+    {variant === 'site' && depthMode === 'linked' && <link rel="preload" as="style" href={depthCss} />}
+    {variant === 'site' && depthMode === 'inline' && <style is:inline set:html={depthCssInline} />}
+
     <script is:inline set:html={bootScript} />
   </head>
 
@@ -167,6 +200,24 @@ const bootScript = `document.documentElement.classList.add('js');${
 
       initCursorField();
     </script>
+
+    {/*
+      The depth layer's stylesheet, linked rather than inlined, and last.
+      Inlined it was ~0.9 KB brotli on every page, which pushed 66 case-study
+      and laby pages past the first TCP window (14.6 KB), and the reveal waits
+      for the whole HTML, so that cost a round trip of LCP. Linked at the end
+      of the body it blocks nothing above it from painting, it is cached
+      across pages, and it is still in place before anything is shown: a
+      parser-inserted stylesheet blocks deferred and module scripts, so the
+      reveal — which unhides the content — runs only once it has applied.
+      At rest every depth primitive is identity, so the first paint is the
+      same with or without it. Site pages only; the gate and the 404 use none.
+      The homepage inlines it instead (depthCss="inline", see the head).
+    */}
+    {variant === 'site' && depthMode === 'linked' && <link rel="stylesheet" href={depthCss} />}
+
+    {/* Site chrome: the gate and the 404 (both 'gate') neither run nor download it. */}
+    {variant === 'site' && <DepthRuntime />}
   </body>
 </html>
 

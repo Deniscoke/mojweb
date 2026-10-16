@@ -9,7 +9,29 @@
 const REDUCED = '(prefers-reduced-motion: reduce)';
 const FINE_POINTER = '(hover: hover) and (pointer: fine)';
 
+/**
+ * CALM
+ * The site's own reduced-motion switch (the "Calm motion" toggles in the nav
+ * and footer). It is an attribute on <html>, set before first paint by the
+ * boot script in BaseLayout from the stored preference, so CSS and every
+ * module see the same answer from the first frame.
+ */
+export const CALM_ATTRIBUTE = 'data-calm';
+/** Dispatched on `document` when a toggle changes Calm. `detail: { calm }`. */
+export const MOTION_CHANGE_EVENT = 'irl:motionchange';
+/** localStorage key. The only value ever stored is `'calm'`. */
+export const MOTION_STORAGE_KEY = 'irl:motion';
+
+/**
+ * True under the system setting OR the site's Calm toggle. Every module that
+ * already asks this question obeys Calm with no wiring of its own.
+ */
 export function prefersReducedMotion(): boolean {
+  return systemPrefersReducedMotion() || document.documentElement.hasAttribute(CALM_ATTRIBUTE);
+}
+
+/** The operating-system setting alone. Only the toggles need the difference. */
+export function systemPrefersReducedMotion(): boolean {
   return window.matchMedia(REDUCED).matches;
 }
 
@@ -18,11 +40,84 @@ export function hasFinePointer(): boolean {
   return window.matchMedia(FINE_POINTER).matches;
 }
 
+/** The system setting only. Prefer `onMotionPreferenceChange`, which also hears Calm. */
 export function onReducedMotionChange(handler: (reduced: boolean) => void): () => void {
   const mq = window.matchMedia(REDUCED);
   const listener = (e: MediaQueryListEvent) => handler(e.matches);
   mq.addEventListener('change', listener);
   return () => mq.removeEventListener('change', listener);
+}
+
+/**
+ * Fires with the combined answer (`prefersReducedMotion()`) whenever either
+ * the system setting or the Calm toggle changes. Modules that can tear down
+ * live (depth, tilt, the scan engine) listen here; the older ones read the
+ * preference once at init and apply it on the next page.
+ */
+export function onMotionPreferenceChange(handler: (calm: boolean) => void): () => void {
+  const mq = window.matchMedia(REDUCED);
+  const listener = () => handler(prefersReducedMotion());
+  mq.addEventListener('change', listener);
+  document.addEventListener(MOTION_CHANGE_EVENT, listener);
+  return () => {
+    mq.removeEventListener('change', listener);
+    document.removeEventListener(MOTION_CHANGE_EVENT, listener);
+  };
+}
+
+/** Native scroll-driven animations. Without them the depth layer is simply absent. */
+export function supportsScrollTimeline(): boolean {
+  return typeof CSS !== 'undefined' && CSS.supports('animation-timeline: view()');
+}
+
+interface DeviceHints {
+  connection?: { saveData?: boolean };
+  deviceMemory?: number;
+}
+
+/**
+ * Whether this device should be asked to run WebGL at all. A cheap, honest
+ * pre-filter, run before any context exists: WebGL2, no data saver, and
+ * enough memory and cores where the browser says. The engine still asks for
+ * its context with `failIfMajorPerformanceCaveat`, which is the real test.
+ */
+export function canAffordGL(): boolean {
+  if (typeof WebGL2RenderingContext === 'undefined') return false;
+  const nav = navigator as Navigator & DeviceHints;
+  if (nav.connection?.saveData) return false;
+  if (nav.deviceMemory !== undefined && nav.deviceMemory < 4) return false;
+  if (nav.hardwareConcurrency && nav.hardwareConcurrency < 4) return false;
+  return true;
+}
+
+/**
+ * Runs `callback` when the main thread is idle, and no later than `timeout`
+ * ms. Safari has no `requestIdleCallback`; there the nearest honest stand-in
+ * is "the task after the next painted frame". Returns a cancel function.
+ */
+export function idle(callback: () => void, timeout = 2000): () => void {
+  if (typeof window.requestIdleCallback === 'function') {
+    const id = window.requestIdleCallback(() => callback(), { timeout });
+    return () => window.cancelIdleCallback(id);
+  }
+
+  let done = false;
+  let after = 0;
+  const cancel = () => {
+    done = true;
+    cancelAnimationFrame(frame);
+    clearTimeout(after);
+    clearTimeout(deadline);
+  };
+  const run = () => {
+    if (done) return;
+    cancel();
+    callback();
+  };
+  const frame = requestAnimationFrame(() => (after = window.setTimeout(run, 0)));
+  // rAF never fires in a background tab; the deadline still does.
+  const deadline = window.setTimeout(run, timeout);
+  return cancel;
 }
 
 /**

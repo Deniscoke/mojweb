@@ -25,6 +25,17 @@ const featuredProjects = await getFeaturedProjects(lang);
  * 2. The per-project hue is confined to the plate. In v0.1 it also coloured
  *    the category line, which put five different colours down one list —
  *    the exact "colour funfair" the brief warned about.
+ *
+ * And one motion decision (living scene, docs/superpowers/specs/
+ * 2026-10-16-living-scene-design.md): on a desk the plates are not shown in
+ * the rows at all. Each row is a `data-scene` anchor, and while it crosses
+ * the middle of the screen the points behind the page draw its plate's
+ * geometry (src/motion/scene). The rows themselves never move. On a phone
+ * the plate is part of the card, flat, and the scene drifts behind it; a
+ * focused row (keyboard) anchors its plate beside the title.
+ *
+ * Clicking a project still grows its plate into the next page
+ * (plateTransition.ts).
  */
 ---
 
@@ -51,6 +62,10 @@ const featuredProjects = await getFeaturedProjects(lang);
             <li
               class="project"
               data-project-row
+              data-scene={`work:${project.slug}`}
+              data-scene-side="right"
+              data-scene-x="0.38"
+              data-scene-scale="0.34"
               data-reveal
               data-draw-group
               data-live={isLive ? '' : undefined}
@@ -78,7 +93,9 @@ const featuredProjects = await getFeaturedProjects(lang);
                 </span>
 
                 <span class="project__plate">
-                  <ProjectVisual visual={project.visual} hue={project.hue} seed={project.slug} />
+                  <span class="project__plate-tilt">
+                    <ProjectVisual visual={project.visual} hue={project.hue} seed={project.slug} />
+                  </span>
                 </span>
               </a>
             </li>
@@ -91,7 +108,8 @@ const featuredProjects = await getFeaturedProjects(lang);
 
 <style>
   .work {
-    /* Anchors the fixed-position preview plate to the pointer. */
+    /* The hidden desk plate sits at the centre of the screen: the plate
+       transition grows from there. */
     --preview-x: 50vw;
     --preview-y: 50vh;
   }
@@ -197,6 +215,30 @@ const featuredProjects = await getFeaturedProjects(lang);
     order: -1;
   }
 
+  /* The plate's own stage, flat. */
+  .project__plate-tilt {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /**
+   * Press depth for the thumb. Cards only: on the desktop layout the link is
+   * an ancestor of the fixed (hidden) plate, and any scale on it would make it
+   * the plate's containing block mid-click.
+   */
+  @media not all and (min-width: 62rem) and (hover: hover) and (pointer: fine) {
+    @media (prefers-reduced-motion: no-preference) {
+      :global(:root:not([data-calm])) .project__link {
+        transition: scale var(--d-instant) var(--e-out);
+      }
+
+      :global(:root:not([data-calm])) .project__link:active {
+        scale: 0.985;
+      }
+    }
+  }
+
   /* -------------------------------------------------- DESKTOP / FINE POINTER */
 
   @media (min-width: 62rem) and (hover: hover) and (pointer: fine) {
@@ -247,8 +289,8 @@ const featuredProjects = await getFeaturedProjects(lang);
       gap: var(--s-3);
     }
 
-    /* The plate leaves the flow entirely and follows the cursor. Because it
-       was already out of flow at rest, showing it causes no layout shift. */
+    /* The plate leaves the flow: on a desk the living scene draws it. It
+       stays in the DOM, hidden, for the plate transition and the keyboard. */
     .project__plate {
       position: fixed;
       inset-block-start: 0;
@@ -259,9 +301,6 @@ const featuredProjects = await getFeaturedProjects(lang);
       pointer-events: none;
       opacity: 0;
       order: 0;
-      /* transform is driven by the eased pointer loop and must not be
-         double-smoothed by CSS; scale and rotate are separate properties so
-         they can transition on their own. */
       transform: translate3d(calc(var(--preview-x) - 50%), calc(var(--preview-y) - 50%), 0);
       scale: 0.94;
       rotate: -3deg;
@@ -270,12 +309,7 @@ const featuredProjects = await getFeaturedProjects(lang);
         scale var(--d-base) var(--e-out),
         rotate var(--d-base) var(--e-out);
       box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.6);
-    }
-
-    .project[data-preview-active] .project__plate {
-      opacity: 1;
-      scale: 1;
-      rotate: 0deg;
+      overflow: hidden;
     }
 
     /* Keyboard users are not hovering, so the plate anchors to the row
@@ -296,15 +330,14 @@ const featuredProjects = await getFeaturedProjects(lang);
       color: oklch(0.82 0.15 var(--project-hue));
     }
   }
+
 </style>
 
 <script>
   import { initPlateTransition } from '~/motion/projects/plateTransition';
-  import { initProjectPointerPreview } from '~/motion/projects/pointerPreview';
 
   const section = document.querySelector<HTMLElement>('[data-work]');
   if (section) {
-    initProjectPointerPreview(section);
     // Clicking a project grows its plate into the loading screen for the page.
     initPlateTransition(section);
   }

@@ -1,4 +1,6 @@
 ---
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import Readout from '~/components/ui/Readout.astro';
 import { site } from '~/config/site';
 import { getExperiments, getProjects } from '~/lib/cms';
@@ -20,6 +22,20 @@ const [projects, experiments] = await Promise.all([
 const [firstName, ...rest] = site.author.name.split(' ');
 const lastName = rest.join(' ');
 
+/**
+ * Denis's portrait for the living scene: a density map of his photo, made by
+ * scripts/build-portrait.mjs (the photo itself is never shipped). The points
+ * gather into it while the hero is on screen; without one they spell the name.
+ */
+const portraitFile = (() => {
+  try {
+    return readdirSync(join(process.cwd(), 'public/assets/portrait')).find((f) => /^portrait-[\w]+\.png$/.test(f));
+  } catch {
+    return undefined;
+  }
+})();
+const portrait = portraitFile && `/assets/portrait/${portraitFile}`;
+
 const readout = [
   { key: 'Locale', value: locale.label, accent: true },
   { key: 'Projects', value: String(projects.length).padStart(2, '0') },
@@ -28,12 +44,16 @@ const readout = [
 ];
 ---
 
-<section class="hero" id="hero" data-hero>
-  <!-- Column rules. The editorial grid, made faintly visible. -->
-  <div class="hero__rules grid12" aria-hidden="true">
-    {Array.from({ length: 12 }, () => <span />)}
-  </div>
-
+<section
+  class="hero"
+  id="hero"
+  data-hero
+  data-scene="portrait"
+  data-scene-side="right"
+  data-scene-x="0.66"
+  data-scene-scale="0.44"
+  data-portrait={portrait}
+>
   <div class="wrap hero__inner grid12">
     <p class="mono hero__role" data-reveal>{site.author.role}</p>
 
@@ -50,11 +70,11 @@ const readout = [
       </p>
     </div>
 
-    <p class="mono hero__disciplines" data-reveal style="--reveal-delay:400ms" data-parallax="0.4">
+    <p class="mono hero__disciplines" data-reveal style="--reveal-delay:400ms">
       {site.author.disciplines.join('  ·  ')}
     </p>
 
-    <div class="hero__aside" data-reveal style="--reveal-delay:460ms" data-parallax="0.8">
+    <div class="hero__aside" data-reveal style="--reveal-delay:460ms">
       <Readout rows={readout} />
       <p class="hero__intro">{dict.hero.intro}</p>
     </div>
@@ -75,40 +95,12 @@ const readout = [
     position: relative;
   }
 
-  /* ---------------------------------------------------------- column rules */
-
-  .hero__rules {
-    position: absolute;
-    inset-block: 0;
-    inset-inline: 0;
-    inline-size: min(100% - var(--gutter) * 2, var(--w-max));
-    margin-inline: auto;
-    pointer-events: none;
-    /* Faded top and bottom so the grid reads as a watermark of the layout
-       rather than as a table. */
-    mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 65%, transparent);
-  }
-
-  .hero__rules > span {
-    border-inline-start: 1px solid var(--c-line);
-    opacity: 0.55;
-  }
-
-  .hero__rules > span:first-child {
-    border-inline-start: 0;
-  }
-
-  @media (max-width: 47.99rem) {
-    .hero__rules {
-      display: none;
-    }
-  }
-
   /* ------------------------------------------------------------ composition */
 
   .hero__inner {
+    --hero-gap: clamp(1.25rem, 3.5vh, 2.5rem);
     position: relative;
-    row-gap: clamp(1.25rem, 3.5vh, 2.5rem);
+    row-gap: var(--hero-gap);
     align-content: center;
   }
 
@@ -232,10 +224,52 @@ const readout = [
       column-gap: var(--col-gap);
     }
   }
+
+  /**
+   * NAME PLANES. As the hero scrolls out, the first name drifts onto a
+   * farther plane, higher and a little smaller; the last name follows at a
+   * third of the distance. Root scroll timeline, transform only, so it runs
+   * on the compositor. The names move on `.line`, never on `.line__inner`,
+   * which owns the reveal. The points behind the hero are the living scene
+   * (src/motion/scene), which owns everything else that moves here.
+   */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      :global(:root:not([data-calm])) .hero__name .line {
+        transform-origin: 0 50%;
+        animation: hero-plane-near linear forwards;
+        animation-timeline: scroll(root);
+        animation-range: 8vh 60vh;
+      }
+
+      :global(:root:not([data-calm])) .hero__name .line:first-child {
+        animation-name: hero-plane-far;
+      }
+
+      /* Below 62rem the hero is shorter than the viewport: it is gone sooner. */
+      @media (max-width: 61.99rem) {
+        :global(:root:not([data-calm])) .hero__name .line {
+          animation-range: 4vh 50vh;
+        }
+      }
+    }
+  }
+
+  @keyframes hero-plane-far {
+    to {
+      translate: 0 calc(-5vh * var(--depth-amp));
+      scale: calc(1 - 0.03 * var(--depth-amp));
+    }
+  }
+
+  @keyframes hero-plane-near {
+    to {
+      translate: 0 calc(-1.5vh * var(--depth-amp));
+    }
+  }
 </style>
 
 <script>
-  import { initHeroPointerField } from '~/motion/hero/pointerField';
   import { REVEAL_EVENT } from '~/motion/language/enterReveal';
 
   const hero = document.querySelector<HTMLElement>('[data-hero]');
@@ -250,9 +284,24 @@ const readout = [
       hero.querySelectorAll<HTMLElement>('[data-reveal], [data-reveal-lines]').forEach((el) => {
         el.classList.add('is-revealed');
       });
-      initHeroPointerField(hero);
     };
 
     document.addEventListener(REVEAL_EVENT, reveal, { once: true });
+
+    /**
+     * The living scene (src/motion/scene) arrives with the visitor's first
+     * input after the reveal (a mouse move, a touch, a scroll, a key), never
+     * on load: nothing moves on its own, and none of it is on the load path
+     * LCP and TBT are measured on. The depth runtime does the import.
+     */
+    const wake = () => {
+      ['pointermove', 'pointerdown', 'wheel', 'touchstart', 'keydown', 'scroll'].forEach((t) => removeEventListener(t, wake));
+      document.dispatchEvent(new Event('irl:scene'));
+    };
+    document.addEventListener(
+      REVEAL_EVENT,
+      () => ['pointermove', 'pointerdown', 'wheel', 'touchstart', 'keydown', 'scroll'].forEach((t) => addEventListener(t, wake, { passive: true })),
+      { once: true },
+    );
   }
 </script>

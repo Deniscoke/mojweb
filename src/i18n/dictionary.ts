@@ -125,4 +125,23 @@ export interface Dictionary {
     languageLabel: string;
     workingTranslation: string;
   };
+  /**
+   * The Calm toggle, in the nav and in the footer (src/motion/depth/README.md
+   * has the markup contract). Pressed means calm: the site's own depth and
+   * transitions step down to the still composition.
+   */
+  motion: {
+    /** The button's label. */
+    calm: string;
+    /**
+     * The one word the desktop nav has room for. It must appear, as a whole
+     * word, in both `calm` and `calmSystem`: those stay the button's
+     * accessible name, and speech users say what they see (WCAG 2.5.3).
+     */
+    calmShort: string;
+    /** Replaces the label while the system's own reduce-motion setting decides. */
+    calmSystem: string;
+    /** Shown after a press: reveals and transitions obey from the next page. */
+    nextPage: string;
+  };
 }
