@@ -52,6 +52,15 @@ export function initScene(): () => void {
   const fine = tier === 'desktop';
   root.dataset.sceneTier = tier;
 
+  // The canvas style and the grain switch-off arrive with the scene, so no
+  // page carries their bytes in its HTML (on the case studies a few dozen
+  // bytes cost LCP a round trip). style-src allows inline styles.
+  const style = document.createElement('style');
+  style.textContent =
+    '.scene{position:fixed;inset:0;inline-size:100%;block-size:100%;z-index:-1;pointer-events:none}' +
+    'html[data-scene-tier] body::after{content:none}';
+  document.head.append(style);
+
   let canvas = document.createElement('canvas');
   canvas.className = 'scene';
   canvas.setAttribute('aria-hidden', 'true');
@@ -72,8 +81,9 @@ export function initScene(): () => void {
     loop.start();
   };
   // On a phone the project cards show their own plates; the scene drifts behind them.
+  // A project without a plate (a photo or an embed leads its page) drifts.
   const shape = (id: string) =>
-    (innerWidth < 992 && id.startsWith('work:') ? drift : shapes.get(id)) ?? fallbackShape;
+    (id.startsWith('work:') && (innerWidth < 992 || !shapes.has(id)) ? drift : shapes.get(id)) ?? fallbackShape;
 
   const detail = DETAIL[tier];
   const raster: Raster = (draw, w = 512, h = 256) => rasterize(draw, Math.round(w * detail), Math.round(h * detail));
@@ -113,7 +123,10 @@ export function initScene(): () => void {
     platesQueued = true;
     sections.forEach((el, i) => {
       const id = el.dataset.scene!;
-      const svg = el.querySelector<SVGSVGElement>('svg[data-visual]');
+      // `data-scene-source`: the plate lives in another element (the case
+      // study's head draws the plate shown below it).
+      const host = el.dataset.sceneSource ? document.querySelector(el.dataset.sceneSource) : el;
+      const svg = host?.querySelector<SVGSVGElement>('svg[data-visual]');
       if (!id.startsWith('work:') || !svg) return;
       const box = svg.viewBox.baseVal;
       const long = Math.max(box.width, box.height) || 1;
@@ -270,7 +283,8 @@ export function initScene(): () => void {
   let velocity = 0;
   const pointer: [number, number, number] = [0, 0, 0];
   let lastPointer = 0;
-  const ink = parseColor(getComputedStyle(document.body).color);
+  // `--scene-ink` lets a page tint its points (a lab in its own colour).
+  const ink = parseColor(getComputedStyle(sections[0]).getPropertyValue('--scene-ink').trim() || getComputedStyle(document.body).color);
 
   const loop = createLoop((dt, now) => {
     const target = resolve(anchors, window.scrollY);
@@ -395,12 +409,15 @@ export function initScene(): () => void {
     painter?.dispose();
     ctx?.destroy();
     canvas.remove();
+    style.remove();
     delete root.dataset.sceneTier;
   };
 }
 
-/** `rgb(r, g, b)` / `rgba(...)` → 0 … 1 channels; bone white if unparseable. */
-function parseColor(css: string): [number, number, number] {
+/** `#rrggbb` or `rgb(r, g, b)` / `rgba(...)` → 0 … 1 channels; bone white if unparseable. */
+export function parseColor(css: string): [number, number, number] {
+  const hex = css.match(/^#([0-9a-f]{6})$/i);
+  if (hex) return [0, 2, 4].map((i) => parseInt(hex[1].slice(i, i + 2), 16) / 255) as [number, number, number];
   const m = css.match(/\d+(\.\d+)?/g);
   if (!m || m.length < 3) return [0.91, 0.89, 0.85];
   return [Number(m[0]) / 255, Number(m[1]) / 255, Number(m[2]) / 255];

@@ -59,15 +59,10 @@ test.describe('living scene', () => {
     await expectState(page, 'credo');
   });
 
-  test('nothing loads before the first input, and subpages never get it', async ({ page }) => {
+  test('nothing loads before the first input', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
     await page.waitForTimeout(3000);
-    await expect(page.locator('canvas.scene')).toHaveCount(0);
-    await page.goto(PAGES.laby);
-    await settle(page);
-    await wake(page);
-    await page.waitForTimeout(1500);
     await expect(page.locator('canvas.scene')).toHaveCount(0);
   });
 
@@ -113,6 +108,8 @@ test.describe('living scene', () => {
     for (const sel of ['.hero__floor', '.hero__ground', '.hero__rules', '.hero__scan', 'canvas.cursor-field', '[data-preview-on]', '.contact__stroke', '[data-motion-toggle]']) {
       await expect(page.locator(sel), sel).toHaveCount(0);
     }
+    await wake(page);
+    await expect(page.locator('canvas.scene')).toHaveCount(1, { timeout: 10_000 });
     expect(await page.evaluate(() => getComputedStyle(document.body, '::after').content)).toBe('none');
   });
 
@@ -235,6 +232,38 @@ test.describe('living scene', () => {
     await page.waitForTimeout(1500);
     expect(requested.filter((u) => u.endsWith('.bin'))).toEqual([]);
     await expect(page.locator('.lab__scan-cap')).toHaveCount(0);
+  });
+
+  for (const [path, hero] of [
+    ['/en/lab/', 'question'],
+    ['/en/laby/', 'credo'],
+    ['/en/lab/digital-space/', 'question'],
+  ] as const) {
+    test(`${path} has its own scene: ${hero}`, async ({ page }) => {
+      await page.goto(path);
+      await settle(page);
+      expect(await page.evaluate(() => getComputedStyle(document.body, '::after').content)).not.toBe('none');
+      await wake(page);
+      await expect(page.locator('canvas.scene')).toHaveCount(1, { timeout: 10_000 });
+      await expectState(page, hero);
+      expect(await page.evaluate(() => getComputedStyle(document.body, '::after').content)).toBe('none');
+    });
+  }
+
+  test('a case study draws its own plate beside the title @desktop-only', async ({ page }) => {
+    await page.goto(PAGES.case);
+    await settle(page);
+    await wake(page);
+    await expectState(page, 'work:circus-movement');
+  });
+
+  test('a lab tints its points in its own colour', async ({ page }) => {
+    await page.goto(PAGES.labyDetail);
+    await settle(page);
+    const ink = await page.locator('[data-scene]').first().evaluate((el) => getComputedStyle(el).getPropertyValue('--scene-ink').trim());
+    expect(ink).toMatch(/^#[0-9a-f]{6}$/i);
+    await wake(page);
+    await expect(page.locator('canvas.scene')).toHaveCount(1, { timeout: 10_000 });
   });
 });
 

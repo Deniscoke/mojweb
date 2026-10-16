@@ -79,7 +79,7 @@ const sections = [
         {dict.lab.all}
       </a>
 
-      <header class="note__head grid12">
+      <header class="note__head grid12" data-scene="question" data-scene-side="right" data-scene-scale="0.24">
         <p class="mono note__id">
           <span class="note__tag">{experiment.tag}</span>
           <span class="note__state" data-state={experiment.state}>
@@ -109,7 +109,7 @@ const sections = [
       <div class="note__body">
         {
           sections.map((section, i) => (
-            <section class="note__section grid12" data-reveal style={`--reveal-delay:${i * 60}ms`}>
+            <section class="note__section grid12" data-reveal style={`--reveal-delay:${i * 60}ms`} data-scene="drift" data-scene-side="full">
               <h2 class="mono note__section-label">{section.label}</h2>
               <div class="note__prose">
                 {section.body.map((p) => (

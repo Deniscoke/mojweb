@@ -288,21 +288,5 @@ const readout = [
     };
 
     document.addEventListener(REVEAL_EVENT, reveal, { once: true });
-
-    /**
-     * The living scene (src/motion/scene) arrives with the visitor's first
-     * input after the reveal (a mouse move, a touch, a scroll, a key), never
-     * on load: nothing moves on its own, and none of it is on the load path
-     * LCP and TBT are measured on. The depth runtime does the import.
-     */
-    const wake = () => {
-      ['pointermove', 'pointerdown', 'wheel', 'touchstart', 'keydown', 'scroll'].forEach((t) => removeEventListener(t, wake));
-      document.dispatchEvent(new Event('irl:scene'));
-    };
-    document.addEventListener(
-      REVEAL_EVENT,
-      () => ['pointermove', 'pointerdown', 'wheel', 'touchstart', 'keydown', 'scroll'].forEach((t) => addEventListener(t, wake, { passive: true })),
-      { once: true },
-    );
   }
 </script>
