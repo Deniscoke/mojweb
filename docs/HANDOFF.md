@@ -52,7 +52,10 @@ API: `src/motion/scene/README.md`, k tomu `src/motion/depth/README.md` (hĺbka, 
   - desktop: WebGL, 16 000 bodov, kurzor body odtláča;
   - mobil: WebGL, 4 000 bodov;
   - statický: 2D, jeden snímok na zmenu sekcie. Platí pre pokojný režim, slabé zariadenia a stratu GL kontextu.
-- **Prepínač „Pokojný/Calm“, bezpečnosť a CSP** sa nemenili. Calm prepína scénu za behu.
+- **Prepínač „Pokojný/Calm“ je odstránený** (Denisova požiadavka). Platí len systémové nastavenie reduced motion a scéna naň reaguje aj za behu. Bezpečnosť a CSP sa nemenili.
+- **Logo vľavo hore** je monogram DM (ten istý ako favicon), nie text.
+- **Kontakt** už nekreslí šípku, body tam len voľne plávajú.
+- **Prechod na projekt** rastie z miesta, kde body kreslia plát projektu (`data-scene-rect`).
 
 ### Brány kvality (všetky musia prejsť pred mergom)
 ```

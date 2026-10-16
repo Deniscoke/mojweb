@@ -18,10 +18,6 @@ const year = new Date().getFullYear();
  * so the grid that opened the page closes it, and they are fully up exactly
  * when the page runs out. Under Calm, without scroll timelines and without
  * JavaScript they simply stand.
- *
- * The Calm toggle is the second of two (the first is in the nav, reachable
- * before any motion is met). The markup is the contract in
- * src/motion/depth/README.md; DepthRuntime wires it on every site page.
  */
 ---
 
@@ -46,21 +42,8 @@ const year = new Date().getFullYear();
         &copy; {year} {site.author.name}
       </p>
       <div class="footer__controls">
-        <button
-          type="button"
-          class="mono footer__calm"
-          data-motion-toggle
-          aria-pressed="false"
-          data-label-system={dict.motion.calmSystem}
-        >
-          <span class="footer__calm-box" aria-hidden="true"></span>
-          <span data-motion-label>{dict.motion.calm}</span>
-        </button>
         <a class="mono footer__top" href="#hero">{dict.footer.backToTop}</a>
       </div>
-      <!-- The copy that is seen. Deliberately not live: the nav's status
-           region announces the hint once, at every width. -->
-      <p class="mono footer__hint" data-motion-hint hidden>{dict.motion.nextPage}</p>
     </div>
   </div>
 </footer>
@@ -156,9 +139,7 @@ const year = new Date().getFullYear();
   }
 
   .footer__legal,
-  .footer__top,
-  .footer__calm,
-  .footer__hint {
+  .footer__top {
     color: var(--c-bone-faint);
   }
 
@@ -169,8 +150,7 @@ const year = new Date().getFullYear();
     gap: 0 var(--s-6);
   }
 
-  .footer__top,
-  .footer__calm {
+  .footer__top {
     min-block-size: 44px;
     display: inline-flex;
     align-items: center;
@@ -178,57 +158,8 @@ const year = new Date().getFullYear();
   }
 
   .footer__top:hover,
-  .footer__top:focus-visible,
-  .footer__calm:hover,
-  .footer__calm:focus-visible {
+  .footer__top:focus-visible {
     color: var(--c-bone);
-  }
-
-  /* --------------------------------------------------------- calm toggle */
-
-  /*
-   * A mono label behind a small square, the notebook's checkbox: open when
-   * the page moves, filled when it is calm. The state is aria-pressed, so
-   * the square only ever shows what assistive technology already reads.
-   */
-  .footer__calm {
-    gap: var(--s-3);
-    min-inline-size: 44px;
-    text-align: start;
-  }
-
-  .footer__calm-box {
-    flex: none;
-    inline-size: 0.75em;
-    block-size: 0.75em;
-    padding: 2px;
-    border: 1px solid currentColor;
-    background-clip: content-box;
-    transition: background-color var(--d-fast) var(--e-out);
-  }
-
-  .footer__calm[aria-pressed='true'] {
-    color: var(--c-bone-dim);
-  }
-
-  .footer__calm[aria-pressed='true'] .footer__calm-box {
-    background-color: currentColor;
-  }
-
-  /* The system setting decides: still focusable and read out, but inert. */
-  .footer__calm[aria-disabled='true'] {
-    cursor: default;
-    color: var(--c-bone-faint);
-  }
-
-  .footer__hint {
-    text-transform: none;
-    letter-spacing: 0.04em;
-  }
-
-  /* Without JavaScript nothing could answer the button, so there is none. */
-  :global(html:not(.js)) .footer__calm {
-    display: none;
   }
 
   @media (min-width: 48rem) {

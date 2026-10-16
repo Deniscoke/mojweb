@@ -13,7 +13,7 @@
  */
 import { createGL, type GL } from '../ambient/gl';
 import { canAffordGL, createLoop, fontsReady, hasFinePointer, idle, onMotionPreferenceChange, prefersReducedMotion, renderScale } from '../utils/env';
-import { ARROW, CREDO } from './glyphs.ts';
+import { CREDO } from './glyphs.ts';
 import { createMorph, type MorphUniforms } from './morph.ts';
 import { scatter } from './points.ts';
 import { imageShape, pathsShape, rasterize, scanShape, svgShape, textShape, type Raster } from './shapes.ts';
@@ -86,7 +86,6 @@ export function initScene(): () => void {
    */
   const queue: Array<() => void> = [
     () => put('credo', pathsShape(Object.values(CREDO), n, 3, raster)),
-    () => put('arrow', pathsShape([ARROW], n, 4, raster)),
   ];
   let cancelSlice = () => {};
   let slicing = false;
@@ -106,6 +105,8 @@ export function initScene(): () => void {
   cancels.push(() => cancelSlice());
   /** Plates are wide-screen shapes: queued the first time the window is wide, at load or later. */
   let platesQueued = false;
+  /** Each plate's half-size in shape units: its viewBox, as svgShape normalised it. */
+  const plateBox = new Map<string, [number, number]>();
   const queuePlates = () => {
     if (platesQueued || innerWidth < 992) return;
     platesQueued = true;
@@ -113,6 +114,9 @@ export function initScene(): () => void {
       const id = el.dataset.scene!;
       const svg = el.querySelector<SVGSVGElement>('svg[data-visual]');
       if (!id.startsWith('work:') || !svg) return;
+      const box = svg.viewBox.baseVal;
+      const long = Math.max(box.width, box.height) || 1;
+      plateBox.set(id, [box.width / long, box.height / long]);
       enqueue(() => {
         try {
           put(id, svgShape(svg, n, 10 + i));
@@ -172,7 +176,10 @@ export function initScene(): () => void {
   /** Per-section placement overrides (`data-scene-x`, `data-scene-scale`), wide screens only. */
   const placement = new Map<string, { cx?: number; scale?: number }>();
   const sideOf = new Map<string, Side>();
+  const dotOf = new Map<string, number>();
   for (const el of sections) {
+    const dot = parseFloat(el.dataset.sceneDot ?? '');
+    if (isFinite(dot)) dotOf.set(el.dataset.scene!, dot);
     const cx = parseFloat(el.dataset.sceneX ?? '');
     const sc = parseFloat(el.dataset.sceneScale ?? '');
     const side = el.dataset.sceneSide as Side;
@@ -185,7 +192,8 @@ export function initScene(): () => void {
     const l = { ...layoutFor(side, innerWidth), ...(innerWidth >= 992 && side !== 'full' ? placement.get(id) : undefined) };
     // A shape never spills past the screen's sides (the drifting field may).
     if (side !== 'full') l.scale = Math.min(l.scale, (innerWidth / innerHeight) * 0.92);
-    return l;
+    const dot = dotOf.get(id);
+    return dot === undefined ? l : { ...l, dot };
   };
   const measure = () => {
     const y = window.scrollY;
@@ -328,6 +336,16 @@ export function initScene(): () => void {
 
     // The arrival starts from the scatter, which stands where its target does.
     const layout = blendLayout(layoutOf(shown.from === 'scatter' ? shown.to : shown.from), layoutOf(shown.to), shown.t);
+    // Where the project's plate stands on screen, drawn by the points: the
+    // plate transition (projects/plateTransition.ts) grows from exactly here.
+    const shownId = shown.t >= 0.5 ? shown.to : shown.from;
+    const half = innerWidth >= 992 ? plateBox.get(shownId) : undefined;
+    if (half) {
+      const w = (half[0] * layout.scale * innerHeight) / 2;
+      const h = (half[1] * layout.scale * innerHeight) / 2;
+      const x = ((layout.cx + 1) / 2) * innerWidth;
+      canvas.dataset.sceneRect = [x - w, innerHeight / 2 - h, 2 * w, 2 * h].map(Math.round).join(',');
+    } else delete canvas.dataset.sceneRect;
     // A still painter draws only when what it shows has changed.
     const frame = `${key}@${innerWidth}x${innerHeight}`;
     if (still && frame === drawn) return false;
@@ -339,7 +357,7 @@ export function initScene(): () => void {
       velocity: still ? 0 : velocity,
       pointer,
       color: ink,
-      size: (fine ? 1.6 : 1.8) * scale(),
+      size: (fine ? 1.6 : 1.8) * scale() * (layout.dot ?? 1),
     });
 
     const settled = mode === 'scroll' && shown.from === target.from && shown.to === target.to && Math.abs(target.t - shown.t) < 0.001 && velocity < 0.001 && pointer[2] < 0.001;

@@ -1,6 +1,6 @@
 ---
 /**
- * The depth runtime and the Calm toggles, as one deferred module.
+ * The depth runtime, as one deferred module.
  *
  * A component of its own, rendered by BaseLayout on site pages only, because
  * Astro bundles a component's script into exactly the pages that render the
@@ -13,10 +13,8 @@
 
 <script>
   import { initDepth } from '~/motion/depth';
-  import { initMotionToggles } from '~/motion/depth/motionPreference';
 
-  // Toggles first: they are controls, and must answer a click immediately.
-  // Depth itself waits for the reveal and an idle moment.
-  initMotionToggles();
+  // Depth waits for the reveal and an idle moment. Reduced motion is the
+  // operating system's setting; the site has no toggle of its own.
   initDepth();
 </script>

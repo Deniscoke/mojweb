@@ -1,6 +1,6 @@
 /**
  * The scene's drawn marks, as SVG path data in a 100 × 100 box, stroked.
- * Credo: Build / Teach / Move / Explore. Contact: the arrow toward the CTA.
+ * Credo: Build / Teach / Move / Explore.
  */
 export const CREDO = {
   /** Three bricks, laid. */
@@ -13,4 +13,3 @@ export const CREDO = {
   explore: 'M50 14a36 36 0 1 0 .01 0zM50 28l9 22-9 22-9-22z',
 } as const;
 
-export const ARROW = 'M14 50h66M58 28l22 22-22 22';

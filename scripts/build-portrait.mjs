@@ -42,13 +42,16 @@ const STEP_TOLERANCE = 13;
 /** ...as long as the pixel is still this close to the wall's own colour. */
 const WALL_TOLERANCE = 95;
 /** Share of the density that comes from edges (features), the rest from brightness. */
-const EDGES = 0.35;
+const EDGES = 0;
+/** Local contrast: brightness minus its own blur (radius in map px), times AMOUNT. */
+const LOCAL_RADIUS = 7;
+const LOCAL_AMOUNT = 1.6;
 /** The head is the top share of the map: tones are stretched over it alone. */
 const HEAD = 0.6;
 /** Points on the darkest part of the figure, as a share of the brightest. */
-const FLOOR = 0.06;
+const FLOOR = 0.03;
 /** The bottom share of the map fades to nothing. */
-const FADE = 0.4;
+const FADE = 0.5;
 const OUT_DIR = 'public/assets/portrait';
 
 const [src, ...rest] = process.argv.slice(2);
@@ -151,9 +154,47 @@ const lum = Float32Array.from({ length: W * H }, (_, i) => {
   const [r, g, b] = px(i);
   return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 });
+// Local contrast (an unsharp mask with a wide radius): features stand out
+// from the face around them, whatever the light falling on the whole head.
+const wide = (() => {
+  let m = Float32Array.from(lum);
+  const pass = (src) => {
+    const o = new Float32Array(src.length);
+    for (let y = 0; y < H; y++)
+      for (let x = 0; x < W; x++) {
+        let s2 = 0;
+        let n2 = 0;
+        for (let d = -LOCAL_RADIUS; d <= LOCAL_RADIUS; d++) {
+          const xx = x + d;
+          if (xx < 0 || xx >= W) continue;
+          s2 += src[y * W + xx];
+          n2++;
+        }
+        o[y * W + x] = s2 / n2;
+      }
+    const o2 = new Float32Array(src.length);
+    for (let y = 0; y < H; y++)
+      for (let x = 0; x < W; x++) {
+        let s2 = 0;
+        let n2 = 0;
+        for (let d = -LOCAL_RADIUS; d <= LOCAL_RADIUS; d++) {
+          const yy = y + d;
+          if (yy < 0 || yy >= H) continue;
+          s2 += o[yy * W + x];
+          n2++;
+        }
+        o2[y * W + x] = s2 / n2;
+      }
+    return o2;
+  };
+  m = pass(m);
+  return m;
+})();
+for (let i = 0; i < lum.length; i++) lum[i] = Math.min(1, Math.max(0, lum[i] + LOCAL_AMOUNT * (lum[i] - wide[i])));
+
 const inside = [...lum].filter((_, i) => figure[i] > 0).sort((a, b) => a - b);
 const head = [...lum].filter((_, i) => figure[i] > 0 && i < W * H * HEAD).sort((a, b) => a - b);
-const lo = head[Math.floor(head.length * 0.05)];
+const lo = head[Math.floor(head.length * 0.12)];
 const hi = head[Math.floor(head.length * 0.97)];
 
 // Edges: Sobel magnitude of the brightness, normalised at its 98th percentile
@@ -177,7 +218,7 @@ for (let y = 0; y < H; y++) {
     const t = Math.min(1, Math.max(0, (lum[i] - lo) / (hi - lo)));
     const e = Math.min(1, edge[i] / edgeHi);
     const s = t * t * (3 - 2 * t);
-    const tone = (1 - EDGES) * Math.pow(s, 2.4) + EDGES * e;
+    const tone = (1 - EDGES) * Math.pow(s, 1.9) + EDGES * e;
     const density = (FLOOR + (1 - FLOOR) * tone) * soft[i] * fade;
     out[i] = Math.round(density * 255);
   }

@@ -130,7 +130,7 @@ const DEPTH_CSS_CAP = 2.5;
  * the toggle selector `initMotionToggles` queries (§5.2). Neither may reach
  * the gate or the 404.
  */
-const DEPTH_MARKERS = ['depth-ready', 'data-motion-toggle'];
+const DEPTH_MARKERS = ['depth-ready'];
 
 // ───────────────────────────────────────────────────── vocabulary (§1, §5.1)
 

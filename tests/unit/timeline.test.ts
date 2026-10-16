@@ -79,6 +79,13 @@ test('blendLayout eases placement across the whole transition', () => {
   assert.ok(early.cx < 0.62 && early.cx > 0.55, `no jump early: ${early.cx}`);
 });
 
+test('blendLayout blends the dot size only when a side sets one', () => {
+  const a = { cx: 0, scale: 1, dim: 0 };
+  assert.equal(blendLayout(a, a, 0.5).dot, undefined);
+  assert.equal(blendLayout({ ...a, dot: 0.5 }, a, 1).dot, 1);
+  assert.equal(blendLayout({ ...a, dot: 0.5 }, a, 0).dot, 0.5);
+});
+
 test('follow finishes the shown morph before switching to the next pair', () => {
   const shown = { from: 'a', to: 'b', t: 0.4, side: 'right' as const };
   const step = follow(shown, { from: 'b', to: 'c', t: 0.1, side: 'right' }, 0.2);

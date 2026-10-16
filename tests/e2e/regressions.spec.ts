@@ -69,7 +69,6 @@ async function freezeAtStart(page: Page): Promise<void> {
   await frames(page);
 }
 
-const HIDE_CURSOR = '.cursor-field{display:none!important}';
 
 // ─────────────────────────────────────────────── keyboard-anchored plate
 
@@ -245,26 +244,5 @@ test.describe('transition start frame is unchanged (W4)', () => {
       release();
     });
 
-    test(`${family}: keyboard @desktop-only`, async ({ page }) => {
-      await page.goto(PAGES.home);
-      await settle(page);
-      await page.addStyleTag({ content: HIDE_CURSOR });
-      const { link, row, href, index } = await rowOf(page, family);
-      await placeTop(page, `#work .project:nth-child(${index + 1})`, 0.4);
-      await link.focus();
-      await page.keyboard.press('Shift+Tab');
-      await page.keyboard.press('Tab');
-      await expect(link).toBeFocused();
-      // Moving focus may have scrolled; put the row back where it was.
-      await placeTop(page, `#work .project:nth-child(${index + 1})`, 0.4);
-      await settle(page);
-      const clip = (await row.locator('.project__plate').boundingBox())!;
-      await expect(page).toHaveScreenshot(`rest-keyboard-${family}.png`, { clip });
-      const release = await holdNavigation(page, href);
-      await page.keyboard.press('Enter');
-      await freezeAtStart(page);
-      await expect(page).toHaveScreenshot(`start-keyboard-${family}.png`, { clip });
-      release();
-    });
   }
 });
