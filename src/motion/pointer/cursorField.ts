@@ -40,6 +40,8 @@ interface Ring {
 
 export function initCursorField(): () => void {
   if (!hasFinePointer() || prefersReducedMotion()) return () => {};
+  // The living scene owns the pointer on its pages (src/motion/scene).
+  if (document.querySelector('[data-scene]')) return () => {};
 
   const canvas = document.createElement('canvas');
   canvas.className = 'cursor-field';

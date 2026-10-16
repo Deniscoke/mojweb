@@ -130,33 +130,14 @@ for (const mode of CALM_MODES) {
       expect(await scrollDrivenAnimations(page)).toBe(0);
       await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
 
-      // The scan mounts late on purpose and draws one static frame under calm
-      // (snapshot, then loseContext). That is a handful of frames, never a loop.
-      // Its caption appears with that frame, so wait for it before judging quiet.
-      const calmCap = page.locator('.hero__scan-cap');
-      if (await calmCap.count()) await calmCap.waitFor({ state: 'visible', timeout: 8000 }).catch(() => {});
+      // The living scene mounts late on purpose and, under calm, draws its
+      // shape once in 2D per change of section: a handful of frames, never a loop.
+      await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'static', { timeout: 8000 });
       const calmQuiet = await untilQuiet(page, { quietMs: 1500, timeoutMs: 9000 });
       expect(calmQuiet.quietAt, 'something keeps animating under calm').not.toBeNull();
       expect(calmQuiet.frames, 'more than one static frame was drawn under calm').toBeLessThanOrEqual(12);
       expect(await rafDuring(page, 1000), 'a loop restarted under calm').toBe(0);
       expect((await readProbe(page)).glLive, 'a GL context is still alive under calm').toBe(0);
-    });
-
-    test('hero scan is one static frame with its caption', async ({ page }) => {
-      await page.goto(PAGES.home);
-      pending((await page.locator('.hero__scan').count()) > 0, 'W3', 'the hero scan host');
-      await settle(page);
-      await page.waitForTimeout(3500);
-      const probe = await readProbe(page);
-      expect(probe.glLive, 'calm snapshots to 2D, then loseContext()').toBe(0);
-      if (probe.gl > 0) {
-        // It drew: the frame stays, as 2D, and the caption says what it is.
-        await expect(page.locator('.hero__scan canvas').first()).toBeVisible();
-        await expect(page.locator('.hero__scan-cap')).toBeVisible();
-      } else {
-        // Gated out (no GPU here): nothing drawn, so nothing captioned.
-        await expect(page.locator('.hero__scan-cap')).toBeHidden();
-      }
     });
 
     test('a project row is a plain link @desktop-only', async ({ page }) => {
@@ -193,12 +174,9 @@ test.describe('idle (WCAG 2.2.2)', () => {
   test('no input for 3 s after load: zero rAF', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
-    // The scan's arrival is the one autonomous moment (< 3 s). If it played,
-    // the clock starts from its first frame.
-    // It mounts after load + idle + on screen (about 3 s), so wait for its
-    // caption — shown with the first frame — unless this browser cannot run it.
-    const cap = page.locator('.hero__scan-cap');
-    if (await cap.count()) await cap.waitFor({ state: 'visible', timeout: 8000 }).catch(() => {});
+    // The living scene's arrival (the name gathering, 1.8 s) is the one
+    // autonomous moment. It mounts after reveal + idle; wait for it to exist.
+    await expect(page.locator('html')).toHaveAttribute('data-scene-tier', /./, { timeout: 8000 });
     const idle = await untilQuiet(page, { quietMs: 1500, timeoutMs: 9000 });
     expect(idle.quietAt, 'the page never stopped animating on its own').not.toBeNull();
     expect(idle.quietAt!, 'autonomous motion ran longer than 5 s (WCAG 2.2.2)').toBeLessThanOrEqual(5000);
@@ -366,21 +344,6 @@ test.describe('what loads where (§5.2, §5.3)', () => {
 // ───────────────────────────────────────────────────────────── hero (W3)
 
 test.describe('hero (§3.1)', () => {
-  test('desktop floor has 12 rules; the scan caption is never shown for nothing @desktop-only', async ({ page }) => {
-    await page.goto(PAGES.home);
-    await settle(page);
-    expect(await page.locator('.hero__rules > span:visible').count()).toBe(12);
-    if (!pendingTail((await page.locator('.hero__scan').count()) > 0, 'W3', 'the hero scan host')) return;
-    await expect(page.locator('.hero__scan')).toHaveAttribute('aria-hidden', 'true');
-    await page.waitForTimeout(3500);
-    const probe = await readProbe(page);
-    if (probe.gl === 0) await expect(page.locator('.hero__scan-cap')).toBeHidden();
-    // The caption is a real link to the note the scan came from.
-    const href = await page.locator('.hero__scan-cap').getAttribute('href');
-    expect(href).toMatch(/^\/en\/(lab|projects)\/[\w-]+\/$/);
-    expect((await page.request.get(href!)).status()).toBe(200);
-  });
-
   test('statement and intro meet AA, sampled from pixels', async ({ page }) => {
     // The same measurement the gpu project makes with the scan drawn; here it
     // proves the sampler and holds today's numbers.
@@ -392,20 +355,6 @@ test.describe('hero (§3.1)', () => {
     ]) {
       expect(await textContrast(page, selector), selector).toBeGreaterThanOrEqual(min);
     }
-  });
-
-  test('phone stage: 11rem band, four rules, no layout shift @mobile-only', async ({ page }) => {
-    await page.goto(PAGES.home);
-    pending((await page.locator('.hero__stage').count()) > 0, 'W3', 'the mobile .hero__stage band');
-    const atFirstLook = await page.locator('.hero__stage').boundingBox();
-    await settle(page);
-    await page.waitForTimeout(3000);
-    const after = await page.locator('.hero__stage').boundingBox();
-    expect(atFirstLook!.height).toBeCloseTo(176, 0);
-    expect(after!.y).toBeCloseTo(atFirstLook!.y, 0);
-    expect(await page.locator('.hero__stage').getAttribute('aria-hidden')).toBe('true');
-    expect(await page.locator('.hero__rules > span:visible').count()).toBe(4);
-    expect((await readProbe(page)).glLive).toBeLessThanOrEqual(1);
   });
 });
 

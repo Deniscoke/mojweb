@@ -219,9 +219,14 @@ export function initScene(): () => void {
 
   const loop = createLoop((dt, now) => {
     const target = resolve(anchors, window.scrollY);
+    const calm = prefersReducedMotion();
     const k = 1 - Math.exp(-dt / EASE_MS);
 
-    if (mode === 'arrival') {
+    if (calm) {
+      // Calm: the shape simply is the section's, at once. One frame per change.
+      mode = 'scroll';
+      shown = target;
+    } else if (mode === 'arrival') {
       const t = Math.min((now - modeStart) / ARRIVAL_MS, 1);
       shown = { from: 'scatter', to: target.from, t, side: target.side };
       if (t >= 1) mode = 'scroll';
@@ -246,7 +251,7 @@ export function initScene(): () => void {
     }
 
     const y = window.scrollY;
-    velocity += (Math.min(Math.abs(y - lastY) / innerHeight / 0.05, 1) - velocity) * k;
+    velocity = calm ? 0 : velocity + (Math.min(Math.abs(y - lastY) / innerHeight / 0.05, 1) - velocity) * k;
     lastY = y;
     if (now - lastPointer > 500) pointer[2] += (0 - pointer[2]) * k;
 
@@ -257,7 +262,6 @@ export function initScene(): () => void {
     }
     canvas.dataset.sceneState = shown.t >= 0.5 ? shown.to : shown.from;
 
-    const calm = prefersReducedMotion();
     const layout = {
       ...layoutFor(shown.side, innerWidth),
       ...(innerWidth >= 992 && shown.side !== 'full' ? placement.get(shown.t >= 0.5 ? shown.to : shown.from) : undefined),

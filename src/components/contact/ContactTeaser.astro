@@ -17,14 +17,13 @@ const dict = useTranslations(lang);
  * plausible-looking address that bounces, and a CTA with no destination is
  * worse than no CTA.
  *
- * This is the second and last use of the SVG line-drawing motif (motion
- * reference 07). A single long stroke closes the page — the same gesture the
- * project plates open with.
+ * The page closes on the living scene: its points gather into an arrow
+ * toward the CTA (`data-scene="arrow"`, src/motion/scene). The line-drawing
+ * stroke that used to close the page is gone — one moving system, not two.
  *
  * DEPTH (docs/motion-depth-plan.md §3.9): the landing. The title arrives
  * from slightly behind the page and has settled before it reaches the
- * reading band. The stroke keeps its one-off draw (never scrubbed, so it can
- * never be left half drawn) and the actions get no scroll motion at all.
+ * reading band. The actions get no scroll motion at all.
  */
 const email = site.contact.email;
 const phone = site.contact.phone;
@@ -45,24 +44,6 @@ const links = site.contact.links.filter((link) => Boolean(link.href));
       </h2>
     </div>
 
-    <!-- The closing stroke. Draws once, when the section arrives. -->
-    <svg
-      class="contact__stroke"
-      viewBox="0 0 1000 60"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-      data-reveal
-      data-draw-group
-      style="--reveal-delay:160ms"
-    >
-      <path
-        d="M0,58 C220,58 260,6 500,6 C740,6 780,58 1000,58"
-        fill="none"
-        stroke="var(--c-signal)"
-        stroke-width="1.5"
-        pathLength="1"
-        data-draw></path>
-    </svg>
 
     <p class="lead contact__lead" data-reveal style="--reveal-delay:200ms">{dict.contact.lead}</p>
 
@@ -143,11 +124,6 @@ const links = site.contact.links.filter((link) => Boolean(link.href));
     text-wrap: balance;
   }
 
-  .contact__stroke {
-    inline-size: 100%;
-    block-size: clamp(2.5rem, 6vw, 4rem);
-    overflow: visible;
-  }
 
   .contact__lead {
     max-inline-size: 40ch;

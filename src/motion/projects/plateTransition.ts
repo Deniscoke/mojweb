@@ -353,8 +353,8 @@ function go(run: Run) {
 
 /**
  * The row's plate where it is on screen right now, if it is shown at all:
- * the carried preview, the keyboard anchor, a card, or the plate standing in
- * the desktop band (SelectedWork). pointerPreview picks a plate up from here.
+ * the keyboard anchor or a phone card. On a desk the plate is hidden (the
+ * living scene draws it), so the transition grows from the screen's centre.
  */
 export function shownPlate(row: HTMLElement): DOMRect | null {
   const plate = row.querySelector<HTMLElement>('.project__plate');

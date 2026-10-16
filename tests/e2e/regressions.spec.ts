@@ -71,62 +71,9 @@ async function freezeAtStart(page: Page): Promise<void> {
 
 const HIDE_CURSOR = '.cursor-field{display:none!important}';
 
-/**
- * The preview eases towards the pointer and stops within 0.4 px of it, so
- * where it rests differs by a sub-pixel from run to run. For a pixel
- * comparison it is put on the pointer once the loop has stopped, on whole
- * device pixels: the plate is centred on the pointer with `-50%`, and an
- * odd height would otherwise leave it on a half pixel.
- */
-async function pinPreview(page: Page, x: number, y: number): Promise<void> {
-  await page.evaluate(
-    ([px, py]) => {
-      const work = document.querySelector<HTMLElement>('[data-work]');
-      const plate = work?.querySelector<HTMLElement>('[data-preview-active] .project__plate');
-      if (!work || !plate) return;
-      const { offsetWidth: w, offsetHeight: h } = plate;
-      work.style.setProperty('--preview-x', `${Math.round(px - w / 2) + w / 2}px`);
-      work.style.setProperty('--preview-y', `${Math.round(py - h / 2) + h / 2}px`);
-    },
-    [x, y] as const,
-  );
-  await frames(page);
-}
+// ─────────────────────────────────────────────── keyboard-anchored plate
 
-// ──────────────────────────────────────────────── cursor-carried preview
-
-test.describe('Selected Work preview @desktop-only', () => {
-  test('the plate follows the pointer, and stays fixed to the viewport when the page scrolls', async ({ page }) => {
-    await page.goto(PAGES.home);
-    await settle(page);
-    const { row, index } = await rowOf(page, 'grid');
-    const { x, y } = await hoverRow(page, index);
-    const plate = row.locator('.project__plate');
-    await expect(plate).toHaveCSS('position', 'fixed');
-    await expect(plate).toHaveCSS('opacity', '1');
-    await page.waitForTimeout(700);
-    const a = (await plate.boundingBox())!;
-
-    await page.mouse.move(x + 120, y + 6, { steps: 6 });
-    await page.waitForTimeout(700);
-    const b = (await plate.boundingBox())!;
-    expect(b.x - a.x).toBeCloseTo(120, -0.5);
-    expect(b.y - a.y).toBeCloseTo(6, -0.5);
-
-    // A transformed ancestor would turn `fixed` into "fixed to the ancestor":
-    // after a scroll the plate would sit somewhere else for the same pointer.
-    await page.mouse.wheel(0, 40);
-    await page.waitForTimeout(150);
-    await page.mouse.move(x + 121, y + 6);
-    await page.mouse.move(x + 120, y + 6);
-    await page.waitForTimeout(700);
-    if (await row.evaluate((el) => el.hasAttribute('data-preview-active'))) {
-      const c = (await plate.boundingBox())!;
-      expect(Math.abs(c.x - b.x)).toBeLessThanOrEqual(2);
-      expect(Math.abs(c.y - b.y)).toBeLessThanOrEqual(2);
-    }
-  });
-
+test.describe('Selected Work keyboard plate @desktop-only', () => {
   test('the keyboard-anchored plate does not lean', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
@@ -149,12 +96,11 @@ test.describe('plate transition', () => {
     test(`${family}: pointer click grows the plate and lands on the project, cover up @desktop-only`, async ({ page }) => {
       await page.goto(PAGES.home);
       await settle(page);
-      const { href, index, row } = await rowOf(page, family);
-      await hoverRow(page, index);
-      await expect(row).toHaveAttribute('data-preview-active', '');
+      // On a desk the plate is not shown in the row any more (the living
+      // scene draws it): a plain click still grows a plate into the page.
+      const { href, link } = await rowOf(page, family);
       const started = Date.now();
-      await page.mouse.down();
-      await page.mouse.up();
+      await link.click();
       await expect(page.locator('.pt')).toHaveCount(1);
       expect(await page.evaluate(() => document.documentElement.hasAttribute('data-plate-transition'))).toBe(true);
       await page.waitForURL(`**${href}`, { waitUntil: 'commit' });
@@ -280,77 +226,10 @@ test('Splatoo click-to-load inserts the sandboxed iframe, focuses it, leaves no 
 
 // ─────────────────────────────────────────────── pointer layers on top
 
-test.describe('pointer layers @desktop-only', () => {
-  test('the cursor field is a fixed, inert, full-viewport canvas on <body>', async ({ page }) => {
-    await page.goto(PAGES.home);
-    await settle(page);
-    await page.mouse.move(300, 300);
-    await page.mouse.move(500, 420, { steps: 5 });
-    const field = page.locator('canvas.cursor-field');
-    await expect(field).toHaveCount(1);
-    await expect(field).toHaveAttribute('aria-hidden', 'true');
-    await expect(field).toHaveCSS('position', 'fixed');
-    await expect(field).toHaveCSS('pointer-events', 'none');
-    expect(await field.evaluate((el) => el.parentElement === document.body)).toBe(true);
-    await page.mouse.wheel(0, 1200);
-    await page.waitForTimeout(300);
-    const box = (await field.boundingBox())!;
-    expect([box.x, box.y, box.width, box.height]).toEqual([0, 0, 1440, 900]);
-  });
-
-  test('hero pointer parallax still moves its layers and composes with the reveal', async ({ page }) => {
-    await page.goto(PAGES.home);
-    await settle(page);
-    await page.mouse.move(200, 200);
-    await page.mouse.move(1200, 700, { steps: 10 });
-    await page.waitForTimeout(400);
-    const moved = await page.evaluate(() =>
-      [...document.querySelectorAll<HTMLElement>('[data-parallax]')].map((el) => ({
-        offset: el.style.translate || el.style.transform,
-        opacity: getComputedStyle(el).opacity,
-      })),
-    );
-    expect(moved.length).toBeGreaterThan(0);
-    for (const layer of moved) {
-      expect(layer.offset).not.toBe('');
-      expect(layer.opacity).toBe('1');
-    }
-  });
-});
-
 // ─────────────────────────────────────────── the transition's first frame
 
 test.describe('transition start frame is unchanged (W4)', () => {
   for (const family of FAMILIES) {
-    test(`${family}: pointer @desktop-only`, async ({ page }) => {
-      await page.goto(PAGES.home);
-      await settle(page);
-      await page.addStyleTag({ content: HIDE_CURSOR });
-      const { row, href, index } = await rowOf(page, family);
-      const { x, y } = await hoverRow(page, index);
-      await page.waitForTimeout(900);
-      await pinPreview(page, x, y);
-      await settle(page);
-      const clip = (await row.locator('.project__plate').boundingBox())!;
-      // A layer that has just finished a scale/rotate transition is
-      // occasionally re-rastered a few anti-aliased pixels differently (seen:
-      // 9 px in 1 of 75 runs). While the plate is carried, the lift also
-      // rests 0.5 px in front of the base by design (two layers in one plane
-      // flicker), which re-rasters accent edges by a sub-pixel: measured
-      // 2026-10-17 up to 79 px on orbit (two arcs of a 1 px ring) and 227 px
-      // on grid (one AA column on ~20 square edges) — the reference predates
-      // the lift. A lift misregistered by 2 px bands every accent edge
-      // (~800 px on grid), and a visible 40 % base accent more still.
-      const carried = { clip, maxDiffPixels: 400 };
-      await expect(page).toHaveScreenshot(`rest-pointer-${family}.png`, carried);
-      const release = await holdNavigation(page, href);
-      await page.mouse.down();
-      await page.mouse.up();
-      await freezeAtStart(page);
-      await expect(page).toHaveScreenshot(`start-pointer-${family}.png`, carried);
-      release();
-    });
-
     test(`${family}: touch @mobile-only`, async ({ page }) => {
       await page.goto(PAGES.home);
       await settle(page);
@@ -388,35 +267,4 @@ test.describe('transition start frame is unchanged (W4)', () => {
       release();
     });
   }
-});
-
-// ───────────────────────────────────────── the Selected Work band (≥ 80rem)
-
-test.describe('Selected Work band (desktop, no hover)', () => {
-  test('a row crossing the middle shows its plate; a still pointer summons nothing @desktop-only', async ({ page }) => {
-    await page.goto(PAGES.home);
-    await settle(page);
-    const row = page.locator('[data-project-row]').nth(1);
-    // Scroll with the wheel only: the pointer never moves.
-    await row.evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      window.scrollBy({ top: r.top + r.height / 2 - innerHeight / 2, behavior: 'instant' });
-    });
-    await frames(page);
-    await page.waitForTimeout(300);
-    const plate = row.locator('.project__plate');
-    const state = await plate.evaluate((el) => {
-      const cs = getComputedStyle(el);
-      return { opacity: Number(cs.opacity), position: cs.position };
-    });
-    expect(state.position, 'the band plate stands in its row, not under the cursor').toBe('absolute');
-    expect(state.opacity, 'the band plate is visible mid-band').toBeGreaterThan(0);
-    expect(await page.locator('[data-project-row][data-preview-active]').count(), 'a still pointer summoned the cursor preview').toBe(0);
-
-    // The first real move over a row summons the cursor-carried plate.
-    const box = (await row.boundingBox())!;
-    await page.mouse.move(box.x + box.width * 0.3, box.y + box.height / 2);
-    await page.mouse.move(box.x + box.width * 0.32, box.y + box.height / 2 + 4);
-    await expect(page.locator('[data-project-row][data-preview-active]')).toHaveCount(1);
-  });
 });

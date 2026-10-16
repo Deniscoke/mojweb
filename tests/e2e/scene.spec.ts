@@ -88,4 +88,14 @@ test.describe('living scene', () => {
     await centre(page, '[data-scene="scan"]');
     await expectState(page, 'scan');
   });
+
+  test('old layers are gone from home', async ({ page }) => {
+    await page.goto(PAGES.home);
+    await settle(page);
+    for (const sel of ['.hero__floor', '.hero__ground', '.hero__rules', '.hero__scan', 'canvas.cursor-field', '[data-preview-on]', '.contact__stroke']) {
+      await expect(page.locator(sel), sel).toHaveCount(0);
+    }
+    expect(await page.evaluate(() => getComputedStyle(document.body, '::after').content)).toBe('none');
+  });
 });
+
