@@ -23,7 +23,7 @@ Všetko tu je overené. Čo tu nie je, si over v kóde a nedomýšľaj si to.
 | `feat/living-scene` | **nová verzia z `feat/motion-depth`: „živá scéna“**. Hotová, otestovaná, pushnutá. |
 
 **Vercel náhľad** vetvy `feat/living-scene` (chránený prihlásením do Vercelu, Denisov účet):
-https://mojweb2-3t0y28qus-denis-mitrovics-projects.vercel.app/sk/ (commit `eedc4b5`)
+https://mojweb2-c9lzxcsqm-denis-mitrovics-projects.vercel.app/sk/ (commit `1972f8f`)
 
 **ČAKÁ SA NA DENISA:** pozrie si náhľad `feat/living-scene` a povie OK, alebo čo zmeniť.
 Po jeho OK: `git checkout main && git merge --no-ff feat/living-scene && git push`, potom over živý web.
