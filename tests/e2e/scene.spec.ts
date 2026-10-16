@@ -42,11 +42,11 @@ test.describe('living scene', () => {
     await expectState(page, 'portrait');
   });
 
-  test('scrolling to Lab sets state scan', async ({ page }) => {
+  test('scrolling to Lab sets state question', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
-    await centre(page, '[data-scene="scan"]');
-    await expectState(page, 'scan');
+    await centre(page, '[data-scene="question"]');
+    await expectState(page, 'question');
   });
 
   test('scene keeps the right state after resize', async ({ page }) => {
@@ -103,8 +103,8 @@ test.describe('living scene', () => {
     );
     await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'static');
     await expect(page.locator('canvas.scene')).toHaveCount(1);
-    await centre(page, '[data-scene="scan"]');
-    await expectState(page, 'scan');
+    await centre(page, '[data-scene="question"]');
+    await expectState(page, 'question');
   });
 
   test('old layers are gone from home', async ({ page }) => {
@@ -224,4 +224,17 @@ test.describe('living scene', () => {
     expect(Math.abs(start![0] - (left + width / 2))).toBeLessThan(24);
     expect(Math.abs(start![1] - (top + height / 2))).toBeLessThan(24);
   });
+
+  test('home never requests a scan file', async ({ page }) => {
+    const requested: string[] = [];
+    page.on('request', (r) => requested.push(r.url()));
+    await page.goto(PAGES.home);
+    await settle(page);
+    await wake(page);
+    await centre(page, '#lab');
+    await page.waitForTimeout(1500);
+    expect(requested.filter((u) => u.endsWith('.bin'))).toEqual([]);
+    await expect(page.locator('.lab__scan-cap')).toHaveCount(0);
+  });
 });
+

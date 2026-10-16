@@ -28,6 +28,6 @@ test('the living scene resumes after a bfcache restore', async ({ page }) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const restored = await expect.poll(() => page.evaluate(() => (window as any).__ps.at(-1)), { timeout: 8000 }).toBe(true).then(() => true, () => false);
   test.skip(!restored, 'the page was not restored from bfcache in this run');
-  await page.evaluate(() => document.querySelector('[data-scene="scan"]')!.scrollIntoView({ block: 'center', behavior: 'instant' }));
-  await expect.poll(() => page.locator('canvas.scene').getAttribute('data-scene-state'), { timeout: 8000 }).toBe('scan');
+  await page.evaluate(() => document.querySelector('[data-scene="question"]')!.scrollIntoView({ block: 'center', behavior: 'instant' }));
+  await expect.poll(() => page.locator('canvas.scene').getAttribute('data-scene-state'), { timeout: 8000 }).toBe('question');
 });

@@ -25,7 +25,6 @@
  *   chunks    the lazy chunks of §5.4 against their own caps, and the total
  *             JS growth against the sum of those caps. A lazy chunk found on
  *             any page's initial import graph is an error, not a size.
- *   scans     point-scan .bin files, raw bytes (octet-stream may not be gzipped).
  *   depth.css the core primitives file, minified and gzipped, ≤ 2.5 KB.
  *   lint      the owner rule, forbidden ancestors (attributes, inline styles
  *             and CSS rules), the triple gate around `animation-timeline`, the
@@ -105,7 +104,7 @@ const LAZY_CHUNKS = [
   { id: 'depth/tilt', match: /^tilt\./, cap: 1.3 },
   // The living scene (docs/superpowers/specs/2026-10-16-living-scene-design.md):
   // runtime, morph, shapes and the shared gl.ts; measured 6.4 KB at landing.
-  { id: 'scene', match: /^(?:scene|morph|shapes|points|timeline|scanData|glyphs|gl)\./, cap: 9 },
+  { id: 'scene', match: /^(?:scene|morph|shapes|points|timeline|glyphs|gl)\./, cap: 9 },
   { id: 'scene/fallback', match: /^fallback\./, cap: 1.5 },
   { id: 'media/depthPhoto', match: /^depthPhoto\./, cap: 2.0 },
 ];
@@ -115,12 +114,6 @@ const LAZY_CHUNKS = [
  * engine's mount 1.3 and gl + pointScan 4.5 left with the hero scan.
  */
 const TOTAL_NEW_JS_CAP = 15.8;
-
-/** Raw KB, §5.3. */
-const SCAN_CAPS = [
-  { match: /-desktop\.bin$/, cap: 70 },
-  { match: /-mobile\.bin$/, cap: 28 },
-];
 
 const DEPTH_CSS = 'src/styles/depth.css';
 const DEPTH_CSS_CAP = 2.5;
@@ -428,7 +421,6 @@ function flattensDecl({ prop, value }) {
 async function readSite(dist) {
   const pages = [];
   const chunks = new Map();
-  const scans = [];
 
   for await (const file of walk(dist)) {
     const rel = toPosix(relative(dist, file));
@@ -450,12 +442,10 @@ async function readSite(dist) {
     } else if (rel.startsWith('_astro/') && rel.endsWith('.js')) {
       const text = await readFile(file, 'utf8');
       chunks.set(`/${rel}`, { name: posix.basename(rel), text, gz: gz(text), ...importsOf(text, `/${rel}`) });
-    } else if (rel.startsWith('assets/scans/') && rel.endsWith('.bin')) {
-      scans.push({ name: posix.basename(rel), bytes: (await stat(file)).size });
     }
   }
   pages.sort((a, b) => a.route.localeCompare(b.route));
-  return { pages, chunks, scans };
+  return { pages, chunks };
 }
 
 /**
@@ -572,12 +562,6 @@ export async function runChecks({ dist, baseline, depthCss = join(root, DEPTH_CS
     error('total-js', '_astro/', `all JS ${signed(totalDelta)} gz over baseline (cap +${TOTAL_NEW_JS_CAP} KB, the §5.4 table)`);
   }
 
-  // ── scan data
-  for (const scan of site.scans) {
-    const cap = SCAN_CAPS.find((c) => c.match.test(scan.name));
-    if (!cap) warn('scan-bin', scan.name, 'neither -desktop nor -mobile: no cap applies');
-    else if (scan.bytes > cap.cap * KB) error('scan-bin', scan.name, `${fmt(scan.bytes)} raw (cap ${cap.cap} KB)`);
-  }
 
   // ── depth.css core
   let depthCssBytes = null;
@@ -592,7 +576,7 @@ export async function runChecks({ dist, baseline, depthCss = join(root, DEPTH_CS
   for (const page of site.pages) lintPage(page, initialByPage.get(page.route), { error, warn });
   lintChunks(site, { error });
 
-  return { errors, warnings, measured, byType, lazy, totalJs, totalDelta, scans: site.scans, depthCssBytes, pages: site.pages.length };
+  return { errors, warnings, measured, byType, lazy, totalJs, totalDelta, depthCssBytes, pages: site.pages.length };
 }
 
 function typeMax(baseline, type) {
@@ -721,17 +705,6 @@ function lintPage(page, initial, { error, warn }) {
     }
   }
 
-  // §3.1 / §11 no-JS: the scan caption describes a JS-only visual, so it is
-  // hidden in the markup and the script reveals it after the first frame.
-  for (const el of elements) {
-    if (el.classes.has('hero__scan-cap') && !el.attrs.has('hidden')) {
-      error('scan-caption', where, `${describe(el)} must ship with \`hidden\` (a no-JS visitor would see a caption for nothing)`);
-    }
-    if (el.classes.has('hero__scan') && el.attrs.get('aria-hidden') !== 'true') {
-      error('scan-caption', where, `${describe(el)} must be aria-hidden="true"`);
-    }
-  }
-
   // CSP: scripts come from 'self' only.
   for (const { attrs } of page.scripts) {
     const src = attrs.get('src');
@@ -813,7 +786,6 @@ function printReport(result, baseline) {
   }
   out.push(`  all JS                        ${fmt(result.totalJs)} gz, ${signed(result.totalDelta)} / +${TOTAL_NEW_JS_CAP} KB`);
   out.push(`  depth.css                     ${result.depthCssBytes === null ? `not built yet (cap ${DEPTH_CSS_CAP} KB)` : `${fmt(result.depthCssBytes)} gz / ${DEPTH_CSS_CAP} KB`}`);
-  out.push(`  scan .bin                     ${result.scans.length ? result.scans.map((s) => `${s.name} ${fmt(s.bytes)}`).join(', ') : 'none built'}`);
   out.push('');
   for (const w of result.warnings) out.push(`  warn  [${w.rule}] ${w.where}: ${w.message}`);
   for (const e of result.errors) out.push(`  FAIL  [${e.rule}] ${e.where}: ${e.message}`);
@@ -892,7 +864,6 @@ async function selfTest() {
     ['chunk-cap', { '_astro/tilt.AbC123.js': `export const t="${noise(2600)}";`, '_astro/home.js': `import("./tilt.AbC123.js");` }],
     ['lazy-on-initial', { '_astro/tilt.AbC123.js': `export const t=1;`, '_astro/home.js': `import"./tilt.AbC123.js";` }],
     ['total-js', { '_astro/unreferenced.js': `export const u="${noise(24000)}";` }],
-    ['scan-bin', { 'assets/scans/kasna-0a1b2c-desktop.bin': randomBytes(80 * KB) }],
     ['depth-css', {}, { depthCss: join(work, 'depth-big.css') }],
     ['owner', home({ body: homeBody('<p data-reveal data-depth="rise">x</p>') })],
     ['owner', home({ body: homeBody('<div data-tilt data-magnetic>x</div>') })],
@@ -908,7 +879,6 @@ async function selfTest() {
     ['triple-gate', home({ css: '@supports (animation-timeline:view()){.x{animation-timeline:scroll(root)}}' })],
     ['flatten', home({ css: '.stage{transform-style:preserve-3d;overflow:hidden}' })],
     ['gate-js', { '_astro/gate.js': `import{r}from"./env.js";document.documentElement.classList.add("depth-ready");` }],
-    ['scan-caption', home({ body: homeBody('<a class="mono hero__scan-cap" href="/en/lab/x/">SCAN</a>') })],
     ['csp', { '_astro/later.js': `export const f=new Function("return 1");` }],
     ['csp', home({ scripts: '<script src="https://cdn.example.com/x.js"></script>' })],
   ];

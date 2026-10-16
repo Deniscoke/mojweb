@@ -8,7 +8,6 @@
  * properties, which an isolated SVG image would not resolve.
  */
 import { fitCount, rng, sampleMask, sampleWeighted, scatter } from './points.ts';
-import { scanPositions } from './scanData.ts';
 
 /** Most points ever sampled from one plate's geometry. */
 const SAMPLES = 1500;
@@ -142,9 +141,4 @@ export function imageShape(
 ): Float32Array {
   const { alpha, w: rw, h: rh } = raster((ctx, cw, ch) => ctx.drawImage(img, 0, 0, cw, ch), w, h);
   return sampleWeighted(alpha, rw, rh, n, seed);
-}
-
-/** The scan at exactly n points; a file that fails to parse gives the scatter. */
-export function scanShape(buf: ArrayBuffer, n: number, seed: number): Float32Array {
-  return fitCount(scanPositions(buf) ?? scatter(n, seed), n, seed);
 }

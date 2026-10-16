@@ -13,10 +13,10 @@
  */
 import { createGL, type GL } from '../ambient/gl';
 import { canAffordGL, createLoop, fontsReady, hasFinePointer, idle, onMotionPreferenceChange, prefersReducedMotion, renderScale } from '../utils/env';
-import { CREDO } from './glyphs.ts';
+import { CREDO, QUESTION } from './glyphs.ts';
 import { createMorph, type MorphUniforms } from './morph.ts';
 import { scatter } from './points.ts';
-import { imageShape, pathsShape, rasterize, scanShape, svgShape, textShape, type Raster } from './shapes.ts';
+import { imageShape, pathsShape, rasterize, svgShape, textShape, type Raster } from './shapes.ts';
 import { blendLayout, computeAnchors, follow, layoutFor, resolve, type Anchor, type Layout, type Pose, type SceneEntry, type Side } from './timeline.ts';
 
 export type Tier = 'desktop' | 'mobile' | 'static';
@@ -86,6 +86,7 @@ export function initScene(): () => void {
    */
   const queue: Array<() => void> = [
     () => put('credo', pathsShape(Object.values(CREDO), n, 3, raster)),
+    () => put('question', pathsShape([QUESTION], n, 4, raster)),
   ];
   let cancelSlice = () => {};
   let slicing = false;
@@ -151,25 +152,6 @@ export function initScene(): () => void {
       .then(() => !disposed && put('portrait', imageShape(img, img.naturalWidth, img.naturalHeight, n, 5, raster)))
       .catch(nameShape);
   } else nameShape();
-  const lab = sections.find((el) => el.dataset.scene === 'scan');
-  const scanUrl = lab?.dataset[fine ? 'desktop' : 'mobile'];
-  if (lab && scanUrl && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((e) => e.isIntersecting)) return;
-        io.disconnect();
-        fetch(scanUrl, { priority: 'low' } as RequestInit)
-          .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(r.status)))
-          .then((buf) => !disposed && put('scan', scanShape(buf, n, 6)))
-          .catch(() => {
-            /* No scan: the Lab keeps the scatter. */
-          });
-      },
-      { rootMargin: '200% 0px' },
-    );
-    io.observe(lab);
-    cancels.push(() => io.disconnect());
-  }
 
   // ------------------------------------------------------------ anchors
   let anchors: Anchor[] = [];

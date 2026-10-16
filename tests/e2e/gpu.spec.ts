@@ -25,7 +25,7 @@ test.beforeEach(async ({ page }) => {
  * included, which is the plan's own reason for the rule. Every long task and
  * long script is still listed on the result, for the merge review.
  */
-const DEPTH_SOURCES = /^(?:tilt|mount|pointScan|gl|depthPhoto|scene|morph|shapes|points|timeline|scanData|glyphs|fallback)\.[\w-]+\.js$/;
+const DEPTH_SOURCES = /^(?:tilt|mount|pointScan|gl|depthPhoto|scene|morph|shapes|points|timeline|glyphs|fallback|kinetic|pick)\.[\w-]+\.js$/;
 
 test('no depth script runs 50 ms while scrolling the homepage at 6× CPU throttle, scene init included @gpu', async ({ page }) => {
   const cdp = await page.context().newCDPSession(page);

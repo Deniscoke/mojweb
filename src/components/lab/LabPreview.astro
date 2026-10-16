@@ -1,9 +1,6 @@
 ---
 import { getExperiments } from '~/lib/cms';
 import { localePath, t, useTranslations } from '~/i18n';
-import { getScan, scanCaption } from '~/data/scans';
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
 
 interface Props {
   lang: string;
@@ -13,16 +10,6 @@ const { lang } = Astro.props;
 const dict = useTranslations(lang);
 const experiments = await getExperiments(lang);
 
-/**
- * The living scene turns into Denis's scan while this section is centred
- * (src/motion/scene). The scan keeps its `hero` approval record; it only
- * moved down the page. Both files must be in this build, or there is no scan.
- */
-const approved = getScan('hero');
-const scan =
-  approved && [approved.files.desktop, approved.files.mobile].every((url) => existsSync(join(process.cwd(), 'public', url)))
-    ? approved
-    : undefined;
 
 /**
  * THE LAB — a notebook, not a second project grid.
@@ -56,10 +43,9 @@ const scan =
     <header
       class="section__head grid12"
       data-reveal
-      data-scene="scan"
+      data-scene="question"
       data-scene-side="right"
-      data-desktop={scan?.files.desktop}
-      data-mobile={scan?.files.mobile}
+      data-scene-scale="0.34"
     >
       <p class="mono section__label">
         <span class="section__index">03</span>
@@ -68,16 +54,6 @@ const scan =
       <div class="section__intro">
         <h2 id="lab-title">{dict.lab.title}</h2>
         <p class="lead">{dict.lab.lead}</p>
-        {
-          /* What the points become here, and where the capture comes from.
-             Under the lead, clear of the scan standing on the right. */
-          scan && (
-            <a class="mono lab__scan-cap" href={localePath(lang, scan.href)}>
-              {scanCaption(scan, lang)}
-              <span aria-hidden="true">→</span>
-            </a>
-          )
-        }
       </div>
     </header>
 
@@ -188,20 +164,7 @@ const scan =
     }
   }
 
-  .lab__scan-cap {
-    display: inline-flex;
-    margin-block-start: var(--s-3);
-    align-items: center;
-    gap: var(--s-2);
-    min-block-size: 44px;
-    color: var(--c-bone-faint);
-    transition: color var(--d-fast) var(--e-out);
-  }
 
-  .lab__scan-cap:hover,
-  .lab__scan-cap:focus-visible {
-    color: var(--c-bone);
-  }
 
   /* ------------------------------------------------------- the instrument */
 
