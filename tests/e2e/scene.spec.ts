@@ -4,8 +4,8 @@ import { PAGES, settle, useStoredCalm } from './support';
 /**
  * THE LIVING SCENE (docs/superpowers/specs/2026-10-16-living-scene-design.md)
  *
- * One canvas behind the homepage; the shape on screen follows the section in
- * the middle of the viewport. The choreography runs on every tier, so these
+ * One canvas behind the homepage, loaded with the visitor's first input; the
+ * shape on screen follows the section in the middle of the viewport. The choreography runs on every tier, so these
  * checks read `data-scene-state` and hold in headless Chrome too, where
  * `failIfMajorPerformanceCaveat` refuses WebGL and the scene draws in 2D.
  */
@@ -17,20 +17,28 @@ async function centre(page: Page, selector: string): Promise<void> {
 }
 
 async function expectState(page: Page, id: string): Promise<void> {
-  await expect.poll(() => state(page), { timeout: 8000 }).toBe(id);
+  await expect.poll(() => state(page), { timeout: 10_000 }).toBe(id);
+}
+
+/** The scene arrives with the first input; a small mouse move is one. */
+async function wake(page: Page): Promise<void> {
+  await page.mouse.move(12, 12);
+  await page.mouse.move(24, 24);
 }
 
 test.describe('living scene', () => {
   test('home has exactly one scene canvas', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
-    await expect(page.locator('canvas.scene')).toHaveCount(1);
+    await wake(page);
+    await expect(page.locator('canvas.scene')).toHaveCount(1, { timeout: 10_000 });
     await expect(page.locator('html')).toHaveAttribute('data-scene-tier', /^(desktop|mobile|static)$/);
   });
 
   test('the name arrives first', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
+    await wake(page);
     await expectState(page, 'name');
   });
 
@@ -51,9 +59,15 @@ test.describe('living scene', () => {
     await expectState(page, 'credo');
   });
 
-  test('subpages have no scene canvas', async ({ page }) => {
+  test('nothing loads before the first input, and subpages never get it', async ({ page }) => {
+    await page.goto(PAGES.home);
+    await settle(page);
+    await page.waitForTimeout(3000);
+    await expect(page.locator('canvas.scene')).toHaveCount(0);
     await page.goto(PAGES.laby);
     await settle(page);
+    await wake(page);
+    await page.waitForTimeout(1500);
     await expect(page.locator('canvas.scene')).toHaveCount(0);
   });
 
@@ -61,6 +75,7 @@ test.describe('living scene', () => {
     await useStoredCalm(page);
     await page.goto(PAGES.home);
     await settle(page);
+    await wake(page);
     await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'static');
     // A canvas that ever held a WebGL context cannot give a 2D one.
     expect(await page.evaluate(() => document.querySelector<HTMLCanvasElement>('canvas.scene')!.getContext('2d') !== null)).toBe(true);
@@ -79,6 +94,7 @@ test.describe('living scene', () => {
   test('context loss falls back to 2D @gpu', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
+    await wake(page);
     await expect(page.locator('html')).toHaveAttribute('data-scene-tier', /^(desktop|mobile)$/);
     await page.evaluate(() =>
       document.querySelector<HTMLCanvasElement>('canvas.scene')!.getContext('webgl2')!.getExtension('WEBGL_lose_context')!.loseContext(),
@@ -105,6 +121,7 @@ test.describe('living scene', () => {
     for (const lang of ['sk', 'sr', 'tr']) {
       await page.goto(`/${lang}/`);
       await settle(page);
+      await wake(page);
       expect(await page.locator('[data-scene]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.scene)), lang).toEqual(ids);
       await expectState(page, 'name');
     }

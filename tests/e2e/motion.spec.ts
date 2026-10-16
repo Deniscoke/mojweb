@@ -132,7 +132,7 @@ for (const mode of CALM_MODES) {
 
       // The living scene mounts late on purpose and, under calm, draws its
       // shape once in 2D per change of section: a handful of frames, never a loop.
-      await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'static', { timeout: 8000 });
+      await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'static', { timeout: 10_000 });
       const calmQuiet = await untilQuiet(page, { quietMs: 1500, timeoutMs: 9000 });
       expect(calmQuiet.quietAt, 'something keeps animating under calm').not.toBeNull();
       expect(calmQuiet.frames, 'more than one static frame was drawn under calm').toBeLessThanOrEqual(12);
@@ -174,9 +174,8 @@ test.describe('idle (WCAG 2.2.2)', () => {
   test('no input for 3 s after load: zero rAF', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
-    // The living scene's arrival (the name gathering, 1.8 s) is the one
-    // autonomous moment. It mounts after reveal + idle; wait for it to exist.
-    await expect(page.locator('html')).toHaveAttribute('data-scene-tier', /./, { timeout: 8000 });
+    // The living scene waits for the first input: without one, nothing on
+    // the page moves on its own.
     const idle = await untilQuiet(page, { quietMs: 1500, timeoutMs: 9000 });
     expect(idle.quietAt, 'the page never stopped animating on its own').not.toBeNull();
     expect(idle.quietAt!, 'autonomous motion ran longer than 5 s (WCAG 2.2.2)').toBeLessThanOrEqual(5000);

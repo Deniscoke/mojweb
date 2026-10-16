@@ -51,7 +51,12 @@ export function initDepth(): () => void {
   let disposed = false;
   let loading = false;
   let teardownTilt: (() => void) | null = null;
-  let teardownScene: (() => void) | null = null;
+  // The living scene's chunk. The homepage's hero asks for it with
+  // `irl:scene` on the visitor's first input (see Hero.astro); it lives here
+  // because this is the one entry with lazy imports, so Vite's preload
+  // helper stays inside this chunk instead of becoming one more request on
+  // every page. Calm and the page's lifetime are the scene's own business.
+  document.addEventListener('irl:scene', () => import('../scene/scene.ts').then((m) => m.initScene(), () => {}), { once: true });
   let cancelIdle = () => {};
 
   const wantsTilt = () =>
@@ -90,12 +95,6 @@ export function initDepth(): () => void {
   const cancelReveal = afterReveal(() => {
     cancelIdle = idle(() => {
       booted = true;
-      if (document.querySelector('[data-scene]'))
-        import('../scene/scene.ts')
-          .then((m) => {
-            if (!disposed) teardownScene = m.initScene();
-          })
-          .catch(() => {});
       if (press) document.addEventListener('touchstart', noop, { passive: true });
       sync();
     }, IDLE_TIMEOUT_MS);
@@ -113,8 +112,6 @@ export function initDepth(): () => void {
     document.removeEventListener('touchstart', noop);
     teardownTilt?.();
     teardownTilt = null;
-    teardownScene?.();
-    teardownScene = null;
     root.classList.remove('depth-ready');
   };
 }

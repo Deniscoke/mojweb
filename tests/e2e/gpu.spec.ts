@@ -67,6 +67,7 @@ test('no depth script runs 50 ms while scrolling the homepage at 6× CPU throttl
 test('statement and intro keep AA contrast with the living scene drawn behind them @gpu', async ({ page }) => {
   await page.goto(PAGES.home);
   await settle(page);
+  await page.mouse.move(12, 12); // the scene arrives with the first input
   await expect(page.locator('html'), 'the scene runs on WebGL on this GPU').toHaveAttribute('data-scene-tier', 'desktop', { timeout: 10_000 });
   // The name has arrived (1.8 s), then a little scroll sets the points travelling.
   await page.waitForTimeout(3500);
@@ -85,6 +86,7 @@ test('statement and intro keep AA contrast with the living scene drawn behind th
 test('the living scene stops drawing when input stops, and releases on calm @gpu', async ({ page }) => {
   await page.goto(PAGES.home);
   await settle(page);
+  await page.mouse.move(12, 12); // the scene arrives with the first input
   await expect(page.locator('html')).toHaveAttribute('data-scene-tier', 'desktop', { timeout: 10_000 });
   await page.waitForTimeout(3500);
   const before = (await readProbe(page)).raf;
