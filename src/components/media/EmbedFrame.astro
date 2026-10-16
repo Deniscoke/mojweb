@@ -206,6 +206,8 @@ const host = new URL(embed.src).host;
         const poster = figure?.querySelector<HTMLElement>('[data-embed-poster]');
         if (!figure || !poster) return;
         figure.dataset.loaded = '';
+        // The living scene steps down to 2D: the GPU belongs to the embed now.
+        document.dispatchEvent(new Event('irl:embed'));
 
         const frame = document.createElement('iframe');
         frame.src = button.dataset.src ?? '';

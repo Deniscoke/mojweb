@@ -47,7 +47,8 @@ export function initScene(): () => void {
   const sections = [...document.querySelectorAll<HTMLElement>('[data-scene]')];
   if (sections.length === 0) return () => {};
 
-  let tier = pickTier();
+  // A loaded embed (a 3D site in an iframe) keeps the GPU: the scene draws in 2D.
+  let tier: Tier = document.querySelector('[data-embed][data-loaded]') ? 'static' : pickTier();
   const n = COUNT[tier];
   const fine = tier === 'desktop';
   root.dataset.sceneTier = tier;
@@ -408,6 +409,10 @@ export function initScene(): () => void {
   addEventListener('pageshow', onShow);
   document.addEventListener('visibilitychange', onVisible);
   addEventListener('resize', onResize, { passive: true });
+  // A loaded embed (Splatoo's 3D viewer) gets the GPU to itself: the scene
+  // goes on in 2D.
+  const onEmbed = () => tier !== 'static' && useFallback();
+  document.addEventListener('irl:embed', onEmbed);
   const offPreference = onMotionPreferenceChange((calm) => {
     if (calm && tier !== 'static') useFallback();
     else if (!calm && tier === 'static' && pickTier() !== 'static') {
@@ -436,6 +441,7 @@ export function initScene(): () => void {
     removeEventListener('pageshow', onShow);
     document.removeEventListener('visibilitychange', onVisible);
     removeEventListener('resize', onResize);
+    document.removeEventListener('irl:embed', onEmbed);
     clearTimeout(resizeTimer);
     loop.destroy();
     painter?.dispose();

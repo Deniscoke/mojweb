@@ -33,6 +33,8 @@ test.describe('phone plates under calm are exactly today’s @mobile-only', () =
   test('every Selected Work plate', async ({ page }) => {
     await page.goto(PAGES.home);
     await settle(page);
+    // The living scene's points pass behind the cards; the plates are what is compared.
+    await page.addStyleTag({ content: NEW_LAYERS });
     const plates = page.locator('#work .project__plate');
     const count = await plates.count();
     expect(count).toBeGreaterThan(0);

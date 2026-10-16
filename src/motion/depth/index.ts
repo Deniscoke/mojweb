@@ -61,8 +61,10 @@ export function initDepth(): () => void {
   const wake = () => {
     INPUTS.forEach((t) => removeEventListener(t, wake));
     import('../scene/scene.ts').then((m) => m.initScene(), () => {});
-    // The kinetic type (GSAP) comes with it, and never under reduced motion.
-    if (!prefersReducedMotion()) import('../kinetic/kinetic.ts').then((m) => m.initKinetic(), () => {});
+    // The kinetic type (GSAP) follows in the next idle moment, never under
+    // reduced motion: evaluating GSAP is one ~25 ms task (150 ms at 6x), so it
+    // must not land on top of the input that woke the page.
+    if (!prefersReducedMotion()) idle(() => import('../kinetic/kinetic.ts').then((m) => m.initKinetic(), () => {}), 1500);
   };
   let cancelIdle = () => {};
 

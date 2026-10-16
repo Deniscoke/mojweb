@@ -15,6 +15,8 @@
  * no page carries a byte more HTML for it (on the case studies a few dozen
  * bytes cost LCP a round trip). `data-kinetic="off"` opts an element out.
  *
+ * The letters move by transform and opacity only, as Web Animations.
+ *
  * Rules (spec §4): what the visitor has already seen is never hidden or
  * replayed; one gather plays at a time; every split is reverted to the
  * original DOM when it lands; scrambles always end on the original text.
@@ -22,10 +24,13 @@
 import { gsap } from 'gsap';
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { SplitText } from 'gsap/SplitText';
-import { hasFinePointer, prefersReducedMotion } from '../utils/env';
+import { idle, prefersReducedMotion } from '../utils/env';
 import { createGate, seen } from './pick.ts';
 
 gsap.registerPlugin(SplitText, ScrambleTextPlugin);
+// The ticker sleeps soon after the last tween (default: 120 idle frames, ~2 s
+// of rAF): when the page stops moving, nothing runs (WCAG 2.2.2).
+gsap.config({ autoSleep: 20 });
 
 const GATHER = 'main h2:not(.mono):not(.entry__title), main .project__title, .project-page__next-title';
 const DECODE = [
@@ -52,7 +57,11 @@ const off = (el: Element) => el.closest('[data-kinetic="off"]') !== null;
 
 export function initKinetic(): () => void {
   if (prefersReducedMotion()) return () => {};
-  const fine = hasFinePointer();
+  // Letters flying in from the side must never widen the page (a phone at
+  // 360 px would scroll sideways for the length of a gather). `clip` on the
+  // headings' <main> keeps their overflow from reaching the page at all, and
+  // makes no scroll container, so sticky labels inside keep working.
+  document.querySelectorAll<HTMLElement>('main').forEach((m) => (m.style.overflowX = 'clip'));
   const gate = createGate();
   const cleanups: Array<() => void> = [];
   const splits = new Set<SplitText>();
@@ -69,6 +78,12 @@ export function initKinetic(): () => void {
   const gatherTargets = unseen([...document.querySelectorAll<HTMLElement>(GATHER)]);
   const prepared = new Map<HTMLElement, SplitText>();
 
+  /** Where a letter waits before it gathers: off its place, turned, unseen. */
+  /** Where a letter waits before it gathers: off its place, turned, unseen. */
+  const scatter = () =>
+    `translate(${gsap.utils.random(-40, 40, 1)}px, ${gsap.utils.random(-40, 40, 1)}px) rotate(${gsap.utils.random(-12, 12, 1)}deg)`;
+  const starts = new WeakMap<Element, string>();
+
   /** Below the fold, before it shows: split, and scatter the letters. */
   const prepare = (el: HTMLElement) => {
     if (prepared.has(el)) return;
@@ -78,15 +93,20 @@ export function initKinetic(): () => void {
     const split = SplitText.create(el, { type: 'words,chars', aria: 'auto' });
     splits.add(split);
     prepared.set(el, split);
-    gsap.set(split.chars, {
-      opacity: 0,
-      x: () => gsap.utils.random(-40, 40),
-      y: () => gsap.utils.random(-40, 40),
-      rotate: () => gsap.utils.random(-12, 12),
-      filter: fine ? 'blur(4px)' : 'none',
-    });
+    for (const c of split.chars as HTMLElement[]) {
+      const t = scatter();
+      starts.set(c, t);
+      c.style.opacity = '0';
+      c.style.transform = t;
+    }
   };
 
+  /**
+   * The flight itself is the browser's own (Web Animations): transform and
+   * opacity on the compositor, nothing read back. Driving it through a GSAP
+   * tween made the scroll callback recalculate the page's style (~60 ms at
+   * 6x); GSAP's part is the split and the decode.
+   */
   const land = (el: HTMLElement) => {
     const split = prepared.get(el);
     if (!split) return;
@@ -97,30 +117,56 @@ export function initKinetic(): () => void {
     };
     if (!gate.tryStart()) {
       // Another heading is gathering: this one is simply there.
-      gsap.set(split.chars, { clearProps: 'all' });
       done();
       return;
     }
-    gsap.to(split.chars, {
-      opacity: 1,
-      x: 0,
-      y: 0,
-      rotate: 0,
-      filter: 'blur(0px)',
-      duration: 0.7,
-      ease: 'expo.out',
-      stagger: 0.018,
-      onComplete: () => {
+    const chars = split.chars as HTMLElement[];
+    const flights = chars.map((c, i) =>
+      c.animate(
+        [
+          { opacity: 0, transform: starts.get(c) ?? 'none' },
+          { opacity: 1, transform: 'none' },
+        ],
+        { duration: 700, delay: i * 18, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'both' },
+      ),
+    );
+    Promise.all(flights.map((f) => f.finished)).then(
+      () => {
         done();
         gate.end();
       },
-    });
+      () => gate.end(),
+    );
   };
+
+  // Splitting is the costly part: it runs in idle time, one heading per
+  // slice, never inside a scroll callback. A heading that arrives before it
+  // was prepared is simply shown.
+  const pending: HTMLElement[] = [];
+  let slicing = false;
+  const nextSlice = () => {
+    const el = pending.shift();
+    slicing = !!el;
+    if (!el) return;
+    cleanups.push(
+      idle(() => {
+        if (!landed.has(el)) prepare(el);
+        nextSlice();
+      }, 600),
+    );
+  };
+  const landed = new WeakSet<HTMLElement>();
 
   if (gatherTargets.length && 'IntersectionObserver' in window) {
     const near = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && prepare(e.target as HTMLElement)),
-      { rootMargin: '0px 0px 30% 0px' },
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          near.unobserve(e.target);
+          pending.push(e.target as HTMLElement);
+          if (!slicing) nextSlice();
+        }),
+      { rootMargin: '0px 0px 60% 0px' },
     );
     const inView = new IntersectionObserver(
       (entries) =>
@@ -129,7 +175,7 @@ export function initKinetic(): () => void {
           const el = e.target as HTMLElement;
           near.unobserve(el);
           inView.unobserve(el);
-          prepare(el);
+          landed.add(el);
           land(el);
         }),
       { rootMargin: '0px 0px -10% 0px' },
