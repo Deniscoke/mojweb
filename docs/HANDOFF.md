@@ -18,16 +18,13 @@ Všetko tu je overené. Čo tu nie je, si over v kóde a nedomýšľaj si to.
 
 | Vetva | Stav |
 |---|---|
-| `main` | živý web, commit `9c7ade7`. **Nemenený.** |
-| `feat/motion-depth` | prvý 3D upgrade (`b6f1fa8`). Denis ho **neschválil**: drobné úpravy, sken v úvode pôsobil mimo, priveľa vrstiev cez seba. **Nemergovať.** |
-| `feat/living-scene` | **nová verzia z `feat/motion-depth`: „živá scéna“**. Hotová, otestovaná, pushnutá. |
+| `main` | **živý web s „živou scénou“**, merge commit `480fa11` (2026-10-16, Denis schválil náhľad). Nasadené na `mojweb` aj `mojweb2` a overené naživo. |
+| `feat/living-scene` | zmergovaná do `main`, dá sa zmazať |
+| `feat/motion-depth` | prvý 3D pokus, Denis ho **neschválil**, nemergovať |
 
-**Vercel náhľad** vetvy `feat/living-scene` (chránený prihlásením do Vercelu, Denisov účet):
-https://mojweb2-c9lzxcsqm-denis-mitrovics-projects.vercel.app/sk/ (commit `1972f8f`)
+Živý web: https://mojweb2.vercel.app/sk/ (scéna sa spustí pri prvom pohybe myši, dotyku alebo scrolle).
 
-**ČAKÁ SA NA DENISA:** pozrie si náhľad `feat/living-scene` a povie OK, alebo čo zmeniť.
-Po jeho OK: `git checkout main && git merge --no-ff feat/living-scene && git push`, potom over živý web.
-**Nemerguj do `main` bez jeho výslovného súhlasu.**
+**Ďalšie kroky:** drobnosti z finálnej kontroly (pozri sekciu 4 a kartu „Doladiť drobnosti živej scény“). Prípadne slabšie body portrétu na mobile.
 
 ## 3. Čo je na `feat/living-scene`
 
@@ -86,7 +83,14 @@ Finálnu kontrolu robil čerstvý recenzent. Jeho 5 dôležitých nálezov je op
 
 ## 4. Otvorené veci pre Denisa
 
-1. **Schváliť náhľad** (pozri sekciu 2).
+1. ~~Schváliť náhľad~~ hotové, `feat/living-scene` je na `main`.
+   Odložené drobnosti z kontroly:
+   - body zamrznú po prepnutí karty;
+   - po zmene adresného riadku na mobile sa scéna nepreráta;
+   - race pri prepnutí pokojného režimu počas štartu WebGL;
+   - mŕtve odkazy v `check-budget`/`motion.spec`;
+   - na homepage nie je zrnitosť;
+   - chýba `console.warn` pri zlyhaní WebGL.
 2. **Sken `kasna`:** potvrdiť, že môže byť na úvode, a dodať **miesto a rok** do popisky. Teraz je tam len „SKEN · REALITYSCAN · 2,6 M BODOV".
 3. **Fotky** (cirkus, snowboard, projekty): Denis ich vyberá. Návod je v `public/media/photos/README.md`, register v `src/data/photos.ts` (pri deťoch súhlas a len Tier 0). Hĺbkové mapy (Tier 1, `build-depth-maps.py`) sú **odložené**, kým fotky neprídu.
 4. Z `docs/launch-readiness.md`: doména (napr. `denismitrovic.cz`), IČO a stránka ochrany súkromia, preklady prípadových štúdií ES/SR/TR, celé meno „Jančiho" a Denisova rola v Splatoo, profily pre JSON-LD, záloha `cms/data/payload.db`.
