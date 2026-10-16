@@ -51,6 +51,7 @@ export function initDepth(): () => void {
   let disposed = false;
   let loading = false;
   let teardownTilt: (() => void) | null = null;
+  let teardownScene: (() => void) | null = null;
   let cancelIdle = () => {};
 
   const wantsTilt = () =>
@@ -89,8 +90,12 @@ export function initDepth(): () => void {
   const cancelReveal = afterReveal(() => {
     cancelIdle = idle(() => {
       booted = true;
-      const hero = document.querySelector<HTMLElement>('[data-hero]');
-      if (hero?.querySelector('.hero__scan')) import('../hero/heroScan').then((m) => m.initHeroScan(hero)).catch(() => {});
+      if (document.querySelector('[data-scene]'))
+        import('../scene/scene.ts')
+          .then((m) => {
+            if (!disposed) teardownScene = m.initScene();
+          })
+          .catch(() => {});
       if (press) document.addEventListener('touchstart', noop, { passive: true });
       sync();
     }, IDLE_TIMEOUT_MS);
@@ -108,6 +113,8 @@ export function initDepth(): () => void {
     document.removeEventListener('touchstart', noop);
     teardownTilt?.();
     teardownTilt = null;
+    teardownScene?.();
+    teardownScene = null;
     root.classList.remove('depth-ready');
   };
 }

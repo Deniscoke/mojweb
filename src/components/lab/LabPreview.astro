@@ -1,6 +1,9 @@
 ---
 import { getExperiments } from '~/lib/cms';
 import { localePath, t, useTranslations } from '~/i18n';
+import { getScan } from '~/data/scans';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 interface Props {
   lang: string;
@@ -9,6 +12,17 @@ interface Props {
 const { lang } = Astro.props;
 const dict = useTranslations(lang);
 const experiments = await getExperiments(lang);
+
+/**
+ * The living scene turns into Denis's scan while this section is centred
+ * (src/motion/scene). The scan keeps its `hero` approval record; it only
+ * moved down the page. Both files must be in this build, or there is no scan.
+ */
+const approved = getScan('hero');
+const scan =
+  approved && [approved.files.desktop, approved.files.mobile].every((url) => existsSync(join(process.cwd(), 'public', url)))
+    ? approved
+    : undefined;
 
 /**
  * THE LAB — a notebook, not a second project grid.
@@ -33,9 +47,20 @@ const experiments = await getExperiments(lang);
  */
 ---
 
-<section class="section lab" id="lab" aria-labelledby="lab-title">
+<section
+  class="section lab"
+  id="lab"
+  aria-labelledby="lab-title"
+>
   <div class="wrap">
-    <header class="section__head grid12" data-reveal>
+    <header
+      class="section__head grid12"
+      data-reveal
+      data-scene="scan"
+      data-scene-side="right"
+      data-desktop={scan?.files.desktop}
+      data-mobile={scan?.files.mobile}
+    >
       <p class="mono section__label">
         <span class="section__index">03</span>
         {dict.lab.label}
@@ -70,7 +95,8 @@ const experiments = await getExperiments(lang);
 
 <style>
   .lab {
-    background-color: var(--c-ink);
+    /* Translucent: the living scene shows through the raised panel. */
+    background-color: color-mix(in srgb, var(--c-ink) 45%, transparent);
     border-block: 1px solid var(--c-line);
   }
 

@@ -60,7 +60,7 @@ vec2 d=c-vec2(U[1].x*asp,U[1].y);
 c+=U[1].z*normalize(d+1e-5)*.08*smoothstep(.18,0.,length(d));
 gl_Position=vec4(c.x/asp,c.y,0.,1.);
 gl_PointSize=max(U[0].w*(1.+p.z*.6),1.);
-A=(.55+.45*fract(S*13.))*(1.-U[2].z);
+A=(.3+.35*fract(S*13.))*(1.-U[2].z);
 }`;
 
 const FRAGMENT = `#version 300 es

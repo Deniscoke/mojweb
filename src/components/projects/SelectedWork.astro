@@ -71,6 +71,10 @@ const featuredProjects = await getFeaturedProjects(lang);
             <li
               class="project"
               data-project-row
+              data-scene={`work:${project.slug}`}
+              data-scene-side="right"
+              data-scene-x="0.38"
+              data-scene-scale="0.34"
               data-reveal
               data-draw-group
               data-live={isLive ? '' : undefined}

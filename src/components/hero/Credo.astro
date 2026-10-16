@@ -23,7 +23,7 @@ const words = dict.credo;
 
 ---
 
-<section class="credo" aria-label={words.map((w) => w.word).join(' · ')}>
+<section class="credo" data-scene="credo" data-scene-side="center" data-scene-scale="1.15" aria-label={words.map((w) => w.word).join(' · ')}>
   <div class="wrap">
     <ol class="credo__list" role="list">
       {
@@ -40,7 +40,8 @@ const words = dict.credo;
 
 <style>
   .credo {
-    background-color: var(--c-ink);
+    /* Translucent: the living scene shows through the raised panel. */
+    background-color: color-mix(in srgb, var(--c-ink) 45%, transparent);
     border-block: 1px solid var(--c-line);
     padding-block: clamp(1.75rem, 5vw, 3.25rem);
   }

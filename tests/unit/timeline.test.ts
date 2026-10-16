@@ -61,8 +61,9 @@ test('retarget skips intermediate states', () => {
 
 test('layoutFor collapses to center below 992px', () => {
   for (const side of ['left', 'right', 'center'] as const) {
-    assert.deepEqual(layoutFor(side, 991), { cx: 0, scale: 0.9, dim: 0.55 });
+    assert.deepEqual(layoutFor(side, 991), { cx: 0, scale: 0.9, dim: 0.35 });
   }
   assert.equal(layoutFor('right', 1440).cx, 0.5);
   assert.equal(layoutFor('left', 1440).cx, -0.5);
+  assert.deepEqual(layoutFor('full', 400), { cx: 0, scale: 1, dim: 0.6 });
 });

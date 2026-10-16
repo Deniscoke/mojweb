@@ -101,9 +101,11 @@ export function svgShape(svg: SVGSVGElement, n: number, seed: number): Float32Ar
     const count = e === els.length - 1 ? n - k : Math.round((lengths[e] / total) * n);
     for (let i = 0; i < count && k < n; i++, k++) {
       const p = el.getPointAtLength(r() * lengths[e]);
-      const q = m ? p.matrixTransform(m) : p;
-      out[k * 3] = (((q.x - box.x) / W) * 2 - 1) * (W / long);
-      out[k * 3 + 1] = (1 - ((q.y - box.y) / H) * 2) * (H / long);
+      // By hand: Chrome's legacy SVGPoint.matrixTransform refuses a DOMMatrix.
+      const x = m ? m.a * p.x + m.c * p.y + m.e : p.x;
+      const y = m ? m.b * p.x + m.d * p.y + m.f : p.y;
+      out[k * 3] = (((x - box.x) / W) * 2 - 1) * (W / long);
+      out[k * 3 + 1] = (1 - ((y - box.y) / H) * 2) * (H / long);
       out[k * 3 + 2] = (r() * 2 - 1) * 0.05;
     }
   });
